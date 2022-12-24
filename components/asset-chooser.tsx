@@ -1,8 +1,9 @@
 import { ChangeEvent, KeyboardEvent, useEffect, useId, useRef, useState } from "react";
-import { listAssets, AssetKind } from "../src/api";
+import { listAssets, AssetKind, importAsset, ChosenFile, chooseFile } from "../src/api";
 import Modal from "react-modal";
 
 import styles from "../styles/AssetChooser.module.css";
+import { FaFileImport } from "react-icons/fa";
 
 export default function AssetChooser({ name, kind }: { name: string, kind: AssetKind }) {
   const id = useId();
@@ -11,6 +12,9 @@ export default function AssetChooser({ name, kind }: { name: string, kind: Asset
   const resultsRef = useRef<HTMLDivElement>(null);
   const [results, setResults] = useState<string[]>([]);
   const [inputValue, setInputValue] = useState("");
+
+  const [newAssetFile, setNewAssetFile] = useState<ChosenFile | null>(null);
+  const [newAssetName, setNewAssetName] = useState<string>("");
 
   useEffect(() => {
     listAssets(inputValue, kind).then(setResults);
@@ -50,38 +54,78 @@ export default function AssetChooser({ name, kind }: { name: string, kind: Asset
     inputRef.current?.focus();
   }
 
+  function handleFileImportButtonClick() {
+    chooseFile().then(setNewAssetFile);
+  }
+
+  function handleNewAssetNameChange(ev: ChangeEvent<HTMLInputElement>) {
+    setNewAssetName(ev.target.value);
+  }
+
+  function handleImportCancelButtonClick() {
+    setNewAssetFile(null);
+    setNewAssetName("");
+  }
+
+  async function handleImportButtonClick() {
+    if (!newAssetFile) return;
+
+    const name = newAssetName + newAssetFile.extension();
+
+    await importAsset(newAssetFile, name);
+
+    setNewAssetFile(null);
+    setNewAssetName("");
+    setInputValue(name);
+    setResults([]);
+  }
+
   return (
-    <div
-      className={`${styles.AssetChooser} ${results.length != 0 ? styles.hasResults : ""}`}>
+    <div className={`${styles.AssetChooser} ${results.length != 0 ? styles.hasResults : ""}`}>
       <label htmlFor={id} className="inline-label">{name}</label>
-      <input
-        type="text"
-        name={name}
-        placeholder="Asset Name"
-        id={id}
-        ref={inputRef}
-        value={inputValue}
-        onChange={handleInputChange}
-        onKeyDown={handleInputKeyDown}
-      />
-      <div className={styles.autoCompleteBox} ref={resultsRef}>
-        {results.map(result => (
-          <button
-            className={styles.autoCompleteItem}
-            key={result}
-            onClick={() => handleResultClick(result)}
-            onKeyDown={handleResultKeyDown}
-          >
-            {result}
-          </button>
-        ))}
+      <div className={styles.assetNameContainer}>
+        <div className={styles.assetNameContainerInner}>
+          <input
+            type="text"
+            name={name}
+            placeholder="Asset Name"
+            id={id}
+            ref={inputRef}
+            value={inputValue}
+            onChange={handleInputChange}
+            onKeyDown={handleInputKeyDown}
+          />
+          <div className={styles.autoCompleteBox} ref={resultsRef}>
+            {results.map(result => (
+              <button
+                className={styles.autoCompleteItem}
+                key={result}
+                onClick={() => handleResultClick(result)}
+                onKeyDown={handleResultKeyDown}
+              >
+                {result}
+              </button>
+            ))}
+          </div>
+        </div>
+        <button style={{ marginLeft: 5 }} className="primary" onClick={handleFileImportButtonClick}>
+          <FaFileImport />
+        </button>
       </div>
-      <Modal isOpen={true} className={styles.modalContent} overlayClassName={styles.modalOverlay}>
+      <Modal isOpen={!!newAssetFile} className={styles.modalContent} overlayClassName={styles.modalOverlay}>
           <header>Importing a new asset</header>
           Choose a name for the new asset you&apos;re importing.
-          <div style={{height: 15}}></div>
+          <div style={{height: 10}}></div>
           <label htmlFor={`${id}-modal-name`} className="inline-label">Asset Name</label>
-          <input type="text" name="name" id={`${id}-modal-name`} />
+          <div className={`input-wrapper ${styles.modalInputWrapper}`}>
+            <input type="text" name="name" id={`${id}-modal-name`} onChange={handleNewAssetNameChange} />
+            <span>{newAssetFile?.extension()}</span>
+          </div>
+          <div style={{height: 5}}></div>
+          <div className={styles.modalActionButtons}>
+            <button className="secondary" onClick={handleImportCancelButtonClick}>Cancel</button>
+            <button className="primary" onClick={handleImportButtonClick}>Import</button>
+          </div>
       </Modal>
     </div>
   );

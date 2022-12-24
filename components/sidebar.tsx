@@ -80,7 +80,7 @@ export default function Sidebar() {
           key={waypoint.id}
         />
       ))}
-      <button className={styles.addWaypoint} onClick={handleAddWaypointClick}>
+      <button className={`primary ${styles.addWaypoint}`} onClick={handleAddWaypointClick}>
         <FaPlus /> Add Waypoint
       </button>
     </div>

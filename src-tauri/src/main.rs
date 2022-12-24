@@ -3,7 +3,7 @@
     windows_subsystem = "windows"
 )]
 
-use std::{io, fs, ffi::OsString, path::PathBuf};
+use std::{io, fs, path::PathBuf};
 
 use tauri::api::dialog::blocking::FileDialogBuilder;
 
@@ -30,7 +30,6 @@ async fn list_assets() -> Result<Vec<String>, String> {
 
 #[tauri::command]
 async fn choose_file() -> Result<Option<String>, String> {
-    println!("Choosing file...");
     match FileDialogBuilder::new().pick_file() {
         Some(path) => match path.to_str() {
             Some(s) => Ok(Some(s.to_owned())),

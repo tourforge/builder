@@ -5,10 +5,16 @@ import styles from "../styles/Home.module.css";
 import Map from "../components/map";
 import Sidebar from "../components/sidebar";
 import { RecoilRoot } from "recoil";
+import { useEffect } from "react";
+import Modal from "react-modal";
 
 const inter = Inter({ subsets: ["latin"] });
 
 export default function Home() {
+  useEffect(() => {
+    Modal.setAppElement(document.getElementById("__next")!);
+  }, []);
+
   return (
     <RecoilRoot>
       <Head>
