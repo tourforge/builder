@@ -1,0 +1,61 @@
+.Waypoint {
+  margin: 5px;
+
+  background-color: rgb(233, 251, 255);
+  color: rgb(10, 84, 102);
+  --input-decoration-color: rgb(68, 135, 141);
+  border-radius: 10px;
+}
+
+.waypointCardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+}
+
+input.waypointTitle {
+  all: unset;
+}
+
+input.waypointTitle::placeholder {
+  color: rgb(83, 125, 134);
+}
+
+button.waypointExpandCollapseButton {
+  all: unset;
+  user-select: none;
+  cursor: pointer;
+
+  padding: 3px;
+  padding-top: 5px;
+
+  transition: transform 0.125s ease;
+}
+
+.Waypoint.expanded button.waypointExpandCollapseButton {
+  transform: rotate(180deg);
+}
+
+section.waypointExtraContent {
+  display: none;
+}
+
+.Waypoint.expanded section.waypointExtraContent {
+  display: flex;
+  flex-direction: column;
+
+  padding: 12px;
+  padding-top: 8px;
+  border-bottom-left-radius: 10px;
+  border-bottom-right-radius: 10px;
+
+  background-color: rgb(242, 254, 255);
+}
+
+.Waypoint :global(label.inline-label) {
+  color: rgb(68, 135, 141);
+  background-color: rgb(245, 253, 255);
+  border-radius: 3px;
+  padding: 1px 2px;
+}

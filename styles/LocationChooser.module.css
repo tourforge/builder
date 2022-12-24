@@ -1,0 +1,12 @@
+.LocationChooser {
+  display: flex;
+
+  gap: 8px;
+}
+
+.LocationChooser>div {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  width: 0;
+}
