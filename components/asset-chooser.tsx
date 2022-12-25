@@ -108,7 +108,7 @@ export default function AssetChooser({ name, kind }: { name: string, kind: Asset
             ))}
           </div>
         </div>
-        <button style={{ marginLeft: 5 }} className="primary" onClick={handleFileImportButtonClick}>
+        <button className="primary" onClick={handleFileImportButtonClick}>
           <FaFileImport />
         </button>
       </div>

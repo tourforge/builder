@@ -54,22 +54,26 @@ export default function Sidebar() {
 
   return (
     <div className={styles.Sidebar}>
-      <label htmlFor={`${id}-title`} className="inline-label">Title</label>
-      <input
-        type="text"
-        name="Tour Title"
-        id={`${id}-title`}
-        defaultValue={currentTour.name}
-        onChange={handleTitleChange}
-      />
-      <label htmlFor={`${id}-desc`} className="inline-label">Description</label>
-      <input
-        type="text"
-        name="Tour Description"
-        id={`${id}-desc`}
-        defaultValue={currentTour.desc}
-        onChange={handleDescChange}
-      />
+      <div className="column">
+        <label htmlFor={`${id}-title`} className="inline-label">Title</label>
+        <input
+          type="text"
+          name="Tour Title"
+          id={`${id}-title`}
+          defaultValue={currentTour.name}
+          onChange={handleTitleChange}
+        />
+      </div>
+      <div className="column">
+        <label htmlFor={`${id}-desc`} className="inline-label">Description</label>
+        <input
+          type="text"
+          name="Tour Description"
+          id={`${id}-desc`}
+          defaultValue={currentTour.desc}
+          onChange={handleDescChange}
+        />
+      </div>
       <header className={styles.waypointsHeader}>Waypoints</header>
       {currentTour.waypoints.map((waypoint, index) => (
         <WaypointEditor

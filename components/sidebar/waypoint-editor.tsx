@@ -51,20 +51,24 @@ export default function WaypointEditor({ waypoint, setWaypoint }: {
         </button>
       </div>
       <section className={styles.waypointExtraContent}>
-        <label htmlFor={`${id}-desc`} className="inline-label">Description</label>
-        <textarea
-          name="Waypoint Description"
-          id={`${id}-desc`}
-          onChange={handleDescChange}
-        />
+        <div className="column">
+          <label htmlFor={`${id}-desc`} className="inline-label">Description</label>
+          <textarea
+            name="Waypoint Description"
+            id={`${id}-desc`}
+            onChange={handleDescChange}
+          />
+        </div>
         <LocationChooser onChange={handleLocationChange} />
         <AssetChooser name="Narration" kind="image" />
-        <label htmlFor={`${id}-transcript`} className="inline-label">Transcript</label>
-        <textarea
-          name="Narration Transcript"
-          id={`${id}-transcript`}
-          onChange={handleTranscriptChange}
-        />
+        <div className="column"> 
+          <label htmlFor={`${id}-transcript`} className="inline-label">Transcript</label>
+          <textarea
+            name="Narration Transcript"
+            id={`${id}-transcript`}
+            onChange={handleTranscriptChange}
+          />
+        </div>
       </section>
     </div>
   );
