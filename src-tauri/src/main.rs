@@ -3,23 +3,25 @@
     windows_subsystem = "windows"
 )]
 
-use std::{io, fs, path::PathBuf};
-
+use std::{fs, io, path::PathBuf, sync::Mutex};
 use tauri::api::dialog::blocking::FileDialogBuilder;
 
+mod lotyr;
+use lotyr::Lotyr;
+
 #[tauri::command]
-async fn list_assets() -> Result<Vec<String>, String> {
-    let assets_dir = assets_dir().map_err_string()?;
+async fn list_assets() -> Result<Vec<String>, ErrorString> {
+    let assets_dir = assets_dir()?;
 
     let mut assets = vec![];
-    for entry in fs::read_dir(&assets_dir).map_err_string()? {
-        let entry = entry.map_err_string()?;
+    for entry in fs::read_dir(&assets_dir)? {
+        let entry = entry?;
 
         // follow symlinks to get the metadata
-        let meta = fs::metadata(entry.path()).map_err_string()?;
+        let meta = fs::metadata(entry.path())?;
 
         if meta.is_file() {
-            if let Some(file_name) = entry.file_name().to_str() { 
+            if let Some(file_name) = entry.file_name().to_str() {
                 assets.push(file_name.to_owned());
             }
         }
@@ -29,21 +31,54 @@ async fn list_assets() -> Result<Vec<String>, String> {
 }
 
 #[tauri::command]
-async fn choose_file() -> Result<Option<String>, String> {
+async fn choose_file() -> Result<Option<String>, ErrorString> {
     match FileDialogBuilder::new().pick_file() {
-        Some(path) => match path.to_str() {
-            Some(s) => Ok(Some(s.to_owned())),
-            None => Err("Path is not valid UTF-8".to_string()),
-        }
+        Some(path) => Ok(path.to_str().map(|s| s.to_owned())),
         None => Ok(None),
     }
 }
 
 #[tauri::command]
-async fn import_asset(path: String, name: String) -> Result<(), String> {
-    fs::copy(path, assets_dir().map_err_string()?.join(name)).map_err_string()?;
+async fn import_asset(path: String, name: String) -> Result<(), ErrorString> {
+    fs::copy(path, assets_dir()?.join(name))?;
 
     Ok(())
+}
+
+#[tauri::command]
+async fn valhalla_route(
+    req: String,
+    lotyr: tauri::State<'_, Mutex<Lotyr>>,
+) -> Result<String, ErrorString> {
+    let lotyr = lotyr.lock().unwrap();
+    Ok(lotyr.route(&req)?)
+}
+
+fn main() {
+    tauri::Builder::default()
+        .invoke_handler(tauri::generate_handler![
+            choose_file,
+            list_assets,
+            import_asset,
+            valhalla_route
+        ])
+        .manage(Mutex::new(create_lotyr_instance()))
+        .run(tauri::generate_context!())
+        .expect("error while running tauri application");
+}
+
+fn create_lotyr_instance() -> Lotyr {
+    // Load the dynamic library
+    let current_dir = std::env::current_dir().unwrap();
+    let mut lotyr_lib_path = current_dir.clone();
+    lotyr_lib_path.push("dev-install/lotyr");
+    lotyr_lib_path.push(libloading::library_filename("lotyr"));
+    lotyr::load_library(lotyr_lib_path.as_os_str()).expect("Failed to load Lotyr library");
+
+    // Create the instance
+    let mut lotyr_conf_path = current_dir;
+    lotyr_conf_path.push("dev-install/lotyr/valhalla.json");
+    Lotyr::new(lotyr_conf_path.as_os_str()).expect("Failed to create Lotyr instance")
 }
 
 fn assets_dir() -> Result<PathBuf, io::Error> {
@@ -58,26 +93,21 @@ fn assets_dir() -> Result<PathBuf, io::Error> {
     Ok(assets_dir)
 }
 
-trait ToStringError {
-    type T;
+// This struct is needed because std::error::Error doesn't implement serde::Serialize,
+// and so cannot be in the return value of Tauri commands.
+struct ErrorString(String);
 
-    fn map_err_string(self) -> Result<Self::T, String>;
-}
-
-impl<T, E: ToString> ToStringError for Result<T, E> {
-    type T = T;
-
-    fn map_err_string(self) -> Result<Self::T, String> {
-        match self {
-            Ok(t) => Ok(t),
-            Err(e) => Err(e.to_string()),
-        }
+impl<T: std::error::Error> From<T> for ErrorString {
+    fn from(err: T) -> Self {
+        Self(err.to_string())
     }
 }
 
-fn main() {
-    tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![choose_file, list_assets, import_asset])
-        .run(tauri::generate_context!())
-        .expect("error while running tauri application");
+impl serde::Serialize for ErrorString {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        serializer.serialize_str(&self.0)
+    }
 }
