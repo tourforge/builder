@@ -7,8 +7,7 @@ import { FaPlus } from "react-icons/fa";
 
 import styles from "../styles/Sidebar.module.css";
 import WaypointEditor from "./sidebar/waypoint-editor";
-import { isClient } from "../src/is-client";
-import { invoke } from "@tauri-apps/api/tauri";
+import { route } from "../src/api";
 
 export default function Sidebar() {
   const id = useId();
@@ -35,8 +34,6 @@ export default function Sidebar() {
       transcript: null,
       gallery: [],
     };
-
-    isClient && invoke("list_assets").then(res => console.log(res)).catch(err => console.error(err));
 
     setCurrentTour(current => ({ ...current, waypoints: [...current.waypoints, newWaypoint] }));
   }

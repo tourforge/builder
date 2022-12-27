@@ -1,6 +1,10 @@
 import { invoke } from "@tauri-apps/api/tauri";
 
+import * as polyline from "./polyline";
+import { LatLng } from "./data";
+
 export type AssetKind = "any" | "narration" | "image"
+
 export class ChosenFile {
   _path: string;
 
@@ -38,4 +42,18 @@ export async function importAsset(file: ChosenFile, name: string) {
     path: file._path,
     name,
   });
+}
+
+export async function route(points: LatLng[]): Promise<LatLng[]> {
+  const req = JSON.stringify({
+    "locations": points.map(ll => ({ "lat": ll.lat, "lon": ll.lng })),
+    "costing": "auto",
+    "units": "miles"
+  });
+
+  const resp: any = JSON.parse(await invoke("valhalla_route", { req }));
+
+  return resp.trip.legs
+    .map((leg: any) => polyline.decode(leg.shape, 6))
+    .reduce((a: any, b: any) => a + b);
 }

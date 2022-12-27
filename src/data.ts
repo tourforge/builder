@@ -28,3 +28,5 @@ export type PoiModel = {
 }
 
 export type GalleryModel = string[]
+
+export type LatLng = { "lat": number, "lng": number }
