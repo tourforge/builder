@@ -1,21 +1,32 @@
 import { ChangeEvent, useEffect, useId, useState } from "react";
 import styles from "../styles/LocationChooser.module.css";
 
-export default function LocationChooser({ defaultLat, defaultLng, onChange }: {
-  defaultLat?: number | undefined,
-  defaultLng?: number | undefined,
+export default function LocationChooser({ lat, lng, onChange }: {
+  lat?: number | undefined,
+  lng?: number | undefined,
   onChange: (lat: number, lng: number) => void
 }) {
   const id = useId();
-  const [lat, setLat] = useState(defaultLat ?? 0);
-  const [lng, setLng] = useState(defaultLng ?? 0);
-  const [latTxt, setLatTxt] = useState(`${lat}`);
-  const [lngTxt, setLngTxt] = useState(`${lng}`);
+  const [latState, setLat] = useState(lat ?? 0);
+  const [lngState, setLng] = useState(lng ?? 0);
+  const [latTxt, setLatTxt] = useState(`${latState}`);
+  const [lngTxt, setLngTxt] = useState(`${lngState}`);
 
   useEffect(() => {
-    onChange(lat, lng);
+    if (lat && latState !== lat) {
+      setLat(lat);
+      setLatTxt(`${lat.toFixed(6)}`);
+    }
+    if (lng && latState !== lat) {
+      setLng(lng);
+      setLngTxt(`${lng.toFixed(6)}`);
+    }
+  }, [lat, lng]),
+
+  useEffect(() => {
+    onChange(latState, lngState);
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [lat, lng]);
+  }, [latState, lngState]);
 
   function handleLatChange(ev: ChangeEvent<HTMLInputElement>) {
     const trimmed = ev.target.value.trim();

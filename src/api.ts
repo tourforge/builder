@@ -55,5 +55,5 @@ export async function route(points: LatLng[]): Promise<LatLng[]> {
 
   return resp.trip.legs
     .map((leg: any) => polyline.decode(leg.shape, 6))
-    .reduce((a: any, b: any) => a + b);
+    .reduce((a: any, b: any) => [...a, ...b]);
 }

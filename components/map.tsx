@@ -1,93 +1,119 @@
-import { nanoid } from "nanoid";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useRecoilState } from "recoil";
 import { route } from "../src/api";
 import { currentTourState } from "../src/state";
 
 import MapLibreMap from "./maplibre_map";
 
+import { Marker } from "maplibre-gl";
+import type { GeoJSONSource } from "maplibre-gl";
+
 export default function Map() {
-  const [id, setId] = useState("");
-  const [tour] = useRecoilState(currentTourState);
+  // we depend on the tour and need a ref with it for `handleMarkerDragEnd` to work
+  const [tour, setTour] = useRecoilState(currentTourState);
+  const tourRef = useRef(tour);
+  tourRef.current = tour;
+
+  const mapMarkersRef = useRef<{ [id: string]: maplibregl.Marker }>({});
   const mapRef = useRef<maplibregl.Map | undefined>();
+
+  const createMarkerElement = (index: number) => {
+    const markerElement = document.createElement("div");
+    markerElement.classList.add("marker");
+    markerElement.innerText = `${index + 1}`;
+    return markerElement;
+  };
+
+  // this function must be written very carefully, since we set it once as a callback
+  // on each marker and it needs to always operate on the most up-to-date state.
+  const handleMarkerDragEnd = useCallback((id: string) => {
+    const marker = mapMarkersRef.current[id];
+    if (!marker) return;
+
+    const idx = tourRef.current.waypoints.findIndex(w => w.id === id);
+    if (idx < 0) return;
+
+    setTour({
+      ...tourRef.current,
+      waypoints: [
+        ...tourRef.current.waypoints.slice(0, idx),
+        {
+          ...tourRef.current.waypoints[idx],
+          lat: marker.getLngLat().lat,
+          lng: marker.getLngLat().lng,
+        },
+        ...tourRef.current.waypoints.slice(idx + 1),
+      ],
+    });
+  }, [setTour]);
 
   useEffect(() => {
     const map = mapRef.current;
     if (!map) return;
 
-    const oldId = id;
-    const newId = nanoid();
-    setId(newId);
+    tour.waypoints.forEach((waypoint, index) => {
+      if (mapMarkersRef.current[waypoint.id]) {
+        mapMarkersRef.current[waypoint.id].setLngLat(waypoint);
+      } else {
+        mapMarkersRef.current[waypoint.id] = new Marker({
+          draggable: true,
+          element: createMarkerElement(index),
+        }).setLngLat(waypoint)
+          .addTo(map)
+          .on("dragend", () => handleMarkerDragEnd(waypoint.id));
+      }
+    });
+  }, [tour, handleMarkerDragEnd]);
 
-    route(tour.waypoints)
-      .then(route => {
-        map.addSource(`route${newId}`, {
-          "type": "geojson",
-          "data": {
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+
+    if (tour.waypoints.length >= 2) {
+      route(tour.waypoints)
+        .then(route => {
+          const routeGeoJson: GeoJSON.GeoJSON = {
             "type": "Feature",
             "properties": {},
             "geometry": {
               "type": "LineString",
               "coordinates": route.map(point => [point.lng, point.lat])
             }
+          };
+
+          if (!map.getSource("route")) {
+            map.addSource("route", {
+              "type": "geojson",
+              "data": routeGeoJson
+            });
+          } else {
+            (map.getSource("route") as GeoJSONSource).setData(routeGeoJson);
           }
-        });
 
-        map.addLayer({
-          "id": `route_layer${newId}`,
-          "type": "line",
-          "source": `route${newId}`,
-          "layout": {
-            "line-join": "round",
-            "line-cap": "round"
-          },
-          "paint": {
-            "line-color": "#888",
-            "line-width": 8
-          },
-        }, `waypoints_layer${newId}`);
-      })
-      .catch(err => console.error(`Failed to calculate route: ${err}`))
-      .finally(() => {
-        if (map.getLayer(`route_layer${oldId}`))
-          map.removeLayer(`route_layer${oldId}`);
-        if (map.getSource(`route${oldId}`))
-          map.removeSource(`route${oldId}`);
-      });
-
-    try {
-      map.addSource(`waypoints${newId}`, {
-        "type": "geojson",
-        "data": {
-          "type": "FeatureCollection",
-          "features": tour.waypoints.map(waypoint => ({
-            "type": "Feature",
-            "properties": {},
-            "geometry": {
-              "type": "Point",
-              "coordinates": [waypoint.lng, waypoint.lat]
-            }
-          }))
-        }
-      });
-
-      map.addLayer({
-        "id": `waypoints_layer${newId}`,
-        "type": "circle",
-        "source": `waypoints${newId}`,
-        "paint": {
-          "circle-radius": 6,
-          "circle-color": "#B42222"
-        },
-      });
-    } finally {
-      if (map.getLayer(`waypoints_layer${oldId}`))
-        map.removeLayer(`waypoints_layer${oldId}`);
-      if (map.getSource(`waypoints${oldId}`))
-        map.removeSource(`waypoints${oldId}`);
+          if (!map.getLayer("route_layer")) {
+            map.addLayer({
+              "id": "route_layer",
+              "type": "line",
+              "source": "route",
+              "layout": {
+                "line-join": "round",
+                "line-cap": "round"
+              },
+              "paint": {
+                "line-color": "#f00",
+                "line-width": 8
+              },
+            });
+          }
+        })
+        .catch(err => console.error(`Failed to calculate route: ${err}`));
+    } else {
+      if (map.getLayer("route_layer"))
+        map.removeLayer("route_layer");
+      if (map.getSource("route"))
+        map.removeSource("route");
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tour, mapRef]);
+  }, [tour]);
 
   return (
     <MapLibreMap mapRef={mapRef} />

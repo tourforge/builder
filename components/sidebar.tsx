@@ -7,7 +7,6 @@ import { FaPlus } from "react-icons/fa";
 
 import styles from "../styles/Sidebar.module.css";
 import WaypointEditor from "./sidebar/waypoint-editor";
-import { route } from "../src/api";
 
 export default function Sidebar() {
   const id = useId();

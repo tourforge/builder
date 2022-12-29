@@ -59,7 +59,7 @@ export default function WaypointEditor({ waypoint, setWaypoint }: {
             onChange={handleDescChange}
           />
         </div>
-        <LocationChooser onChange={handleLocationChange} />
+        <LocationChooser lat={waypoint.lat} lng={waypoint.lng} onChange={handleLocationChange} />
         <AssetChooser name="Narration" kind="image" />
         <div className="column"> 
           <label htmlFor={`${id}-transcript`} className="inline-label">Transcript</label>
