@@ -39,6 +39,8 @@ button.secondary {
 label {
   font-size: 12px;
   color: gray;
+  margin-left: 4px;
+  margin-bottom: 4px;
 }
 
 label.inline-label {

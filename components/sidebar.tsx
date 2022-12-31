@@ -1,14 +1,18 @@
-import { nanoid } from "nanoid";
-import { ChangeEvent, useId } from "react";
+import { ChangeEvent, RefObject, useId } from "react";
 import { useRecoilState } from "recoil";
-import { WaypointModel } from "../src/data";
-import { currentTourState } from "../src/state";
+
+import { nanoid } from "nanoid";
 import { FaPlus } from "react-icons/fa";
+
+import { LatLng, WaypointModel } from "../src/data";
+import { callIfUpdater, currentTourState, removeElementAtIndex, replaceElementAtIndex } from "../src/state";
+
+import GalleryEditor from "./gallery-editor";
 
 import styles from "../styles/Sidebar.module.css";
 import WaypointEditor from "./sidebar/waypoint-editor";
 
-export default function Sidebar() {
+export default function Sidebar({ mapCenter }: { mapCenter: RefObject<LatLng> }) {
   const id = useId();
 
   const [currentTour, setCurrentTour] = useRecoilState(currentTourState);
@@ -17,7 +21,7 @@ export default function Sidebar() {
     setCurrentTour(current => ({ ...current, name: ev.target.value }));
   }
 
-  function handleDescChange(ev: ChangeEvent<HTMLInputElement>) {
+  function handleDescChange(ev: ChangeEvent<HTMLTextAreaElement>) {
     setCurrentTour(current => ({ ...current, desc: ev.target.value }));
   }
 
@@ -26,8 +30,8 @@ export default function Sidebar() {
       id: nanoid(),
       name: "Untitled",
       desc: "",
-      lat: 0.0,
-      lng: 0.0,
+      lat: mapCenter.current?.lat ?? 0,
+      lng: mapCenter.current?.lng ?? 0,
       narration: null,
       trigger_radius: 30.0,
       transcript: null,
@@ -40,11 +44,11 @@ export default function Sidebar() {
   function setWaypoint(index: number, waypoint: WaypointModel) {
     setCurrentTour(current => ({
       ...current,
-      waypoints: [
-        ...current.waypoints.slice(0, index),
+      waypoints: replaceElementAtIndex(
+        current.waypoints,
+        index,
         waypoint,
-        ...current.waypoints.slice(index + 1),
-      ],
+      ),
     }));
   }
 
@@ -62,21 +66,30 @@ export default function Sidebar() {
       </div>
       <div className="column">
         <label htmlFor={`${id}-desc`} className="inline-label">Description</label>
-        <input
-          type="text"
+        <textarea
+          rows={3}
           name="Tour Description"
           id={`${id}-desc`}
           defaultValue={currentTour.desc}
           onChange={handleDescChange}
-        />
+        ></textarea>
       </div>
+      <GalleryEditor
+        gallery={currentTour.gallery}
+        setGallery={newGallery => setCurrentTour({
+          ...currentTour,
+          gallery: callIfUpdater(currentTour.gallery, newGallery)
+        })}
+      />
       <header className={styles.waypointsHeader}>Waypoints</header>
       {currentTour.waypoints.map((waypoint, index) => (
         <WaypointEditor
           waypoint={waypoint}
-          setWaypoint={newWaypoint => typeof newWaypoint === "function"
-            ? setWaypoint(index, newWaypoint(waypoint))
-            : setWaypoint(index, newWaypoint)}
+          setWaypoint={newWaypoint => setWaypoint(index, callIfUpdater(waypoint, newWaypoint))}
+          remove={() => setCurrentTour(currentTour => ({
+            ...currentTour,
+            waypoints: removeElementAtIndex(currentTour.waypoints, index),
+          }))}
           key={waypoint.id}
         />
       ))}

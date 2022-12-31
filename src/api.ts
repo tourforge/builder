@@ -5,6 +5,8 @@ import { LatLng } from "./data";
 
 export type AssetKind = "any" | "narration" | "image"
 
+// This is an abstraction over a chosen file in case we want to make a different
+// API backend for web browsers
 export class ChosenFile {
   _path: string;
 
@@ -30,6 +32,10 @@ export async function listAssets(query: string = "", kind: AssetKind = "any") {
   if (kind == "narration")
     assets = assets.filter(asset => asset.endsWith(".mp3"));
   return assets;
+}
+
+export async function imageAssetUrl(name: string): Promise<string | null> {
+  return `otb-asset://${name}`;
 }
 
 export async function chooseFile(): Promise<ChosenFile | null> {

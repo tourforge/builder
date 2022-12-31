@@ -1,9 +1,12 @@
-import { useLayoutEffect, useState, useEffect, MutableRefObject } from "react";
+import { MutableRefObject, useEffect, useLayoutEffect, useState } from "react";
 
 import maplibreGl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 
-export default function MapLibreMap({ mapRef }: { mapRef: MutableRefObject<maplibregl.Map | undefined> }) {
+export default function MapLibreMap({ mapRef, onLoaded }: {
+  mapRef: MutableRefObject<maplibregl.Map | undefined>,
+  onLoaded: () => void,
+}) {
   const [mapId, _setMapId] = useState("map");
   const [map, setMap] = useState<maplibregl.Map | undefined>();
 
@@ -27,7 +30,8 @@ export default function MapLibreMap({ mapRef }: { mapRef: MutableRefObject<mapli
 
   useEffect(() => {
     mapRef.current = map;
-  }, [map, mapRef]);
+    onLoaded();
+  }, [map, mapRef, onLoaded]);
 
   return <div id={mapId}></div>;
 }

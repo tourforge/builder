@@ -4,7 +4,7 @@
 )]
 
 use std::{fs, io, path::PathBuf, sync::Mutex};
-use tauri::api::dialog::blocking::FileDialogBuilder;
+use tauri::{api::dialog::blocking::FileDialogBuilder, AppHandle};
 
 mod lotyr;
 use lotyr::Lotyr;
@@ -54,6 +54,50 @@ async fn valhalla_route(
     Ok(lotyr.route(&req)?)
 }
 
+fn otb_asset_protocol(
+    _app: &AppHandle<impl tauri::Runtime>,
+    req: &tauri::http::Request,
+) -> Result<tauri::http::Response, Box<dyn std::error::Error>> {
+    let asset_name = req
+        .uri()
+        .trim_start_matches("otb-asset://")
+        .trim_end_matches('/');
+
+    // TODO: further protections?
+    if asset_name.chars().any(|ch| matches!(ch, '/' | '\\')) {
+        let mut resp = tauri::http::Response::default();
+        resp.set_status(tauri::http::status::StatusCode::NOT_FOUND);
+        return Ok(resp);
+    }
+
+    let mut file_path = assets_dir()?;
+    file_path.push(asset_name);
+
+    match std::fs::read(file_path) {
+        Ok(body) => {
+            let file_type = infer::get(&body);
+
+            let mut resp = tauri::http::Response::new(body);
+            resp.set_mimetype(
+                file_type
+                    .as_ref()
+                    .map(infer::Type::mime_type)
+                    .map(String::from),
+            );
+
+            Ok(resp)
+        }
+        Err(e) => match e.kind() {
+            io::ErrorKind::NotFound => {
+                let mut resp = tauri::http::Response::default();
+                resp.set_status(tauri::http::status::StatusCode::NOT_FOUND);
+                Ok(resp)
+            }
+            _ => Err(e)?,
+        },
+    }
+}
+
 fn main() {
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![
@@ -62,6 +106,7 @@ fn main() {
             import_asset,
             valhalla_route
         ])
+        .register_uri_scheme_protocol("otb-asset", otb_asset_protocol)
         .manage(Mutex::new(create_lotyr_instance()))
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

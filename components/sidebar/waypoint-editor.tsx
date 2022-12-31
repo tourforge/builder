@@ -1,15 +1,22 @@
 import { ChangeEvent, useId, useState } from "react";
-import { FaChevronUp } from "react-icons/fa";
 import { SetterOrUpdater } from "recoil";
-import { WaypointModel } from "../../src/data";
 
-import styles from "../../styles/WaypointEditor.module.css";
+import clsx from "clsx";
+import { FaChevronUp, FaTrash } from "react-icons/fa";
+
+import { WaypointModel } from "../../src/data";
+import { callIfUpdater } from "../../src/state";
+
 import AssetChooser from "../asset-chooser";
+import GalleryEditor from "../gallery-editor";
 import LocationChooser from "../location-chooser";
 
-export default function WaypointEditor({ waypoint, setWaypoint }: {
+import styles from "../../styles/WaypointEditor.module.css";
+
+export default function WaypointEditor({ waypoint, setWaypoint, remove }: {
   waypoint: WaypointModel,
-  setWaypoint: SetterOrUpdater<WaypointModel>
+  setWaypoint: SetterOrUpdater<WaypointModel>,
+  remove: () => void,
 }) {
   const id = useId();
   const [expanded, setExpanded] = useState(false);
@@ -34,6 +41,10 @@ export default function WaypointEditor({ waypoint, setWaypoint }: {
     setWaypoint(waypoint => ({ ...waypoint, transcript: ev.target.value }));
   }
 
+  function handleNarrationChange(narration: string) {
+    setWaypoint(waypoint => ({ ...waypoint, narration: narration.trim() === "" ? null : narration.trim() }));
+  }
+
   return (
     <div className={`${styles.Waypoint} ${expanded ? styles.expanded : ""}`}>
       <div className={styles.waypointCardHeader}>
@@ -46,7 +57,11 @@ export default function WaypointEditor({ waypoint, setWaypoint }: {
           id={`${id}-title`}
           onChange={handleTitleChange}
         />
-        <button className={styles.waypointExpandCollapseButton} onClick={handleExpandCollapseClick}>
+        <div style={{flex:1}}></div>
+        <button className={styles.waypointButton} onClick={remove}>
+          <FaTrash />
+        </button>
+        <button className={clsx([styles.waypointButton, styles.waypointExpandCollapseButton])} onClick={handleExpandCollapseClick}>
           <FaChevronUp />
         </button>
       </div>
@@ -60,7 +75,14 @@ export default function WaypointEditor({ waypoint, setWaypoint }: {
           />
         </div>
         <LocationChooser lat={waypoint.lat} lng={waypoint.lng} onChange={handleLocationChange} />
-        <AssetChooser name="Narration" kind="image" />
+        <GalleryEditor
+          gallery={waypoint.gallery}
+          setGallery={newWaypoint => setWaypoint(waypoint => ({
+            ...waypoint,
+            gallery: callIfUpdater(waypoint.gallery, newWaypoint)
+          }))}
+        />
+        <AssetChooser name="Narration" kind="narration" onChange={handleNarrationChange} />
         <div className="column"> 
           <label htmlFor={`${id}-transcript`} className="inline-label">Transcript</label>
           <textarea

@@ -9,9 +9,9 @@
 
 .waypointCardHeader {
   display: flex;
-  justify-content: space-between;
   align-items: center;
   padding: 12px;
+  gap: 8px;
 }
 
 input.waypointTitle {
@@ -22,14 +22,16 @@ input.waypointTitle::placeholder {
   color: rgb(83, 125, 134);
 }
 
-button.waypointExpandCollapseButton {
+button.waypointButton {
   all: unset;
   user-select: none;
   cursor: pointer;
 
   padding: 3px;
   padding-top: 5px;
+}
 
+button.waypointExpandCollapseButton {
   transition: transform 0.125s ease;
 }
 
