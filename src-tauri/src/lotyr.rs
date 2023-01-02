@@ -72,14 +72,14 @@ pub struct Lotyr {
 unsafe impl Send for Lotyr {}
 
 impl Lotyr {
-    pub fn new(config_path: &OsStr) -> Result<Lotyr, LotyrError> {
+    pub fn new(config: String) -> Result<Lotyr, LotyrError> {
         let library = get_library();
 
-        let config_path = CString::new(config_path.to_str().unwrap()).unwrap();
+        let config = CString::new(config).unwrap();
         let mut ptr: *mut Opaque = std::ptr::null_mut();
 
         unsafe {
-            Self::lotyr_error((library.lotyr_new)(&mut ptr, config_path.as_ptr()))?;
+            Self::lotyr_error((library.lotyr_new)(&mut ptr, config.as_ptr()))?;
         }
 
         Ok(Lotyr { ptr })
