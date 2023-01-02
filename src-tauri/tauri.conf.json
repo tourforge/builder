@@ -11,15 +11,7 @@
   },
   "tauri": {
     "allowlist": {
-      "all": false,
-      "fs": {
-        "scope": ["$DOCUMENT/OTBAssets/*"],
-        "readFile": true
-      },
-      "protocol": {
-        "asset": true,
-        "assetScope": ["$DOCUMENT/OTBAssets/*"]
-      }
+      "all": false
     },
     "bundle": {
       "active": true,
