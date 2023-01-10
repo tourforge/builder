@@ -1,9 +1,9 @@
 import { invoke } from "@tauri-apps/api/tauri";
 
 import * as polyline from "./polyline";
-import { LatLng } from "./data";
+import { LatLng, TourModel } from "./data";
 
-export type AssetKind = "any" | "narration" | "image"
+export type AssetKind = "any" | "narration" | "image" | "tiles"
 
 // This is an abstraction over a chosen file in case we want to make a different
 // API backend for web browsers
@@ -24,18 +24,52 @@ export class ChosenFile {
   }
 }
 
+export async function listProjects(): Promise<string[]> {
+  return await invoke("list_projects");
+}
+
+export async function createProject(name: string) {
+  await invoke("create_project", { name });
+}
+
+export async function openProject(name: string) {
+  await invoke("open_project", { name });
+}
+
+export async function listTours(): Promise<{ id: string, name: string }[]> {
+  return await invoke("list_tours", { projectName: currentProject() });
+}
+
+export async function createTour(tour: TourModel): Promise<void> {
+  await invoke("create_tour", { projectName: currentProject(), tour });
+}
+
+export async function getTour(id: string): Promise<TourModel> {
+  return await invoke("get_tour", { projectName: currentProject(), tourId: id });
+}
+
+export async function putTour(id: string, tour: TourModel): Promise<void> {
+  await invoke("put_tour", { projectName: currentProject(), tourId: id, tour });
+}
+
+export async function deleteTour(id: string): Promise<void> {
+  await invoke("delete_tour", { projectName: currentProject(), tourId: id });
+}
+
 export async function listAssets(query: string = "", kind: AssetKind = "any") {
-  let assets: string[] = await invoke("list_assets");
+  let assets: string[] = await invoke("list_assets", { projectName: currentProject() });
   assets = assets.filter(asset => asset.includes(query) && asset.length !== query.length);
   if (kind === "image")
     assets = assets.filter(asset => asset.endsWith(".png") || asset.endsWith(".jpg") || asset.endsWith(".jpeg"));
   if (kind == "narration")
     assets = assets.filter(asset => asset.endsWith(".mp3"));
+  if (kind == "tiles")
+    assets = assets.filter(asset => asset.endsWith(".mbtiles"));
   return assets;
 }
 
 export async function imageAssetUrl(name: string): Promise<string | null> {
-  return `otb-asset://${name}`;
+  return `otb-asset://${currentProject()}/${name}`;
 }
 
 export async function chooseFile(): Promise<ChosenFile | null> {
@@ -46,6 +80,7 @@ export async function chooseFile(): Promise<ChosenFile | null> {
 export async function importAsset(file: ChosenFile, name: string) {
   await invoke("import_asset", {
     path: file._path,
+    projectName: currentProject(),
     name,
   });
 }
@@ -62,4 +97,8 @@ export async function route(points: LatLng[]): Promise<LatLng[]> {
   return resp.trip.legs
     .map((leg: any) => polyline.decode(leg.shape, 6))
     .reduce((a: any, b: any) => [...a, ...b]);
+}
+
+function currentProject(): string | undefined {
+  return (window as any).__OPENTOURBUILDER_CURRENT_PROJECT_NAME__;
 }

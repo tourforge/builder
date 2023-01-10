@@ -21,6 +21,7 @@ tauri = { version = "1.2.2", features = ["dialog"] }
 libloading = "0.7.4"
 lazy_static = "1.4.0"
 infer = { version = "0.11.0", default-features = false }
+uuid = { version = "1", features = ["v4", "fast-rng"] }
 
 [features]
 # by default Tauri runs in production mode

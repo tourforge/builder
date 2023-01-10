@@ -1,13 +1,13 @@
 /* eslint-disable @next/next/no-img-element */
 import { useEffect, useState } from "react";
-import { SetterOrUpdater } from "recoil";
 
-import { imageAssetUrl } from "../src/api";
-import { replaceElementAtIndex } from "../src/state";
+import { imageAssetUrl } from "src/api";
+import { replaceElementAtIndex, removeElementAtIndex, SetterOrUpdater } from "src/state";
 
-import styles from "../styles/GalleryEditor.module.css";
 import AssetChooser from "./asset-chooser";
 import Modal from "./modal";
+
+import styles from "styles/tour-editor/GalleryEditor.module.css";
 
 export default function GalleryEditor({ gallery, setGallery }: {
   gallery: string[],
@@ -23,6 +23,13 @@ export default function GalleryEditor({ gallery, setGallery }: {
   function handleGalleryItemClick(index: number) {
     setOpenItem(index);
     setOpenItemChosenAsset(gallery[index]);
+  }
+
+  function handleModalDeleteButtonClick() {
+    setOpenItem(undefined);
+    setOpenItemChosenAsset(undefined);
+    if (typeof openItem === "number")
+      setGallery(gallery => removeElementAtIndex(gallery, openItem));
   }
 
   function handleModalCancelButtonClick() {
@@ -53,8 +60,9 @@ export default function GalleryEditor({ gallery, setGallery }: {
         <Modal isOpen={typeof openItem !== "undefined"}>
           <header>Gallery image</header>
           Choose an asset for this image in the gallery.
-          <AssetChooser name="Gallery image" kind="image" defaultValue={openItemChosenAsset} onChange={setOpenItemChosenAsset} />
+          <AssetChooser name="Gallery image" kind="image" value={openItemChosenAsset} onChange={setOpenItemChosenAsset} />
           <div className={styles.modalActionButtons}>
+            {openItem !== "new" ? <button className="danger" onClick={handleModalDeleteButtonClick}>Delete</button> : <></>}
             <button className="secondary" onClick={handleModalCancelButtonClick}>Cancel</button>
             <button className="primary" onClick={handleModalDoneButtonClick}>Save</button>
           </div>

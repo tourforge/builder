@@ -3,16 +3,202 @@
     windows_subsystem = "windows"
 )]
 
-use std::{fs, io, path::PathBuf, sync::Mutex};
+use std::{
+    fs,
+    io::{self, prelude::*},
+    path::PathBuf,
+    sync::Mutex,
+};
+
+use serde::Serialize;
 use serde_json::json;
-use tauri::{api::dialog::blocking::FileDialogBuilder, AppHandle};
+use tauri::{api::dialog::blocking::FileDialogBuilder, AppHandle, Manager};
 
 mod lotyr;
 use lotyr::Lotyr;
 
+fn main() {
+    tauri::Builder::default()
+        .setup(|app| {
+            fs::create_dir_all(projects_dir(&app.handle())?)?;
+
+            Ok(())
+        })
+        .invoke_handler(tauri::generate_handler![
+            list_projects,
+            create_project,
+            open_project,
+            list_tours,
+            create_tour,
+            get_tour,
+            put_tour,
+            delete_tour,
+            choose_file,
+            list_assets,
+            import_asset,
+            valhalla_route,
+        ])
+        .register_uri_scheme_protocol("otb-asset", otb_asset_protocol)
+        .manage(Mutex::new(create_lotyr_instance()))
+        .run(tauri::generate_context!())
+        .expect("error while running tauri application");
+}
+
+// The commands that are marked as `async` are only marked that way so that Tauri runs them off of
+// the main thread. We're not actually using async I/O since Tauri itself doesn't.
+
 #[tauri::command]
-async fn list_assets() -> Result<Vec<String>, ErrorString> {
-    let assets_dir = assets_dir()?;
+async fn list_projects(app: AppHandle) -> Result<Vec<String>, ErrorString> {
+    let projects_dir = fs::read_dir(projects_dir(&app)?)?;
+
+    let mut projects = vec![];
+    for project_dir in projects_dir {
+        let project_dir = project_dir?;
+
+        if let Some(project_name) = project_dir.file_name().to_str() {
+            projects.push(project_name.to_owned())
+        }
+    }
+
+    Ok(projects)
+}
+
+#[tauri::command]
+async fn create_project(app: AppHandle, name: &str) -> Result<(), ErrorString> {
+    if !project_name_valid(name) {
+        return Err(ErrorString::new("Invalid project name"));
+    }
+
+    init_project_dir(&app, name)?;
+
+    build_project_window(&app, name)?;
+
+    if let Some(welcome_window) = app.get_window("welcome") {
+        welcome_window.close()?;
+    }
+
+    Ok(())
+}
+
+#[tauri::command]
+async fn open_project(app: AppHandle, name: &str) -> Result<(), ErrorString> {
+    if !project_name_valid(name) {
+        return Err(ErrorString::new("Invalid project name"));
+    }
+
+    build_project_window(&app, name)?;
+
+    if let Some(welcome_window) = app.get_window("welcome") {
+        welcome_window.close()?;
+    }
+
+    Ok(())
+}
+
+#[derive(Serialize)]
+struct ProjectTour {
+    id: String,
+    name: String,
+}
+
+#[tauri::command]
+async fn list_tours(app: AppHandle, project_name: &str) -> Result<Vec<ProjectTour>, ErrorString> {
+    let mut tours = Vec::new();
+    for dir_entry in fs::read_dir(project_dir(&app, project_name)?)? {
+        let dir_entry = dir_entry?;
+
+        if let Some(file_name) = dir_entry.file_name().to_str() {
+            if !file_name.ends_with(".otb.json") {
+                continue;
+            }
+
+            let tour_id = file_name.trim_end_matches(".otb.json").to_owned();
+
+            tours.push(ProjectTour {
+                name: tour_name(&app, project_name, &tour_id)?,
+                id: tour_id,
+            });
+        }
+    }
+
+    Ok(tours)
+}
+
+fn tour_name(app: &AppHandle<impl tauri::Runtime>, project_name: &str, tour_id: &str) -> Result<String, ErrorString> {
+    let path = tour_json_path(app, project_name, tour_id)?;
+    let json = serde_json::from_reader(fs::File::open(path)?)?;
+    match json {
+        serde_json::Value::Object(map) => {
+            let name_value = map.get("name").ok_or_else(|| ErrorString::new("Invalid tour JSON"))?;
+
+            match name_value {
+                serde_json::Value::String(name) => Ok(name.clone()),
+                _ => Err(ErrorString::new("Invalid tour json")),
+            }
+        }
+        _ => Err(ErrorString::new("Invalid tour JSON")),
+    }
+}
+
+#[tauri::command]
+async fn create_tour(app: AppHandle, project_name: &str, tour: serde_json::Value) -> Result<(), ErrorString> {
+    let tour_id = uuid::Uuid::new_v4().to_string();
+
+    let tour_json_path = tour_json_path(&app, project_name, &tour_id)?;
+
+    serde_json::to_writer(fs::File::create(tour_json_path)?, &tour)?;
+
+    Ok(())
+}
+
+#[tauri::command]
+async fn get_tour(
+    app: AppHandle,
+    project_name: &str,
+    tour_id: &str,
+) -> Result<serde_json::Value, ErrorString> {
+    let tour_json_path = tour_json_path(&app, project_name, tour_id)?;
+
+    Ok(serde_json::from_reader(fs::File::open(tour_json_path)?)?)
+}
+
+#[tauri::command]
+async fn put_tour(
+    app: AppHandle,
+    project_name: &str,
+    tour_id: &str,
+    tour: serde_json::Value,
+) -> Result<(), ErrorString> {
+    let tour_json_path = tour_json_path(&app, project_name, tour_id)?;
+
+    serde_json::to_writer(fs::File::create(tour_json_path)?, &tour)?;
+
+    Ok(())
+}
+
+#[tauri::command]
+async fn delete_tour(app: AppHandle, project_name: &str, tour_id: &str) -> Result<(), ErrorString> {
+    fs::remove_file(tour_json_path(&app, project_name, tour_id)?)?;
+
+    Ok(())
+}
+
+#[tauri::command]
+async fn valhalla_route(
+    req: String,
+    lotyr: tauri::State<'_, Mutex<Lotyr>>,
+) -> Result<String, ErrorString> {
+    let lotyr = lotyr.lock().unwrap();
+    Ok(lotyr.route(&req)?)
+}
+
+#[tauri::command]
+async fn list_assets(app: AppHandle, project_name: &str) -> Result<Vec<String>, ErrorString> {
+    if !project_name_valid(project_name) {
+        return Err(ErrorString::new("Invalid project name"));
+    }
+
+    let assets_dir = assets_dir(&app, project_name)?;
 
     let mut assets = vec![];
     for entry in fs::read_dir(&assets_dir)? {
@@ -32,6 +218,22 @@ async fn list_assets() -> Result<Vec<String>, ErrorString> {
 }
 
 #[tauri::command]
+async fn import_asset(
+    app: AppHandle,
+    path: String,
+    project_name: &str,
+    name: String,
+) -> Result<(), ErrorString> {
+    if !project_name_valid(project_name) {
+        return Err(ErrorString::new("Invalid project name"));
+    }
+
+    fs::copy(path, assets_dir(&app, project_name)?.join(name))?;
+
+    Ok(())
+}
+
+#[tauri::command]
 async fn choose_file() -> Result<Option<String>, ErrorString> {
     match FileDialogBuilder::new().pick_file() {
         Some(path) => Ok(path.to_str().map(|s| s.to_owned())),
@@ -39,39 +241,100 @@ async fn choose_file() -> Result<Option<String>, ErrorString> {
     }
 }
 
-#[tauri::command]
-async fn import_asset(path: String, name: String) -> Result<(), ErrorString> {
-    fs::copy(path, assets_dir()?.join(name))?;
+fn build_project_window(
+    app: &AppHandle<impl tauri::Runtime>,
+    name: &str,
+) -> Result<(), ErrorString> {
+    tauri::WindowBuilder::new(
+        app,
+        "project",
+        tauri::WindowUrl::App(PathBuf::from("project")),
+    )
+    .initialization_script(&format!(
+        r#"window.__OPENTOURBUILDER_CURRENT_PROJECT_NAME__ = "{}";"#,
+        name
+    ))
+    .title("OpenTourBuilder")
+    .focused(true)
+    .build()?;
 
     Ok(())
 }
 
-#[tauri::command]
-async fn valhalla_route(
-    req: String,
-    lotyr: tauri::State<'_, Mutex<Lotyr>>,
-) -> Result<String, ErrorString> {
-    let lotyr = lotyr.lock().unwrap();
-    Ok(lotyr.route(&req)?)
+fn tour_id_valid(id: &str) -> bool {
+    id.chars()
+        .all(|ch| matches!(ch, 'a'..='z' | '0'..='9' | '-'))
+}
+
+fn project_name_valid(name: &str) -> bool {
+    name.chars()
+        .all(|ch| matches!(ch, 'a'..='z' | 'A'..='Z' | '0'..='9' | ' ' | '-'))
+}
+
+// Project directory structure:
+// project-name
+// - project.json
+// - assets/
+//   - asset-name.jpg
+//   - asset-name.png
+//   - asset-name.mp3
+//   - asset-name.osm.pbf
+//   - ...
+// - tour-name-1.json
+// - tour-name-2.json
+// - ...
+fn init_project_dir(app: &AppHandle<impl tauri::Runtime>, name: &str) -> Result<(), io::Error> {
+    let mut path = projects_dir(app)?;
+    path.push(name);
+
+    fs::create_dir_all(&path)?;
+
+    let mut tours_json_path = PathBuf::from(&path);
+    tours_json_path.push("project.json");
+
+    let mut tours_json = fs::OpenOptions::new()
+        .write(true)
+        .create_new(true)
+        .open(tours_json_path)?;
+    tours_json.write_all(br#"{"tours":[]}"#)?;
+
+    let mut assets_dir_path = PathBuf::from(&path);
+    assets_dir_path.push("assets");
+    fs::create_dir(assets_dir_path)?;
+
+    Ok(())
 }
 
 fn otb_asset_protocol(
-    _app: &AppHandle<impl tauri::Runtime>,
+    app: &AppHandle<impl tauri::Runtime>,
     req: &tauri::http::Request,
 ) -> Result<tauri::http::Response, Box<dyn std::error::Error>> {
-    let asset_name = req
+    let mut parts = req
         .uri()
         .trim_start_matches("otb-asset://")
-        .trim_end_matches('/');
+        .trim_end_matches('/')
+        .split('/');
+    let Some(project_name) = parts.next() else {
+        let mut resp = tauri::http::Response::default();
+        resp.set_status(tauri::http::status::StatusCode::NOT_FOUND);
+        return Ok(resp);
+    };
+    let Some(asset_name) = parts.next() else {
+        let mut resp = tauri::http::Response::default();
+        resp.set_status(tauri::http::status::StatusCode::NOT_FOUND);
+        return Ok(resp);
+    };
 
     // TODO: further protections?
-    if asset_name.chars().any(|ch| matches!(ch, '/' | '\\')) {
+    if project_name.chars().any(|ch| matches!(ch, '/' | '\\'))
+        || asset_name.chars().any(|ch| matches!(ch, '/' | '\\'))
+    {
         let mut resp = tauri::http::Response::default();
         resp.set_status(tauri::http::status::StatusCode::NOT_FOUND);
         return Ok(resp);
     }
 
-    let mut file_path = assets_dir()?;
+    let mut file_path = assets_dir(app, project_name)?;
     file_path.push(asset_name);
 
     match std::fs::read(file_path) {
@@ -99,20 +362,6 @@ fn otb_asset_protocol(
     }
 }
 
-fn main() {
-    tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![
-            choose_file,
-            list_assets,
-            import_asset,
-            valhalla_route
-        ])
-        .register_uri_scheme_protocol("otb-asset", otb_asset_protocol)
-        .manage(Mutex::new(create_lotyr_instance()))
-        .run(tauri::generate_context!())
-        .expect("error while running tauri application");
-}
-
 fn create_lotyr_instance() -> Lotyr {
     // Load the dynamic library
     let current_dir = std::env::current_dir().unwrap();
@@ -124,17 +373,55 @@ fn create_lotyr_instance() -> Lotyr {
     // Create the instance
     let mut valhalla_base_path = current_dir;
     valhalla_base_path.push("dev-install/lotyr");
-    Lotyr::new(valhalla_config(valhalla_base_path.to_str().unwrap())).expect("Failed to create Lotyr instance")
+    Lotyr::new(valhalla_config(valhalla_base_path.to_str().unwrap()))
+        .expect("Failed to create Lotyr instance")
 }
 
-fn assets_dir() -> Result<PathBuf, io::Error> {
-    let Some(document_dir) = tauri::api::path::document_dir() else {
+fn tour_json_path(
+    app: &AppHandle<impl tauri::Runtime>,
+    project: &str,
+    tour_id: &str,
+) -> Result<PathBuf, io::Error> {
+    if !project_name_valid(project) {
+        return Err(io::Error::new(io::ErrorKind::Other, "Invalid project name"));
+    }
+
+    if !tour_id_valid(tour_id) {
+        return Err(io::Error::new(io::ErrorKind::Other, "Invalid tour id"));
+    }
+
+    let mut tour_json_path = project_dir(app, project)?;
+    tour_json_path.push(String::from(tour_id) + ".otb.json");
+
+    Ok(tour_json_path)
+}
+
+fn project_dir(app: &AppHandle<impl tauri::Runtime>, project: &str) -> Result<PathBuf, io::Error> {
+    if !project_name_valid(project) {
+        return Err(io::Error::new(io::ErrorKind::Other, "Invalid project name"));
+    }
+
+    let mut project_dir = projects_dir(app)?;
+    project_dir.push(project);
+
+    Ok(project_dir)
+}
+
+fn projects_dir(app: &AppHandle<impl tauri::Runtime>) -> Result<PathBuf, io::Error> {
+    let Some(mut projects_dir) = app.path_resolver().app_data_dir() else {
         Err(io::Error::new(io::ErrorKind::Other, "Failed to determine user documents directory"))?
     };
 
-    let assets_dir = document_dir.join("OTBAssets");
+    projects_dir.push("projects");
 
-    fs::create_dir_all(&assets_dir)?;
+    Ok(projects_dir)
+}
+
+fn assets_dir(app: &AppHandle<impl tauri::Runtime>, project: &str) -> Result<PathBuf, io::Error> {
+    let mut assets_dir = projects_dir(app)?;
+
+    assets_dir.push(project);
+    assets_dir.push("assets");
 
     Ok(assets_dir)
 }
@@ -402,6 +689,12 @@ fn valhalla_config(valhalla_base_path: &str) -> String {
 // This struct is needed because std::error::Error doesn't implement serde::Serialize,
 // and so cannot be in the return value of Tauri commands.
 struct ErrorString(String);
+
+impl ErrorString {
+    pub fn new(s: impl ToString) -> ErrorString {
+        ErrorString(s.to_string())
+    }
+}
 
 impl<T: std::error::Error> From<T> for ErrorString {
     fn from(err: T) -> Self {

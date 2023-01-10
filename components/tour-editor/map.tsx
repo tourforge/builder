@@ -1,18 +1,20 @@
 import { MutableRefObject, useCallback, useEffect, useRef, useState } from "react";
-import { useRecoilState } from "recoil";
 
 import type { GeoJSONSource } from "maplibre-gl";
 import { Marker } from "maplibre-gl";
 
-import { route } from "../src/api";
-import { currentTourState, replaceElementAtIndex } from "../src/state";
+import { route } from "src/api";
+import { replaceElementAtIndex, SetterOrUpdater } from "src/state";
 
 import MapLibreMap from "./maplibre_map";
-import { LatLng } from "../src/data";
+import { LatLng, TourModel } from "src/data";
 
-export default function Map({ centerRef }: { centerRef?: MutableRefObject<LatLng> | undefined }) {
+export default function Map({ centerRef, tour, setTour }: {
+  centerRef?: MutableRefObject<LatLng> | undefined,
+  tour: TourModel,
+  setTour: SetterOrUpdater<TourModel>,
+}) {
   // we depend on the tour and need a ref with it for `handleMarkerDragEnd` to work
-  const [tour, setTour] = useRecoilState(currentTourState);
   const tourRef = useRef(tour);
   tourRef.current = tour;
 

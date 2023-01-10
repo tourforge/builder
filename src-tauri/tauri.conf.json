@@ -6,7 +6,7 @@
     "distDir": "../out"
   },
   "package": {
-    "productName": "opentourbuilder",
+    "productName": "OpenTourBuilder",
     "version": "0.1.0"
   },
   "tauri": {
@@ -54,11 +54,12 @@
     },
     "windows": [
       {
+        "label": "welcome",
         "fullscreen": false,
         "height": 600,
-        "resizable": true,
-        "title": "OpenTourBuilder",
-        "width": 800
+        "resizable": false,
+        "title": "OpenTourBuilder - Welcome",
+        "width": 400
       }
     ]
   }

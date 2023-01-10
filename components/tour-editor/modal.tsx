@@ -2,7 +2,7 @@ import React from "react";
 
 import ReactModal from "react-modal";
 
-import styles from "../styles/Modal.module.css";
+import styles from "styles/tour-editor/Modal.module.css";
 
 export default function Modal({ isOpen, children }: { isOpen: boolean, children?: React.ReactNode }) {
   return (

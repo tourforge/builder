@@ -3,16 +3,16 @@ import { ChangeEvent, KeyboardEvent, useEffect, useId, useRef, useState } from "
 import { FaFileImport } from "react-icons/fa";
 import { toast } from "react-toastify";
 
-import { AssetKind, chooseFile, ChosenFile, importAsset, listAssets } from "../src/api";
+import { AssetKind, chooseFile, ChosenFile, importAsset, listAssets } from "src/api";
 
 import Modal from "./modal";
 
-import styles from "../styles/AssetChooser.module.css";
+import styles from "styles/tour-editor/AssetChooser.module.css";
 
-export default function AssetChooser({ name, kind, defaultValue, onChange = () => {} }: {
+export default function AssetChooser({ name, kind, value, onChange = () => {} }: {
   name: string,
   kind: AssetKind,
-  defaultValue?: string | undefined,
+  value?: string | undefined,
   onChange?: (value: string) => void,
 }) {
   const id = useId();
@@ -20,10 +20,14 @@ export default function AssetChooser({ name, kind, defaultValue, onChange = () =
   const inputRef = useRef<HTMLInputElement>(null);
   const resultsRef = useRef<HTMLDivElement>(null);
   const [results, setResults] = useState<string[]>([]);
-  const [inputValue, setInputValue] = useState(defaultValue ?? "");
+  const [inputValue, setInputValue] = useState(value ?? "");
 
   const [newAssetFile, setNewAssetFile] = useState<ChosenFile | null>(null);
   const [newAssetName, setNewAssetName] = useState<string>("");
+
+  useEffect(() => {
+    setInputValue(value ?? "");
+  }, [value]);
 
   useEffect(() => {
     listAssets(inputValue, kind)
@@ -35,13 +39,11 @@ export default function AssetChooser({ name, kind, defaultValue, onChange = () =
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  useEffect(() => {
-    onChange(inputValue);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [inputValue]);
-
   function handleInputChange(ev: ChangeEvent<HTMLInputElement>) {
-    setInputValue(ev.target.value);
+    if (value === undefined)
+      setInputValue(ev.target.value);
+
+    onChange(ev.target.value);
 
     listAssets(ev.target.value, kind)
       .then(setResults)
@@ -72,7 +74,9 @@ export default function AssetChooser({ name, kind, defaultValue, onChange = () =
   }
 
   function handleResultClick(result: string) {
-    setInputValue(result);
+    if (value === undefined)
+      setInputValue(result);
+    onChange(result);
     setResults([]);
     inputRef.current?.focus();
   }

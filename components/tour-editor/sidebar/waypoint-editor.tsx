@@ -1,17 +1,16 @@
 import { ChangeEvent, useId, useState } from "react";
-import { SetterOrUpdater } from "recoil";
 
 import clsx from "clsx";
 import { FaChevronUp, FaTrash } from "react-icons/fa";
 
-import { WaypointModel } from "../../src/data";
-import { callIfUpdater } from "../../src/state";
+import { WaypointModel } from "src/data";
+import { callIfUpdater, SetterOrUpdater } from "src/state";
 
 import AssetChooser from "../asset-chooser";
 import GalleryEditor from "../gallery-editor";
 import LocationChooser from "../location-chooser";
 
-import styles from "../../styles/WaypointEditor.module.css";
+import styles from "styles/tour-editor/WaypointEditor.module.css";
 
 export default function WaypointEditor({ waypoint, setWaypoint, remove }: {
   waypoint: WaypointModel,
@@ -77,9 +76,9 @@ export default function WaypointEditor({ waypoint, setWaypoint, remove }: {
         <LocationChooser lat={waypoint.lat} lng={waypoint.lng} onChange={handleLocationChange} />
         <GalleryEditor
           gallery={waypoint.gallery}
-          setGallery={newWaypoint => setWaypoint(waypoint => ({
+          setGallery={newGallery => setWaypoint(waypoint => ({
             ...waypoint,
-            gallery: callIfUpdater(waypoint.gallery, newWaypoint)
+            gallery: callIfUpdater(waypoint.gallery, newGallery)
           }))}
         />
         <AssetChooser name="Narration" kind="narration" onChange={handleNarrationChange} />

@@ -5,6 +5,7 @@ export type TourModel = {
   gallery: GalleryModel,
   path: string,
   pois: PoiModel[],
+  tiles: string | undefined,
 }
 
 export type WaypointModel = {

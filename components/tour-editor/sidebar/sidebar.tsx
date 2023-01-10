@@ -1,28 +1,34 @@
 import { ChangeEvent, RefObject, useId } from "react";
-import { useRecoilState } from "recoil";
 
 import { nanoid } from "nanoid";
 import { FaPlus } from "react-icons/fa";
 
-import { LatLng, WaypointModel } from "../src/data";
-import { callIfUpdater, currentTourState, removeElementAtIndex, replaceElementAtIndex } from "../src/state";
+import { LatLng, TourModel, WaypointModel } from "src/data";
+import { callIfUpdater, removeElementAtIndex, replaceElementAtIndex, SetterOrUpdater } from "src/state";
 
-import GalleryEditor from "./gallery-editor";
+import GalleryEditor from "../gallery-editor";
 
-import styles from "../styles/Sidebar.module.css";
-import WaypointEditor from "./sidebar/waypoint-editor";
+import styles from "styles/tour-editor/Sidebar.module.css";
+import WaypointEditor from "./waypoint-editor";
+import AssetChooser from "../asset-chooser";
 
-export default function Sidebar({ mapCenter }: { mapCenter: RefObject<LatLng> }) {
+export default function Sidebar({ mapCenter, tour, setTour }: {
+  mapCenter: RefObject<LatLng>,
+  tour: TourModel,
+  setTour: SetterOrUpdater<TourModel>
+}) {
   const id = useId();
 
-  const [currentTour, setCurrentTour] = useRecoilState(currentTourState);
-
   function handleTitleChange(ev: ChangeEvent<HTMLInputElement>) {
-    setCurrentTour(current => ({ ...current, name: ev.target.value }));
+    setTour(current => ({ ...current, name: ev.target.value }));
   }
 
   function handleDescChange(ev: ChangeEvent<HTMLTextAreaElement>) {
-    setCurrentTour(current => ({ ...current, desc: ev.target.value }));
+    setTour(current => ({ ...current, desc: ev.target.value }));
+  }
+
+  function handleTilesChange(tiles: string) {
+    setTour(current => ({ ...current, tiles }));
   }
 
   async function handleAddWaypointClick() {
@@ -38,11 +44,11 @@ export default function Sidebar({ mapCenter }: { mapCenter: RefObject<LatLng> })
       gallery: [],
     };
 
-    setCurrentTour(current => ({ ...current, waypoints: [...current.waypoints, newWaypoint] }));
+    setTour(current => ({ ...current, waypoints: [...current.waypoints, newWaypoint] }));
   }
 
   function setWaypoint(index: number, waypoint: WaypointModel) {
-    setCurrentTour(current => ({
+    setTour(current => ({
       ...current,
       waypoints: replaceElementAtIndex(
         current.waypoints,
@@ -60,7 +66,7 @@ export default function Sidebar({ mapCenter }: { mapCenter: RefObject<LatLng> })
           type="text"
           name="Tour Title"
           id={`${id}-title`}
-          defaultValue={currentTour.name}
+          value={tour.name}
           onChange={handleTitleChange}
         />
       </div>
@@ -70,25 +76,26 @@ export default function Sidebar({ mapCenter }: { mapCenter: RefObject<LatLng> })
           rows={3}
           name="Tour Description"
           id={`${id}-desc`}
-          defaultValue={currentTour.desc}
+          value={tour.desc}
           onChange={handleDescChange}
         ></textarea>
       </div>
+      <AssetChooser name="Map Tiles" kind="tiles" value={tour.tiles} onChange={handleTilesChange} />
       <GalleryEditor
-        gallery={currentTour.gallery}
-        setGallery={newGallery => setCurrentTour({
-          ...currentTour,
-          gallery: callIfUpdater(currentTour.gallery, newGallery)
+        gallery={tour.gallery}
+        setGallery={newGallery => setTour({
+          ...tour,
+          gallery: callIfUpdater(tour.gallery, newGallery)
         })}
       />
       <header className={styles.waypointsHeader}>Waypoints</header>
-      {currentTour.waypoints.map((waypoint, index) => (
+      {tour.waypoints.map((waypoint, index) => (
         <WaypointEditor
           waypoint={waypoint}
           setWaypoint={newWaypoint => setWaypoint(index, callIfUpdater(waypoint, newWaypoint))}
-          remove={() => setCurrentTour(currentTour => ({
-            ...currentTour,
-            waypoints: removeElementAtIndex(currentTour.waypoints, index),
+          remove={() => setTour(tour => ({
+            ...tour,
+            waypoints: removeElementAtIndex(tour.waypoints, index),
           }))}
           key={waypoint.id}
         />

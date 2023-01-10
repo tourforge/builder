@@ -1,18 +1,4 @@
-import { atom } from "recoil";
-
-import { TourModel } from "./data";
-
-export const currentTourState = atom<TourModel>({
-  key: "currentTourState",
-  default: {
-    name: "Untitled",
-    desc: "",
-    waypoints: [],
-    gallery: [],
-    path: "",
-    pois: [],
-  },
-});
+export type SetterOrUpdater<T> = (valOrUpdater: T | ((currVal: T) => T)) => void
 
 export function callIfUpdater<T>(currVal: T, valOrUpdater: ((currVal: T) => T) | T): T {
   if (typeof valOrUpdater === "function") {
