@@ -4,8 +4,6 @@
   display: grid;
   grid-template-rows: 1fr;
   grid-template-columns: var(--sidebar-width) 1fr;
-}
 
-.main > :nth-child(2) {
   height: 100vh;
 }
