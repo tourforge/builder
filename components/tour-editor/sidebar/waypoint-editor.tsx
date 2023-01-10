@@ -82,7 +82,7 @@ export default function WaypointEditor({ waypoint, setWaypoint, remove }: {
             gallery: callIfUpdater(waypoint.gallery, newGallery)
           }))}
         />
-        <AssetChooser name="Narration" kind="narration" onChange={handleNarrationChange} />
+        <AssetChooser name="Narration" kind="narration" value={waypoint.narration ?? undefined} onChange={handleNarrationChange} />
         <div className="column"> 
           <label htmlFor={`${id}-transcript`} className="inline-label">Transcript</label>
           <textarea
