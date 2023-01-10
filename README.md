@@ -1,36 +1,40 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# OpenTourBuilder
 
-## Getting Started
+This repository holds the source code for the part of OpenTourBuilder that lets you build custom
+tours on a desktop computer.
 
-First, run the development server:
+## Development
 
-```bash
-npm run dev
-# or
-yarn dev
-```
+You'll need two things to run OpenTourBuilder as a developer: a built dynamic library of
+[Lotyr](https://github.com/opentourbuilder/lotyr) for your platform and a `valhalla_tiles.tar` file.
+These two files are what allows OpenTourBuilder to calculate route instructions between the stops
+added along each tour. If both of these files are not in place, then the application will not be
+able to generate routes and therefore will not be fully functional.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Once you've acquired these two files, create two new directories: `src-tauri/dev-install/` and
+within that one, `src-tauri/dev-install/lotyr`. Place the Lotyr library and the `valhalla_tiles.tar`
+files inside this directory. Assuming you didn't change the names of these files, you should be
+good to go!
 
-You can start editing the page by modifying `pages/index.tsx`. The page auto-updates as you edit the file.
+## Overall architecture
 
-[API routes](https://nextjs.org/docs/api-routes/introduction) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.ts`.
+The front-end of the application is built with [Next.js](https://nextjs.org/), which is a framework
+built around [React](https://reactjs.org/). These are technologies that only work to build web apps,
+so we use [Tauri](https://tauri.app/) as our framework for running the application on desktop.
+Tauri application backends are written in [Rust](https://www.rust-lang.org/); you can find the
+backend of this application in the `src-tauri/` subdirectory.
 
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/api-routes/introduction) instead of React pages.
+### Front-end architecture
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+The architecture of the front-end is very simple: it stores the tours in-memory as a regular JS
+object using React Hooks to manage the state. Importantly, the tour object is never modified;
+instead, it is only ever replaced with a new object containing the updated state. This is following
+the typcial guidelines for using React Hooks. In order to persist tours to disk and perform other
+actions that interact with the OS, the front-end calls the backend over the interface provided by
+Tauri. Tours in particular are automatically saved to disk every second if they have been modified.
 
-## Learn More
 
-To learn more about Next.js, take a look at the following resources:
+### Backend architecture
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+The backend is arguable simpler than the front-end. It holds no state and provides some minimal
+abstractions around creating, reading, updating, and deleting tours and projects and assets.
