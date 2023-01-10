@@ -70,6 +70,7 @@ export default function WaypointEditor({ waypoint, setWaypoint, remove }: {
           <textarea
             name="Waypoint Description"
             id={`${id}-desc`}
+            value={waypoint.desc}
             onChange={handleDescChange}
           />
         </div>
@@ -87,6 +88,7 @@ export default function WaypointEditor({ waypoint, setWaypoint, remove }: {
           <textarea
             name="Narration Transcript"
             id={`${id}-transcript`}
+            value={waypoint.transcript ?? ""}
             onChange={handleTranscriptChange}
           />
         </div>
