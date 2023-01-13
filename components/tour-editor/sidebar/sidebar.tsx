@@ -3,14 +3,16 @@ import { ChangeEvent, RefObject, useId } from "react";
 import { nanoid } from "nanoid";
 import { FaPlus } from "react-icons/fa";
 
-import { LatLng, TourModel, WaypointModel } from "src/data";
-import { callIfUpdater, removeElementAtIndex, replaceElementAtIndex, SetterOrUpdater } from "src/state";
+import { ControlPointModel, LatLng, TourModel, WaypointModel } from "src/data";
+import { callIfUpdater, insertElementAtIndex, removeElementAtIndex, replaceElementAtIndex, SetterOrUpdater } from "src/state";
 
 import GalleryEditor from "../gallery-editor";
 
 import styles from "styles/tour-editor/Sidebar.module.css";
 import WaypointEditor from "./waypoint-editor";
 import AssetChooser from "../asset-chooser";
+import { ControlPointEditor } from "./control-point-editor";
+import AddPointButton from "./add-point-button";
 
 export default function Sidebar({ mapCenter, tour, setTour }: {
   mapCenter: RefObject<LatLng>,
@@ -31,8 +33,9 @@ export default function Sidebar({ mapCenter, tour, setTour }: {
     setTour(current => ({ ...current, tiles }));
   }
 
-  async function handleAddWaypointClick() {
+  async function addWaypoint(index: number) {
     const newWaypoint: WaypointModel = {
+      type: "waypoint",
       id: nanoid(),
       name: "Untitled",
       desc: "",
@@ -44,10 +47,22 @@ export default function Sidebar({ mapCenter, tour, setTour }: {
       gallery: [],
     };
 
-    setTour(current => ({ ...current, waypoints: [...current.waypoints, newWaypoint] }));
+    setTour(current => ({ ...current, waypoints: insertElementAtIndex(current.waypoints, index, newWaypoint) }));
   }
 
-  function setWaypoint(index: number, waypoint: WaypointModel) {
+  async function addControlPoint(index: number) {
+    const newWaypoint: ControlPointModel = {
+      type: "control",
+      id: nanoid(),
+      lat: mapCenter.current?.lat ?? 0,
+      lng: mapCenter.current?.lng ?? 0,
+      control: "route",
+    };
+
+    setTour(current => ({ ...current, waypoints: insertElementAtIndex(current.waypoints, index, newWaypoint) }));
+  }
+
+  function setWaypoint(index: number, waypoint: WaypointModel | ControlPointModel) {
     setTour(current => ({
       ...current,
       waypoints: replaceElementAtIndex(
@@ -89,20 +104,38 @@ export default function Sidebar({ mapCenter, tour, setTour }: {
         })}
       />
       <header className={styles.waypointsHeader}>Waypoints</header>
-      {tour.waypoints.map((waypoint, index) => (
-        <WaypointEditor
-          waypoint={waypoint}
-          setWaypoint={newWaypoint => setWaypoint(index, callIfUpdater(waypoint, newWaypoint))}
-          remove={() => setTour(tour => ({
-            ...tour,
-            waypoints: removeElementAtIndex(tour.waypoints, index),
-          }))}
-          key={waypoint.id}
-        />
-      ))}
-      <button className={`primary ${styles.addWaypoint}`} onClick={handleAddWaypointClick}>
-        <FaPlus /> Add Waypoint
-      </button>
+      <div className={styles.waypointsList}>
+        {tour.waypoints.map((waypoint, index) => {
+          const realIndex = tour.waypoints.filter(w => w.type === "waypoint").findIndex(w => w.id === waypoint.id);
+
+          return (
+            <>
+              <AddPointButton addWaypoint={() => addWaypoint(index)} addControlPoint={index !== 0 ? () => addControlPoint(index) : undefined} />
+              {waypoint.type === "waypoint"
+                ? <WaypointEditor
+                  index={realIndex}
+                  waypoint={waypoint}
+                  setWaypoint={newWaypoint => setWaypoint(index, callIfUpdater(waypoint, newWaypoint))}
+                  remove={() => setTour(tour => ({
+                    ...tour,
+                    waypoints: removeElementAtIndex(tour.waypoints, index),
+                  }))}
+                  key={waypoint.id}
+                />
+                : <ControlPointEditor
+                  point={waypoint}
+                  setPoint={newPoint => setWaypoint(index, callIfUpdater(waypoint, newPoint))}
+                  remove={() => setTour(tour => ({
+                    ...tour,
+                    waypoints: removeElementAtIndex(tour.waypoints, index),
+                  }))}
+                  key={waypoint.id}
+                />}
+            </>
+          );
+        })}
+        <AddPointButton addWaypoint={() => addWaypoint(tour.waypoints.length)} />
+      </div>
     </div>
   );
 }

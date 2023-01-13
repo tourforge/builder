@@ -1,6 +1,4 @@
 .Waypoint {
-  margin: 5px;
-
   background-color: rgb(233, 251, 255);
   color: rgb(10, 84, 102);
   --input-decoration-color: rgb(68, 135, 141);
@@ -12,6 +10,12 @@
   align-items: center;
   padding: 12px;
   gap: 8px;
+}
+
+.waypointNumber {
+  font-weight: bold;
+  width: 16px;
+  text-align: center;
 }
 
 input.waypointTitle {

@@ -8,6 +8,10 @@ export function callIfUpdater<T>(currVal: T, valOrUpdater: ((currVal: T) => T) |
   }
 }
 
+export function insertElementAtIndex<T>(arr: T[], index: number, value: T): T[] {
+  return [...arr.slice(0, index), value, ...arr.slice(index)];
+}
+
 export function replaceElementAtIndex<T>(arr: T[], index: number, newValue: T): T[] {
   return [...arr.slice(0, index), newValue, ...arr.slice(index + 1)];
 }

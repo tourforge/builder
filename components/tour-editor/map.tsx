@@ -23,15 +23,22 @@ export default function Map({ centerRef, tour, setTour }: {
   const mapMarkersRef = useRef<{ [id: string]: maplibregl.Marker }>({});
   const mapRef = useRef<maplibregl.Map | undefined>();
 
-  function createMarkerElement(index: number) {
-    const markerElement = document.createElement("div");
-    markerElement.classList.add("marker");
-    markerElement.innerText = `${index + 1}`;
-    return markerElement;
+  function createMarkerElement(index: number | null) {
+    if (index !== null) {
+      const markerElement = document.createElement("div");
+      markerElement.classList.add("marker");
+      markerElement.innerText = `${index + 1}`;
+      return markerElement;
+    } else {
+      const markerElement = document.createElement("div");
+      markerElement.classList.add("marker-control");
+      return markerElement;
+    }
   }
 
-  function updateMarkerElement(element: HTMLElement, index: number) {
-    element.innerText = `${index + 1}`;
+  function updateMarkerElement(element: HTMLElement, index: number | null) {
+    if (index !== null)
+      element.innerText = `${index + 1}`;
   }
 
   // this function must be written very carefully, since we set it once as a callback
@@ -62,7 +69,10 @@ export default function Map({ centerRef, tour, setTour }: {
     const map = mapRef.current;
     if (!map) return;
 
-    tour.waypoints.forEach((waypoint, index) => {
+    tour.waypoints.forEach(waypoint => {
+      let index: number | null = tour.waypoints.filter(w => w.type === "waypoint").findIndex(w => w.id === waypoint.id);
+      if (index === -1) index = null;
+
       if (mapMarkersRef.current[waypoint.id]) {
         mapMarkersRef.current[waypoint.id].setLngLat(waypoint);
         updateMarkerElement(mapMarkersRef.current[waypoint.id].getElement(), index);

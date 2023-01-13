@@ -10,18 +10,19 @@ export default function LocationChooser({ lat, lng, onChange }: {
   const id = useId();
   const [latState, setLat] = useState(lat ?? 0);
   const [lngState, setLng] = useState(lng ?? 0);
-  const [latTxt, setLatTxt] = useState(`${latState}`);
-  const [lngTxt, setLngTxt] = useState(`${lngState}`);
+  const [latTxt, setLatTxt] = useState(truncateDecimal(latState.toString(), 6));
+  const [lngTxt, setLngTxt] = useState(truncateDecimal(lngState.toString(), 6));
 
   useEffect(() => {
     if (lat && latState !== lat) {
       setLat(lat);
-      setLatTxt(`${lat.toFixed(6)}`);
+      setLatTxt(truncateDecimal(lat.toString(), 6));
     }
     if (lng && latState !== lat) {
       setLng(lng);
-      setLngTxt(`${lng.toFixed(6)}`);
+      setLngTxt(truncateDecimal(lng.toString(), 6));
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lat, lng]),
 
   useEffect(() => {
@@ -38,13 +39,10 @@ export default function LocationChooser({ lat, lng, onChange }: {
       const group = /-?0*(\d*(\.\d*)?)/.exec(trimmed)?.[1];
       if (!group) return;
 
-      const newLat = Number.parseFloat(trimmed);
+      let newLatTxt = truncateDecimal(trimmed.startsWith("-") ? "-" + group : group, 6);
 
-      setLat(newLat);
-      if (trimmed.startsWith("-"))
-        setLatTxt(`-${group}`);
-      else
-        setLatTxt(group);
+      setLat(Number.parseFloat(newLatTxt));
+      setLatTxt(newLatTxt);
     }
   }
 
@@ -57,13 +55,10 @@ export default function LocationChooser({ lat, lng, onChange }: {
       const group = /-?0*(\d*(\.\d*)?)/.exec(trimmed)?.[1];
       if (!group) return;
 
-      const newLng = Number.parseFloat(trimmed);
+      let newLngTxt = truncateDecimal(trimmed.startsWith("-") ? "-" + group : group, 6);
 
-      setLng(newLng);
-      if (trimmed.startsWith("-"))
-        setLngTxt(`-${group}`);
-      else
-        setLngTxt(group);
+      setLng(Number.parseFloat(newLngTxt));
+      setLngTxt(newLngTxt);
     }
   }
 
@@ -79,4 +74,14 @@ export default function LocationChooser({ lat, lng, onChange }: {
       </div>
     </div>
   );
+}
+
+function truncateDecimal(s: string, maxDigitsAfterDot: number): string {
+  let parts = s.split(".");
+
+  if (parts.length === 1) {
+    return s;
+  } else {
+    return `${parts[0]}.${parts[1].substring(0, maxDigitsAfterDot)}`;
+  }
 }

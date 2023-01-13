@@ -12,7 +12,8 @@ import LocationChooser from "../location-chooser";
 
 import styles from "styles/tour-editor/WaypointEditor.module.css";
 
-export default function WaypointEditor({ waypoint, setWaypoint, remove }: {
+export default function WaypointEditor({ index, waypoint, setWaypoint, remove }: {
+  index: number,
   waypoint: WaypointModel,
   setWaypoint: SetterOrUpdater<WaypointModel>,
   remove: () => void,
@@ -47,6 +48,7 @@ export default function WaypointEditor({ waypoint, setWaypoint, remove }: {
   return (
     <div className={`${styles.Waypoint} ${expanded ? styles.expanded : ""}`}>
       <div className={styles.waypointCardHeader}>
+        <span className={styles.waypointNumber}>{index + 1}</span>
         <input
           type="text"
           name="Waypoint Title"

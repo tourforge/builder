@@ -1,7 +1,7 @@
 export type TourModel = {
   name: string,
   desc: string,
-  waypoints: WaypointModel[],
+  waypoints: (WaypointModel | ControlPointModel)[],
   gallery: GalleryModel,
   path: string,
   pois: PoiModel[],
@@ -9,6 +9,7 @@ export type TourModel = {
 }
 
 export type WaypointModel = {
+  type: "waypoint",
   id: string,
   name: string,
   desc: string,
@@ -18,6 +19,14 @@ export type WaypointModel = {
   trigger_radius: number,
   transcript: string | null,
   gallery: GalleryModel,
+}
+
+export type ControlPointModel = {
+  type: "control",
+  id: string,
+  lat: number,
+  lng: number,
+  control: "route" | "path",
 }
 
 export type PoiModel = {
