@@ -1,4 +1,4 @@
-import { MutableRefObject, useEffect, useLayoutEffect, useState } from "react";
+import { MutableRefObject, useEffect, useId, useState } from "react";
 
 import maplibreGl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
@@ -7,12 +7,11 @@ export default function MapLibreMap({ mapRef, onLoaded }: {
   mapRef: MutableRefObject<maplibregl.Map | undefined>,
   onLoaded: () => void,
 }) {
-  const [mapId, _setMapId] = useState("map");
-  const [map, setMap] = useState<maplibregl.Map | undefined>();
+  const mapId = useId();
+  const [isLoaded, setIsLoaded] = useState(false);
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useLayoutEffect(() => {
-    if (map) return;
+  useEffect(() => {
+    if (mapRef.current) return;
 
     const mapElem = document.getElementById(mapId);
     if (mapElem == null) return;
@@ -20,18 +19,17 @@ export default function MapLibreMap({ mapRef, onLoaded }: {
     if (mapElem.children.length != 0)
       removeChildren(document.getElementById(mapId));
 
-    setMap(new maplibreGl.Map({
+    mapRef.current = new maplibreGl.Map({
       container: mapId,
       style: "https://api.maptiler.com/maps/streets-v2/style.json?key=LBk0jSklMmNKwGftcTqc", // stylesheet location
-      center: [-74.5, 40], // starting position [lng, lat]
-      zoom: 3, // starting zoom
-    }));
-  });
+      center: [-79, 34], // starting position [lng, lat]
+      zoom: 5, // starting zoom
+    }).on("load", () => { setIsLoaded(true); });
+  }, []);
 
   useEffect(() => {
-    mapRef.current = map;
-    onLoaded();
-  }, [map, mapRef, onLoaded]);
+    if (isLoaded) onLoaded();
+  }, [isLoaded, onLoaded]);
 
   return <div id={mapId}></div>;
 }

@@ -45,6 +45,7 @@ export default function Sidebar({ mapCenter, tour, setTour }: {
       trigger_radius: 30.0,
       transcript: null,
       gallery: [],
+      control: "route",
     };
 
     setTour(current => ({ ...current, waypoints: insertElementAtIndex(current.waypoints, index, newWaypoint) }));
@@ -134,7 +135,7 @@ export default function Sidebar({ mapCenter, tour, setTour }: {
             </>
           );
         })}
-        <AddPointButton addWaypoint={() => addWaypoint(tour.waypoints.length)} />
+        <AddPointButton addWaypoint={() => addWaypoint(tour.waypoints.length)} alwaysVisible />
       </div>
     </div>
   );

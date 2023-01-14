@@ -7,7 +7,7 @@ import { route } from "src/api";
 import { replaceElementAtIndex, SetterOrUpdater } from "src/state";
 
 import MapLibreMap from "./maplibre_map";
-import { LatLng, TourModel } from "src/data";
+import { ControlPointModel, LatLng, TourModel, WaypointModel } from "src/data";
 
 export default function Map({ centerRef, tour, setTour }: {
   centerRef?: MutableRefObject<LatLng> | undefined,
@@ -95,9 +95,15 @@ export default function Map({ centerRef, tour, setTour }: {
   }, [tour, handleMarkerDragEnd]);
 
   // This effect manages the route on the map
+  const [oldPoints, setOldPoints] = useState<(WaypointModel | ControlPointModel)[]>([]);
   useEffect(() => {
     const map = mapRef.current;
-    if (!map) return;
+    if (!isLoaded || !map) return;
+
+    if (oldPoints.length === tour.waypoints.length && oldPoints.every((oldPoint, i) => oldPoint.lat === tour.waypoints[i].lat && oldPoint.lng === tour.waypoints[i].lng && oldPoint.control === tour.waypoints[i].control))
+      return;
+
+    setOldPoints(tour.waypoints);
 
     if (tour.waypoints.length >= 2) {
       route(tour.waypoints)
@@ -145,7 +151,7 @@ export default function Map({ centerRef, tour, setTour }: {
       if (map.getSource("route"))
         map.removeSource("route");
     }
-  }, [tour]);
+  }, [isLoaded, tour.waypoints]);
 
   // Set up an event on the map for when the center changes
   useEffect(() => {

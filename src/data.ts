@@ -19,6 +19,7 @@ export type WaypointModel = {
   trigger_radius: number,
   transcript: string | null,
   gallery: GalleryModel,
+  control: "route" | "path",
 }
 
 export type ControlPointModel = {

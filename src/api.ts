@@ -1,7 +1,7 @@
 import { invoke } from "@tauri-apps/api/tauri";
 
 import * as polyline from "./polyline";
-import { LatLng, TourModel } from "./data";
+import { ControlPointModel, LatLng, TourModel, WaypointModel } from "./data";
 
 export type AssetKind = "any" | "narration" | "image" | "tiles"
 
@@ -85,18 +85,34 @@ export async function importAsset(file: ChosenFile, name: string) {
   });
 }
 
-export async function route(points: LatLng[]): Promise<LatLng[]> {
-  const req = JSON.stringify({
-    "locations": points.map(ll => ({ "lat": ll.lat, "lon": ll.lng })),
-    "costing": "auto",
-    "units": "miles"
-  });
+export async function route(points: (ControlPointModel | WaypointModel)[]): Promise<LatLng[]> {
+  const fullPath: LatLng[] = [];
+  for (let i = 0; i < points.length - 1; i++) {
+    const a = points[i];
+    const b = points[i + 1];
 
-  const resp: any = JSON.parse(await invoke("valhalla_route", { req }));
+    const req = JSON.stringify({
+      "locations": [a, b].map(ll => ({ "lat": ll.lat, "lon": ll.lng })),
+      "costing": "auto",
+      "units": "miles"
+    });
 
-  return resp.trip.legs
-    .map((leg: any) => polyline.decode(leg.shape, 6))
-    .reduce((a: any, b: any) => [...a, ...b]);
+    if (a.control !== "path" || b.control !== "path") {
+      const resp: any = JSON.parse(await invoke("valhalla_route", { req }));
+      const path: LatLng[] = resp.trip.legs
+        .map((leg: any) => polyline.decode(leg.shape, 6))
+        .reduce((a: any, b: any) => [...a, ...b]);
+      
+      if (a.control === "path") path.unshift(a);
+      if (b.control === "path") path.push(b);
+
+      fullPath.push(...path);
+    } else {
+      fullPath.push(a, b);
+    }
+  }
+
+  return fullPath;
 }
 
 function currentProject(): string | undefined {
