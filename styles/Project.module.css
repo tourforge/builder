@@ -11,7 +11,7 @@
   flex-direction: column;
   align-items: stretch;
 
-  width: 250px;
+  width: 270px;
 
   border-right: 1px solid lightgray;
 }
@@ -24,7 +24,7 @@
   font-size: 14px;
 }
 
-.ProjectSidebar button {
+.ProjectSidebarButton {
   all: unset;
   user-select: none;
   display: flex;
@@ -36,18 +36,37 @@
   color: rgb(48, 48, 48);
 }
 
-.ProjectSidebar button:enabled {
+.ProjectSidebarButton:enabled {
   cursor: pointer;
 }
 
-.ProjectSidebar button:enabled:hover {
+.ProjectSidebarButton:enabled:hover {
   background-color: rgba(0, 0, 0, 0.03125);
 }
 
-.ProjectSidebar button:enabled:active {
+.ProjectSidebarButton:enabled:active {
   background-color: rgba(0, 0, 0, 0.0625);
 }
 
 .ProjectSidebar .dualButton {
   display: flex;
+}
+
+.ProjectButtons {
+  display: flex;
+  align-items: center;
+
+  padding: 8px;
+  gap: 8px;
+  border-top: 1px solid lightgray;
+}
+
+.SettingsButton {
+  all: unset;
+  user-select: none;
+  cursor: pointer;
+  display: flex;
+
+  font-size: 24px;
+  padding: 8px;
 }

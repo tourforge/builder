@@ -1,6 +1,6 @@
 import Head from "next/head";
 import { useEffect, useRef, useState } from "react";
-import { FaRegFile, FaMapSigns, FaPlus, FaEllipsisV, FaTrash } from "react-icons/fa";
+import { FaRegFile, FaMapSigns, FaPlus, FaTrash, FaCog, FaFileExport } from "react-icons/fa";
 
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -122,15 +122,26 @@ function ProjectSidebar({ tourWritten, tourId, setTourId, setTour }: {
 
   return (
     <div className={styles.ProjectSidebar}>
-      <button><FaRegFile /> Assets</button>
+      <button className={styles.ProjectSidebarButton}><FaRegFile /> Assets</button>
       <header>Tours</header>
       {toursList.map(tour => (
         <div className={styles.dualButton} key={tour.id}>
-          <button style={{flex: 1}} onClick={() => handleTourClick(tour.id)}><FaMapSigns /> {tour.name}</button>
-          <button onClick={() => handleTourDeleteClick(tour.id)}><FaTrash /></button>
+          <button className={styles.ProjectSidebarButton} style={{flex: 1}} onClick={() => handleTourClick(tour.id)}><FaMapSigns /> {tour.name}</button>
+          <button className={styles.ProjectSidebarButton} onClick={() => handleTourDeleteClick(tour.id)}><FaTrash /></button>
         </div>
       ))}
-      <button onClick={handleAddTourClick}><FaPlus /> Add Tour</button>
+      <button className={styles.ProjectSidebarButton} onClick={handleAddTourClick}><FaPlus /> Add Tour</button>
+      <div style={{flex:1}}></div>
+      <ProjectButtons />
+    </div>
+  );
+}
+
+function ProjectButtons() {
+  return (
+    <div className={styles.ProjectButtons}>
+      <button className="primary" style={{flex: 1, justifyContent: "center"}}><FaFileExport /> Export</button>
+      <button className="secondary" style={{flex: 1, justifyContent: "center"}}><FaCog /> Settings</button>
     </div>
   );
 }
