@@ -3,8 +3,9 @@ import { FaPlus } from "react-icons/fa";
 
 import styles from "styles/tour-editor/AddPointButton.module.css";
 
-export default function AddPointButton({ addWaypoint, addControlPoint, alwaysVisible = false }: {
+export default function AddPointButton({ addWaypoint, addPoi, addControlPoint, alwaysVisible = false }: {
   addWaypoint?: (() => void) | undefined,
+  addPoi?: (() => void) | undefined,
   addControlPoint?: (() => void) | undefined,
   alwaysVisible?: boolean,
 }) {
@@ -24,7 +25,9 @@ export default function AddPointButton({ addWaypoint, addControlPoint, alwaysVis
     return (
       <div className={clsx(styles.AddPointButton, alwaysVisible && styles.alwaysVisible)}>
         <div className={styles.buttonContainer} style={{ flex: "unset", transformOrigin: "center" }}>
-          <button className="primary" onClick={addWaypoint || addControlPoint}>{addWaypoint ? "Add Waypoint" : "Add Control Point"}</button>
+          <button className="primary" onClick={addWaypoint || addPoi || addControlPoint}>
+            {addWaypoint ? "Add Waypoint" : addPoi ? "Add Point of Interest" : "Add Control Point"}
+          </button>
         </div>
       </div>
     );

@@ -31,6 +31,7 @@ export type ControlPointModel = {
 }
 
 export type PoiModel = {
+  id: string,
   name: string,
   desc: string,
   lat: number,

@@ -64,6 +64,34 @@ export default function Map({ centerRef, tour, setTour }: {
     });
   }, [setTour]);
 
+  function createPoiMarkerElement() {
+    const markerElement = document.createElement("div");
+    markerElement.classList.add("marker-poi");
+    markerElement.innerHTML = "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 192 512\" style=\"width: 16px; height: 16px\"><!-- Font Awesome Pro 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) --><path fill=\"white\" d=\"M20 424.229h20V279.771H20c-11.046 0-20-8.954-20-20V212c0-11.046 8.954-20 20-20h112c11.046 0 20 8.954 20 20v212.229h20c11.046 0 20 8.954 20 20V492c0 11.046-8.954 20-20 20H20c-11.046 0-20-8.954-20-20v-47.771c0-11.046 8.954-20 20-20zM96 0C56.235 0 24 32.235 24 72s32.235 72 72 72 72-32.235 72-72S135.764 0 96 0z\"/></svg>";
+    return markerElement;
+  }
+
+  const handlePoiMarkerDragEnd = useCallback((id: string) => {
+    const marker = mapMarkersRef.current[id];
+    if (!marker) return;
+
+    const idx = tourRef.current.pois.findIndex(p => p.id === id);
+    if (idx < 0) return;
+
+    setTour({
+      ...tourRef.current,
+      pois: replaceElementAtIndex(
+        tourRef.current.pois,
+        idx,
+        {
+          ...tourRef.current.pois[idx],
+          lat: marker.getLngLat().lat,
+          lng: marker.getLngLat().lng,
+        },
+      )
+    });
+  }, [setTour]);
+
   // This effect manages the markers on the map
   useEffect(() => {
     const map = mapRef.current;
@@ -86,13 +114,26 @@ export default function Map({ centerRef, tour, setTour }: {
       }
     });
 
+    tour.pois.forEach(poi => {
+      if (mapMarkersRef.current[poi.id]) {
+        mapMarkersRef.current[poi.id].setLngLat(poi);
+      } else {
+        mapMarkersRef.current[poi.id] = new Marker({
+          draggable: true,
+          element: createPoiMarkerElement(),
+        }).setLngLat(poi)
+          .addTo(map)
+          .on("dragend", () => handlePoiMarkerDragEnd(poi.id));
+      }
+    });
+
     for (const id in mapMarkersRef.current) {
-      if (!tour.waypoints.some(waypoint => waypoint.id == id)) {
+      if (!tour.waypoints.some(waypoint => waypoint.id == id) && !tour.pois.some(poi => poi.id == id)) {
         mapMarkersRef.current[id].remove();
         delete mapMarkersRef.current[id];
       }
     }
-  }, [tour, handleMarkerDragEnd]);
+  }, [tour, handleMarkerDragEnd, handlePoiMarkerDragEnd]);
 
   // This effect manages the route on the map
   const [oldPoints, setOldPoints] = useState<(WaypointModel | ControlPointModel)[]>([]);

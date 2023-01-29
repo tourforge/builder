@@ -118,7 +118,23 @@ textarea,
   background-color: red;
   color: white;
   font-weight: bold;
-  border: 4px solid black;
+  border: 4px solid rgb(75, 0, 0);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  font-size: 18px;
+}
+
+.marker-poi {
+  width: 32px;
+  height: 32px;
+  border-radius: 20px;
+  background-color: rgb(111, 235, 125);
+  color: white;
+  font-weight: bold;
+  border: 4px solid rgb(25, 104, 34);
   text-align: center;
   display: flex;
   flex-direction: column;

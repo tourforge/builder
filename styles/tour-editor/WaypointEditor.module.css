@@ -1,4 +1,5 @@
 .Waypoint {
+  margin: 4px 0;
   background-color: rgb(233, 251, 255);
   color: rgb(10, 84, 102);
   --input-decoration-color: rgb(68, 135, 141);
