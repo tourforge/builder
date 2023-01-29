@@ -23,7 +23,6 @@ export default function AssetChooser({ name, kind, value, onChange = () => {} }:
   const [inputValue, setInputValue] = useState(value ?? "");
 
   const [newAssetFile, setNewAssetFile] = useState<ChosenFile | null>(null);
-  const [newAssetName, setNewAssetName] = useState<string>("");
 
   useEffect(() => {
     setInputValue(value ?? "");
@@ -90,30 +89,14 @@ export default function AssetChooser({ name, kind, value, onChange = () => {} }:
       });
   }
 
-  function handleNewAssetNameChange(ev: ChangeEvent<HTMLInputElement>) {
-    setNewAssetName(ev.target.value);
-  }
-
-  function handleImportCancelButtonClick() {
+  function handleImportModalCancel() {
     setNewAssetFile(null);
-    setNewAssetName("");
   }
 
-  async function handleImportButtonClick() {
-    if (!newAssetFile) return;
-
-    const name = newAssetName + newAssetFile.extension();
-
-    try {
-      await importAsset(newAssetFile, name);
-      setNewAssetFile(null);
-      setNewAssetName("");
-      setInputValue(name);
-      setResults([]);
-    } catch (err) {
-      console.error(err);
-      toast.error("Asset import failed!");
-    }
+  function handleImportModalFinish(name: string) {
+    setNewAssetFile(null);
+    setInputValue(name);
+    onChange(name);
   }
 
   return (
@@ -149,20 +132,64 @@ export default function AssetChooser({ name, kind, value, onChange = () => {} }:
         </button>
       </div>
       <Modal isOpen={!!newAssetFile}>
-          <header>Importing a new asset</header>
-          Choose a name for the new asset you&apos;re importing.
-          <div className="column">
-            <label htmlFor={`${id}-modal-name`} className="inline-label">Asset Name</label>
-            <div className={`input-wrapper ${styles.modalInputWrapper}`}>
-              <input type="text" name="name" id={`${id}-modal-name`} onChange={handleNewAssetNameChange} />
-              <span>{newAssetFile?.extension()}</span>
-            </div>
-          </div>
-          <div className={styles.modalActionButtons}>
-            <button className="secondary" onClick={handleImportCancelButtonClick}>Cancel</button>
-            <button className="primary" onClick={handleImportButtonClick}>Import</button>
-          </div>
+          {!!newAssetFile
+            ? <ImportModal
+                newAssetFile={newAssetFile}
+                onCancel={handleImportModalCancel}
+                onFinish={handleImportModalFinish}
+              />
+            : null}
       </Modal>
     </div>
   );
+}
+
+function ImportModal({ newAssetFile, onCancel, onFinish }: {
+  newAssetFile: ChosenFile,
+  onCancel: () => void,
+  onFinish: (name: string) => void,
+}) {
+  const id = useId();
+
+  const [newAssetName, setNewAssetName] = useState<string>("");
+
+  function handleNewAssetNameChange(ev: ChangeEvent<HTMLInputElement>) {
+    setNewAssetName(ev.target.value);
+  }
+
+  function handleImportCancelButtonClick() {
+    onCancel();
+  }
+
+  async function handleImportButtonClick() {
+    if (!newAssetFile) return;
+
+    const name = newAssetName + newAssetFile.extension();
+
+    try {
+      await importAsset(newAssetFile, name);
+      onFinish(name);
+    } catch (err) {
+      console.error(err);
+      toast.error(`Asset import failed! ${err}`);
+    }
+  }
+
+  return (
+    <>
+      <header>Importing a new asset</header>
+      Choose a name for the new asset you&apos;re importing.
+      <div className="column">
+        <label htmlFor={`${id}-modal-name`} className="inline-label">Asset Name</label>
+        <div className={`input-wrapper ${styles.modalInputWrapper}`}>
+          <input type="text" name="name" id={`${id}-modal-name`} onChange={handleNewAssetNameChange} />
+          <span>{newAssetFile?.extension()}</span>
+        </div>
+      </div>
+      <div className={styles.modalActionButtons}>
+        <button className="secondary" onClick={handleImportCancelButtonClick}>Cancel</button>
+        <button className="primary" onClick={handleImportButtonClick}>Import</button>
+      </div>
+    </>
+  )
 }

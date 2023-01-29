@@ -19,6 +19,7 @@
   background-color: white;
   border-radius: 10px;
   padding: 16px;
+  margin: 24px;
   gap: 10px;
   display: flex;
   flex-direction: column;

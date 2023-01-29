@@ -124,12 +124,18 @@ async fn list_tours(app: AppHandle, project_name: &str) -> Result<Vec<ProjectTou
     Ok(tours)
 }
 
-fn tour_name(app: &AppHandle<impl tauri::Runtime>, project_name: &str, tour_id: &str) -> Result<String, ErrorString> {
+fn tour_name(
+    app: &AppHandle<impl tauri::Runtime>,
+    project_name: &str,
+    tour_id: &str,
+) -> Result<String, ErrorString> {
     let path = tour_json_path(app, project_name, tour_id)?;
     let json = serde_json::from_reader(fs::File::open(path)?)?;
     match json {
         serde_json::Value::Object(map) => {
-            let name_value = map.get("name").ok_or_else(|| ErrorString::new("Invalid tour JSON"))?;
+            let name_value = map
+                .get("name")
+                .ok_or_else(|| ErrorString::new("Invalid tour JSON"))?;
 
             match name_value {
                 serde_json::Value::String(name) => Ok(name.clone()),
@@ -141,7 +147,11 @@ fn tour_name(app: &AppHandle<impl tauri::Runtime>, project_name: &str, tour_id: 
 }
 
 #[tauri::command]
-async fn create_tour(app: AppHandle, project_name: &str, tour: serde_json::Value) -> Result<(), ErrorString> {
+async fn create_tour(
+    app: AppHandle,
+    project_name: &str,
+    tour: serde_json::Value,
+) -> Result<(), ErrorString> {
     let tour_id = uuid::Uuid::new_v4().to_string();
 
     let tour_json_path = tour_json_path(&app, project_name, &tour_id)?;
@@ -228,6 +238,10 @@ async fn import_asset(
         return Err(ErrorString::new("Invalid project name"));
     }
 
+    if !asset_name_valid(&name) {
+        return Err(ErrorString::new("Invalid asset name"));
+    }
+
     fs::copy(path, assets_dir(&app, project_name)?.join(name))?;
 
     Ok(())
@@ -256,6 +270,7 @@ fn build_project_window(
     ))
     .title("OpenTourBuilder")
     .focused(true)
+    .inner_size(1280.0, 720.0)
     .build()?;
 
     Ok(())
@@ -268,7 +283,12 @@ fn tour_id_valid(id: &str) -> bool {
 
 fn project_name_valid(name: &str) -> bool {
     name.chars()
-        .all(|ch| matches!(ch, 'a'..='z' | 'A'..='Z' | '0'..='9' | ' ' | '-'))
+        .all(|ch| matches!(ch, 'a'..='z' | 'A'..='Z' | '0'..='9' | '-'))
+}
+
+fn asset_name_valid(name: &str) -> bool {
+    name.chars()
+        .all(|ch| matches!(ch, 'a'..='z' | 'A'..='Z' | '0'..='9' | '-' | '.'))
 }
 
 // Project directory structure:

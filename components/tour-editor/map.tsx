@@ -158,6 +158,9 @@ export default function Map({ centerRef, tour, setTour }: {
     const map = mapRef.current;
     if (!map) return;
 
+    if (centerRef)
+      centerRef.current = map.getCenter();
+
     map.on("move", () => {
       if (centerRef) {
         centerRef.current = {

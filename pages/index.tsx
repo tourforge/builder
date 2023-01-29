@@ -22,6 +22,7 @@ export default function Home() {
 
   function handleModalCancelClick() {
     setNewProjectName(undefined);
+    setError(undefined);
   }
 
   function handleModalCreateClick() {
@@ -40,6 +41,11 @@ export default function Home() {
 
     if (projects?.findIndex(prj => prj.toLowerCase() === ev.target.value.toLowerCase()) != -1) {
       setError("Project name already used");
+      return;
+    }
+
+    if (/[^a-zA-Z0-9\-]/.test(ev.target.value)) {
+      setError("Project name can only contain alphanumeric characters or dashes");
       return;
     }
 
