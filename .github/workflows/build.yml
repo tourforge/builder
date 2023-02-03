@@ -16,10 +16,11 @@ on:
 jobs:
   build-tauri-binaries:
     strategy:
+      fail-fast: false
       matrix:
-        platform: [macos-latest, ubuntu-latest, windows-latest]
+        os: [macos-latest, ubuntu-latest, windows-latest]
 
-    runs-on: ${{ matrix.platform }}
+    runs-on: ${{ matrix.os }}
     steps:
       
       - name: Checkout Repository
@@ -36,8 +37,8 @@ jobs:
       - name: Linux Only - Install Dependencies
         if: matrix.os == 'ubuntu-latest'
         run: |
-          sudo apt-get update
-          sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.0-dev libappindicator3-dev librsvg2-dev patchelf
+          sudo apt update
+          sudo apt install -y libgtk-3-dev libwebkit2gtk-4.0-dev libappindicator3-dev librsvg2-dev patchelf
       
       
       - name: Yarn Install
