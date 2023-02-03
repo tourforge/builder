@@ -191,5 +191,5 @@ function ImportModal({ newAssetFile, onCancel, onFinish }: {
         <button className="primary" onClick={handleImportButtonClick}>Import</button>
       </div>
     </>
-  )
+  );
 }
