@@ -35,6 +35,11 @@ fn main() {
             delete_tour,
             choose_file,
             list_assets,
+            delete_asset,
+            get_asset_attrib,
+            set_asset_attrib,
+            get_asset_alt,
+            set_asset_alt,
             import_asset,
             valhalla_route,
         ])
@@ -219,12 +224,176 @@ async fn list_assets(app: AppHandle, project_name: &str) -> Result<Vec<String>, 
 
         if meta.is_file() {
             if let Some(file_name) = entry.file_name().to_str() {
-                assets.push(file_name.to_owned());
+                if !file_name.ends_with(".attrib.txt") && !file_name.ends_with(".alt.txt") {
+                    assets.push(file_name.to_owned());
+                }
             }
         }
     }
 
     Ok(assets)
+}
+
+#[tauri::command]
+async fn delete_asset(app: AppHandle, project_name: &str, asset_name: &str) -> Result<(), ErrorString> {
+    if !project_name_valid(project_name) {
+        return Err(ErrorString::new("Invalid project name"));
+    }
+
+    if !asset_name_valid(asset_name) {
+        return Err(ErrorString::new("Invalid asset name"));
+    }
+
+    let mut asset_path = assets_dir(&app, project_name)?;
+    asset_path.push(asset_name);
+
+    let mut attrib_path = assets_dir(&app, project_name)?;
+    attrib_path.push(format!("{asset_name}.attrib.txt"));
+
+    let mut alt_path = assets_dir(&app, project_name)?;
+    alt_path.push(format!("{asset_name}.alt.txt"));
+
+    if let Err(err) = fs::remove_file(asset_path) {
+        if err.kind() != io::ErrorKind::NotFound {
+            Err(err)?
+        }
+    }
+
+    if let Err(err) = fs::remove_file(attrib_path) {
+        if err.kind() != io::ErrorKind::NotFound {
+            Err(err)?
+        }
+    }
+
+    if let Err(err) = fs::remove_file(alt_path) {
+        if err.kind() != io::ErrorKind::NotFound {
+            Err(err)?
+        }
+    }
+
+    Ok(())
+}
+
+#[tauri::command]
+async fn get_asset_attrib(
+    app: AppHandle,
+    project_name: &str,
+    asset_name: &str,
+) -> Result<String, ErrorString> {
+    if !project_name_valid(project_name) {
+        return Err(ErrorString::new("Invalid project name"));
+    }
+
+    if !asset_name_valid(asset_name) {
+        return Err(ErrorString::new("Invalid asset name"));
+    }
+
+    let mut attrib_path = assets_dir(&app, project_name)?;
+    attrib_path.push(format!("{asset_name}.attrib.txt"));
+
+    match fs::File::open(attrib_path) {
+        Ok(mut attrib_file) => {
+            let mut attrib = String::new();
+            attrib_file.read_to_string(&mut attrib)?;
+            Ok(attrib)
+        }
+        Err(err) => match err.kind() {
+            io::ErrorKind::NotFound => Ok(String::new()),
+            _ => Err(err)?,
+        },
+    }
+}
+
+#[tauri::command]
+async fn set_asset_attrib(
+    app: AppHandle,
+    project_name: &str,
+    asset_name: &str,
+    attrib: &str,
+) -> Result<(), ErrorString> {
+    if !project_name_valid(project_name) {
+        return Err(ErrorString::new("Invalid project name"));
+    }
+
+    if !asset_name_valid(asset_name) {
+        return Err(ErrorString::new("Invalid asset name"));
+    }
+
+    let mut attrib_path = assets_dir(&app, project_name)?;
+    attrib_path.push(format!("{asset_name}.attrib.txt"));
+
+    if !attrib.is_empty() {
+        let mut attrib_file = fs::File::create(attrib_path)?;
+
+        attrib_file.write_all(attrib.as_bytes())?;
+    } else if let Err(err) = fs::remove_file(attrib_path) {
+        if err.kind() != io::ErrorKind::NotFound {
+            Err(err)?
+        }
+    }
+
+    Ok(())
+}
+
+#[tauri::command]
+async fn get_asset_alt(
+    app: AppHandle,
+    project_name: &str,
+    asset_name: &str,
+) -> Result<String, ErrorString> {
+    if !project_name_valid(project_name) {
+        return Err(ErrorString::new("Invalid project name"));
+    }
+
+    if !asset_name_valid(asset_name) {
+        return Err(ErrorString::new("Invalid asset name"));
+    }
+
+    let mut alt_path = assets_dir(&app, project_name)?;
+    alt_path.push(format!("{asset_name}.alt.txt"));
+
+    match fs::File::open(alt_path) {
+        Ok(mut alt_file) => {
+            let mut alt = String::new();
+            alt_file.read_to_string(&mut alt)?;
+            Ok(alt)
+        }
+        Err(err) => match err.kind() {
+            io::ErrorKind::NotFound => Ok(String::new()),
+            _ => Err(err)?,
+        },
+    }
+}
+
+#[tauri::command]
+async fn set_asset_alt(
+    app: AppHandle,
+    project_name: &str,
+    asset_name: &str,
+    alt: &str,
+) -> Result<(), ErrorString> {
+    if !project_name_valid(project_name) {
+        return Err(ErrorString::new("Invalid project name"));
+    }
+
+    if !asset_name_valid(asset_name) {
+        return Err(ErrorString::new("Invalid asset name"));
+    }
+
+    let mut alt_path = assets_dir(&app, project_name)?;
+    alt_path.push(format!("{asset_name}.alt.txt"));
+
+    if !alt.is_empty() {
+        let mut alt_file = fs::File::create(alt_path)?;
+
+        alt_file.write_all(alt.as_bytes())?;
+    } else if let Err(err) = fs::remove_file(alt_path) {
+        if err.kind() != io::ErrorKind::NotFound {
+            Err(err)?
+        }
+    }
+
+    Ok(())
 }
 
 #[tauri::command]

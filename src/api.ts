@@ -68,6 +68,26 @@ export async function listAssets(query: string = "", kind: AssetKind = "any") {
   return assets;
 }
 
+export async function deleteAsset(asset: string): Promise<void> {
+  await invoke("delete_asset", { projectName: currentProject(), assetName: asset });
+}
+
+export async function getAssetAttrib(asset: string): Promise<string> {
+  return await invoke("get_asset_attrib", { projectName: currentProject(), assetName: asset });
+}
+
+export async function setAssetAttrib(asset: string, attrib: string): Promise<string> {
+  return await invoke("set_asset_attrib", { projectName: currentProject(), assetName: asset, attrib });
+}
+
+export async function getAssetAlt(asset: string): Promise<string> {
+  return await invoke("get_asset_alt", { projectName: currentProject(), assetName: asset });
+}
+
+export async function setAssetAlt(asset: string, alt: string): Promise<string> {
+  return await invoke("set_asset_alt", { projectName: currentProject(), assetName: asset, alt });
+}
+
 export async function imageAssetUrl(name: string): Promise<string | null> {
   return `otb-asset://${currentProject()}/${name}`;
 }

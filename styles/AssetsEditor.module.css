@@ -1,0 +1,30 @@
+.AssetsEditor {
+  display: flex;
+  flex-wrap: wrap;
+  align-content: stretch;
+  gap: 20px;
+  padding: 20px;
+}
+
+.asset {
+  all: unset;
+  cursor: pointer;
+  user-select: none;
+  display: flex;
+
+  padding: 16px;
+  border-radius: 16px;
+  width: 96px;
+  height: 96px;
+  background-color: rgb(228, 240, 255);
+  word-break: break-all;
+}
+
+.asset:hover {
+  background-color: rgb(213, 230, 252);
+}
+
+.modalActionButtons {
+  display: flex;
+  justify-content: space-between;
+}
