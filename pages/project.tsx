@@ -5,7 +5,7 @@ import { FaRegFile, FaMapSigns, FaPlus, FaTrash, FaCog, FaFileExport } from "rea
 
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { createTour, deleteTour, getTour, listTours, putTour } from "src/api";
+import { createTour, deleteTour, exportProject, getTour, listTours, putTour } from "src/api";
 import { TourModel } from "src/data";
 import { SetterOrUpdater, callIfUpdater } from "src/state";
 
@@ -170,9 +170,13 @@ function ProjectSidebar({ screen, setScreen }: {
 }
 
 function ProjectButtons() {
+  async function handleExport() {
+    await exportProject();
+  }
+
   return (
     <div className={styles.ProjectButtons}>
-      <button className="primary" style={{ flex: 1, justifyContent: "center" }}><FaFileExport /> Export</button>
+      <button className="primary" style={{ flex: 1, justifyContent: "center" }} onClick={handleExport}><FaFileExport /> Export</button>
       <button className="secondary" style={{ flex: 1, justifyContent: "center" }}><FaCog /> Settings</button>
     </div>
   );

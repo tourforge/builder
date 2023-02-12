@@ -1,3 +1,8 @@
+export type AssetMeta = {
+  alt?: string | undefined,
+  attrib?: string | undefined,
+}
+
 export type TourModel = {
   name: string,
   desc: string,

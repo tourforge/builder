@@ -2,7 +2,8 @@ import { ChangeEvent, useEffect, useId, useState } from "react";
 
 import { toast } from "react-toastify";
 
-import { deleteAsset, getAssetAlt, getAssetAttrib, listAssets, setAssetAlt, setAssetAttrib } from "src/api";
+import { deleteAsset, getAssetMeta, listAssets, setAssetMeta } from "src/api";
+import { AssetMeta } from "src/data";
 
 import styles from "../styles/AssetsEditor.module.css";
 import Modal from "./tour-editor/modal";
@@ -39,42 +40,25 @@ export default function AssetsEditor() {
 function AssetPopup({ assetName, onDone }: { assetName: string, onDone: () => void }) {
   const id = useId();
 
-  const [attrib, setAttrib] = useState<string | undefined>();
-  const [alt, setAlt] = useState<string | undefined>();
+  const [meta, setMeta] = useState<AssetMeta | undefined>();
 
   useEffect(() => {
-    getAssetAttrib(assetName)
-      .then(attrib => setAttrib(attrib))
+    getAssetMeta(assetName)
+      .then(meta => setMeta(meta))
       .catch(err => {
-        console.error("Failed to load asset attrib", err);
-        toast.error(`Failed to load attribution text: ${err}`);
-      });
-
-    getAssetAlt(assetName)
-      .then(alt => setAlt(alt))
-      .catch(err => {
-        console.error("Failed to load asset alt", err);
-        toast.error(`Failed to load alt text: ${err}`);
+        console.error("Failed to load asset metadata", err);
+        toast.error(`Failed to load metadata: ${err}`);
       });
   }, [assetName]);
 
   useEffect(() => {
-    if (!attrib) return;
+    if (!meta) return;
 
-    setAssetAttrib(assetName, attrib).catch(err => {
-      console.error("Failed to set asset attrib", err);
-      toast.error(`Failed to update attribution text: ${err}`);
+    setAssetMeta(assetName, meta).catch(err => {
+      console.error("Failed to set asset metadata", err);
+      toast.error(`Failed to update metadata: ${err}`);
     });
-  }, [assetName, attrib]);
-
-  useEffect(() => {
-    if (!alt) return;
-
-    setAssetAlt(assetName, alt).catch(err => {
-      console.error("Failed to set asset alt", err);
-      toast.error(`Failed to update alt text: ${err}`);
-    });
-  }, [assetName, alt]);
+  }, [assetName, meta]);
 
   function handleDoneClick() {
     onDone();
@@ -91,23 +75,23 @@ function AssetPopup({ assetName, onDone }: { assetName: string, onDone: () => vo
   }
 
   function handleAttribChange(ev: ChangeEvent<HTMLTextAreaElement>) {
-    setAttrib(ev.target.value);
+    setMeta(meta => ({ ...meta, attrib: ev.target.value }));
   }
 
   function handleAltChange(ev: ChangeEvent<HTMLTextAreaElement>) {
-    setAlt(ev.target.value);
+    setMeta(meta => ({ ...meta, alt: ev.target.value }));
   }
 
   return (
     <>
       <div className="column">
         <label htmlFor={`${id}-attrib`} className="inline-label">Attribution</label>
-        <textarea rows={3} name="name" id={`${id}-attrib`} onChange={handleAttribChange} value={attrib}>
+        <textarea rows={3} name="name" id={`${id}-attrib`} onChange={handleAttribChange} value={meta?.attrib}>
         </textarea>
       </div>
       <div className="column">
         <label htmlFor={`${id}-alt`} className="inline-label">Alt Text</label>
-        <textarea rows={3} name="name" id={`${id}-alt`} onChange={handleAltChange} value={alt}>
+        <textarea rows={3} name="name" id={`${id}-alt`} onChange={handleAltChange} value={meta?.alt}>
         </textarea>
       </div>
       <div className={styles.modalActionButtons}>

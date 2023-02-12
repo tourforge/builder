@@ -5,7 +5,7 @@
 
 use std::{
     fs,
-    io::{self, prelude::*},
+    io::{self, prelude::*, BufWriter},
     path::PathBuf,
     sync::Mutex,
 };
@@ -14,6 +14,7 @@ use serde::Serialize;
 use serde_json::json;
 use tauri::{api::dialog::blocking::FileDialogBuilder, AppHandle, Manager};
 
+mod export;
 mod lotyr;
 use lotyr::Lotyr;
 
@@ -36,12 +37,11 @@ fn main() {
             choose_file,
             list_assets,
             delete_asset,
-            get_asset_attrib,
-            set_asset_attrib,
-            get_asset_alt,
-            set_asset_alt,
+            get_asset_meta,
+            set_asset_meta,
             import_asset,
             valhalla_route,
+            export,
         ])
         .register_uri_scheme_protocol("otb-asset", otb_asset_protocol)
         .manage(Mutex::new(create_lotyr_instance()))
@@ -109,10 +109,8 @@ struct ProjectTour {
 #[tauri::command]
 async fn list_tours(app: AppHandle, project_name: &str) -> Result<Vec<ProjectTour>, ErrorString> {
     let mut tours = Vec::new();
-    for dir_entry in fs::read_dir(project_dir(&app, project_name)?)? {
-        let dir_entry = dir_entry?;
-
-        if let Some(file_name) = dir_entry.file_name().to_str() {
+    for path in list_tour_paths(&app, project_name)? {
+        if let Some(file_name) = path.file_name().and_then(|name| name.to_str()) {
             if !file_name.ends_with(".otb.json") {
                 continue;
             }
@@ -123,6 +121,26 @@ async fn list_tours(app: AppHandle, project_name: &str) -> Result<Vec<ProjectTou
                 name: tour_name(&app, project_name, &tour_id)?,
                 id: tour_id,
             });
+        }
+    }
+
+    Ok(tours)
+}
+
+fn list_tour_paths(
+    app: &AppHandle<impl tauri::Runtime>,
+    project_name: &str,
+) -> Result<Vec<PathBuf>, ErrorString> {
+    let mut tours = Vec::new();
+    for dir_entry in fs::read_dir(project_dir(app, project_name)?)? {
+        let dir_entry = dir_entry?;
+
+        if let Some(file_name) = dir_entry.file_name().to_str() {
+            if !file_name.ends_with(".otb.json") {
+                continue;
+            }
+
+            tours.push(dir_entry.path());
         }
     }
 
@@ -224,7 +242,7 @@ async fn list_assets(app: AppHandle, project_name: &str) -> Result<Vec<String>, 
 
         if meta.is_file() {
             if let Some(file_name) = entry.file_name().to_str() {
-                if !file_name.ends_with(".attrib.txt") && !file_name.ends_with(".alt.txt") {
+                if !file_name.ends_with(".meta.json") {
                     assets.push(file_name.to_owned());
                 }
             }
@@ -235,7 +253,11 @@ async fn list_assets(app: AppHandle, project_name: &str) -> Result<Vec<String>, 
 }
 
 #[tauri::command]
-async fn delete_asset(app: AppHandle, project_name: &str, asset_name: &str) -> Result<(), ErrorString> {
+async fn delete_asset(
+    app: AppHandle,
+    project_name: &str,
+    asset_name: &str,
+) -> Result<(), ErrorString> {
     if !project_name_valid(project_name) {
         return Err(ErrorString::new("Invalid project name"));
     }
@@ -275,11 +297,11 @@ async fn delete_asset(app: AppHandle, project_name: &str, asset_name: &str) -> R
 }
 
 #[tauri::command]
-async fn get_asset_attrib(
+async fn get_asset_meta(
     app: AppHandle,
     project_name: &str,
     asset_name: &str,
-) -> Result<String, ErrorString> {
+) -> Result<serde_json::Value, ErrorString> {
     if !project_name_valid(project_name) {
         return Err(ErrorString::new("Invalid project name"));
     }
@@ -288,28 +310,24 @@ async fn get_asset_attrib(
         return Err(ErrorString::new("Invalid asset name"));
     }
 
-    let mut attrib_path = assets_dir(&app, project_name)?;
-    attrib_path.push(format!("{asset_name}.attrib.txt"));
+    let mut meta_path = assets_dir(&app, project_name)?;
+    meta_path.push(format!("{asset_name}.meta.json"));
 
-    match fs::File::open(attrib_path) {
-        Ok(mut attrib_file) => {
-            let mut attrib = String::new();
-            attrib_file.read_to_string(&mut attrib)?;
-            Ok(attrib)
-        }
+    match fs::File::open(meta_path) {
+        Ok(meta_file) => Ok(serde_json::from_reader(meta_file)?),
         Err(err) => match err.kind() {
-            io::ErrorKind::NotFound => Ok(String::new()),
+            io::ErrorKind::NotFound => Ok(json!({})),
             _ => Err(err)?,
         },
     }
 }
 
 #[tauri::command]
-async fn set_asset_attrib(
+async fn set_asset_meta(
     app: AppHandle,
     project_name: &str,
     asset_name: &str,
-    attrib: &str,
+    meta: serde_json::Value,
 ) -> Result<(), ErrorString> {
     if !project_name_valid(project_name) {
         return Err(ErrorString::new("Invalid project name"));
@@ -319,79 +337,11 @@ async fn set_asset_attrib(
         return Err(ErrorString::new("Invalid asset name"));
     }
 
-    let mut attrib_path = assets_dir(&app, project_name)?;
-    attrib_path.push(format!("{asset_name}.attrib.txt"));
+    let mut meta_path = assets_dir(&app, project_name)?;
+    meta_path.push(format!("{asset_name}.meta.json"));
 
-    if !attrib.is_empty() {
-        let mut attrib_file = fs::File::create(attrib_path)?;
-
-        attrib_file.write_all(attrib.as_bytes())?;
-    } else if let Err(err) = fs::remove_file(attrib_path) {
-        if err.kind() != io::ErrorKind::NotFound {
-            Err(err)?
-        }
-    }
-
-    Ok(())
-}
-
-#[tauri::command]
-async fn get_asset_alt(
-    app: AppHandle,
-    project_name: &str,
-    asset_name: &str,
-) -> Result<String, ErrorString> {
-    if !project_name_valid(project_name) {
-        return Err(ErrorString::new("Invalid project name"));
-    }
-
-    if !asset_name_valid(asset_name) {
-        return Err(ErrorString::new("Invalid asset name"));
-    }
-
-    let mut alt_path = assets_dir(&app, project_name)?;
-    alt_path.push(format!("{asset_name}.alt.txt"));
-
-    match fs::File::open(alt_path) {
-        Ok(mut alt_file) => {
-            let mut alt = String::new();
-            alt_file.read_to_string(&mut alt)?;
-            Ok(alt)
-        }
-        Err(err) => match err.kind() {
-            io::ErrorKind::NotFound => Ok(String::new()),
-            _ => Err(err)?,
-        },
-    }
-}
-
-#[tauri::command]
-async fn set_asset_alt(
-    app: AppHandle,
-    project_name: &str,
-    asset_name: &str,
-    alt: &str,
-) -> Result<(), ErrorString> {
-    if !project_name_valid(project_name) {
-        return Err(ErrorString::new("Invalid project name"));
-    }
-
-    if !asset_name_valid(asset_name) {
-        return Err(ErrorString::new("Invalid asset name"));
-    }
-
-    let mut alt_path = assets_dir(&app, project_name)?;
-    alt_path.push(format!("{asset_name}.alt.txt"));
-
-    if !alt.is_empty() {
-        let mut alt_file = fs::File::create(alt_path)?;
-
-        alt_file.write_all(alt.as_bytes())?;
-    } else if let Err(err) = fs::remove_file(alt_path) {
-        if err.kind() != io::ErrorKind::NotFound {
-            Err(err)?
-        }
-    }
+    let meta_file = fs::File::create(meta_path)?;
+    serde_json::to_writer(meta_file, &meta)?;
 
     Ok(())
 }
@@ -424,6 +374,32 @@ async fn choose_file() -> Result<Option<String>, ErrorString> {
     }
 }
 
+#[tauri::command]
+async fn export(app: AppHandle, project_name: &str) -> Result<(), ErrorString> {
+    let mut builder = FileDialogBuilder::new()
+        .add_filter("OpenTourBuilder Tour Bundle", &["otb.zip"])
+        .set_file_name("export.otb.zip")
+        .set_title("Save Tour Export");
+
+    if let Some(document_dir) = tauri::api::path::document_dir() {
+        builder = builder.set_directory(document_dir);
+    }
+
+    let Some(target_path) = builder.save_file() else {
+        return Ok(())
+    };
+
+    let target_file = fs::File::create(target_path)?;
+
+    export::export(
+        assets_dir(&app, project_name)?,
+        list_tour_paths(&app, project_name)?.iter(),
+        target_file,
+    )?;
+
+    Ok(())
+}
+
 fn build_project_window(
     app: &AppHandle<impl tauri::Runtime>,
     name: &str,
@@ -434,8 +410,7 @@ fn build_project_window(
         tauri::WindowUrl::App(PathBuf::from("project")),
     )
     .initialization_script(&format!(
-        r#"window.__OPENTOURBUILDER_CURRENT_PROJECT_NAME__ = "{}";"#,
-        name
+        r#"window.__OPENTOURBUILDER_CURRENT_PROJECT_NAME__ = "{name}";"#
     ))
     .title("OpenTourBuilder")
     .focused(true)

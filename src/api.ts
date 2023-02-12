@@ -1,7 +1,7 @@
 import { invoke } from "@tauri-apps/api/tauri";
 
 import * as polyline from "./polyline";
-import { ControlPointModel, LatLng, TourModel, WaypointModel } from "./data";
+import { AssetMeta, ControlPointModel, LatLng, TourModel, WaypointModel } from "./data";
 
 export type AssetKind = "any" | "narration" | "image" | "tiles"
 
@@ -72,20 +72,12 @@ export async function deleteAsset(asset: string): Promise<void> {
   await invoke("delete_asset", { projectName: currentProject(), assetName: asset });
 }
 
-export async function getAssetAttrib(asset: string): Promise<string> {
-  return await invoke("get_asset_attrib", { projectName: currentProject(), assetName: asset });
+export async function getAssetMeta(asset: string): Promise<AssetMeta> {
+  return await invoke("get_asset_meta", { projectName: currentProject(), assetName: asset });
 }
 
-export async function setAssetAttrib(asset: string, attrib: string): Promise<string> {
-  return await invoke("set_asset_attrib", { projectName: currentProject(), assetName: asset, attrib });
-}
-
-export async function getAssetAlt(asset: string): Promise<string> {
-  return await invoke("get_asset_alt", { projectName: currentProject(), assetName: asset });
-}
-
-export async function setAssetAlt(asset: string, alt: string): Promise<string> {
-  return await invoke("set_asset_alt", { projectName: currentProject(), assetName: asset, alt });
+export async function setAssetMeta(asset: string, meta: AssetMeta): Promise<void> {
+  return await invoke("set_asset_meta", { projectName: currentProject(), assetName: asset, meta });
 }
 
 export async function imageAssetUrl(name: string): Promise<string | null> {
@@ -133,6 +125,10 @@ export async function route(points: (ControlPointModel | WaypointModel)[]): Prom
   }
 
   return fullPath;
+}
+
+export async function exportProject(): Promise<void> {
+  await invoke("export", { projectName: currentProject() });
 }
 
 function currentProject(): string | undefined {
