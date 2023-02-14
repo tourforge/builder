@@ -3,7 +3,7 @@ import { MutableRefObject, useCallback, useEffect, useRef, useState } from "reac
 import type { GeoJSONSource } from "maplibre-gl";
 import { Marker } from "maplibre-gl";
 
-import { route } from "src/api";
+import * as polyline from "src/polyline";
 import { replaceElementAtIndex, SetterOrUpdater } from "src/state";
 
 import MapLibreMap from "./maplibre_map";
@@ -136,63 +136,53 @@ export default function Map({ centerRef, tour, setTour }: {
   }, [tour, handleMarkerDragEnd, handlePoiMarkerDragEnd]);
 
   // This effect manages the route on the map
-  const [oldPoints, setOldPoints] = useState<(WaypointModel | ControlPointModel)[]>([]);
   useEffect(() => {
     const map = mapRef.current;
     if (!isLoaded || !map) return;
 
-    if (oldPoints.length === tour.waypoints.length && oldPoints.every((oldPoint, i) => oldPoint.lat === tour.waypoints[i].lat && oldPoint.lng === tour.waypoints[i].lng && oldPoint.control === tour.waypoints[i].control))
-      return;
+    if (tour.path.length > 0) {
+      const route = polyline.decode(tour.path);
 
-    setOldPoints(tour.waypoints);
+      const routeGeoJson: GeoJSON.GeoJSON = {
+        "type": "Feature",
+        "properties": {},
+        "geometry": {
+          "type": "LineString",
+          "coordinates": route.map(point => [point.lng, point.lat])
+        }
+      };
 
-    if (tour.waypoints.length >= 2) {
-      route(tour.waypoints)
-        .then(route => {
-          const routeGeoJson: GeoJSON.GeoJSON = {
-            "type": "Feature",
-            "properties": {},
-            "geometry": {
-              "type": "LineString",
-              "coordinates": route.map(point => [point.lng, point.lat])
-            }
-          };
-
-          if (!map.getSource("route")) {
-            map.addSource("route", {
-              "type": "geojson",
-              "data": routeGeoJson
-            });
-          } else {
-            (map.getSource("route") as GeoJSONSource).setData(routeGeoJson);
-          }
-
-          if (!map.getLayer("route_layer")) {
-            map.addLayer({
-              "id": "route_layer",
-              "type": "line",
-              "source": "route",
-              "layout": {
-                "line-join": "round",
-                "line-cap": "round"
-              },
-              "paint": {
-                "line-color": "#f00",
-                "line-width": 4
-              },
-            });
-          }
-        })
-        .catch(err => {
-          console.error(`Failed to calculate route: ${err}`);
+      if (!map.getSource("route")) {
+        map.addSource("route", {
+          "type": "geojson",
+          "data": routeGeoJson
         });
+      } else {
+        (map.getSource("route") as GeoJSONSource).setData(routeGeoJson);
+      }
+
+      if (!map.getLayer("route_layer")) {
+        map.addLayer({
+          "id": "route_layer",
+          "type": "line",
+          "source": "route",
+          "layout": {
+            "line-join": "round",
+            "line-cap": "round"
+          },
+          "paint": {
+            "line-color": "#f00",
+            "line-width": 4
+          },
+        });
+      }
     } else {
       if (map.getLayer("route_layer"))
         map.removeLayer("route_layer");
       if (map.getSource("route"))
         map.removeSource("route");
     }
-  }, [isLoaded, tour.waypoints]);
+  }, [isLoaded, tour.path]);
 
   // Set up an event on the map for when the center changes
   useEffect(() => {

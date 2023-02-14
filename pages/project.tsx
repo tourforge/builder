@@ -5,7 +5,9 @@ import { FaRegFile, FaMapSigns, FaPlus, FaTrash, FaCog, FaFileExport } from "rea
 
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { createTour, deleteTour, exportProject, getTour, listTours, putTour } from "src/api";
+
+import * as polyline from "src/polyline";
+import { createTour, deleteTour, exportProject, getTour, listTours, putTour, route } from "src/api";
 import { TourModel } from "src/data";
 import { SetterOrUpdater, callIfUpdater } from "src/state";
 
@@ -56,10 +58,24 @@ export default function Project() {
     case "tour":
       const setTour = (valOrUpdater: ((currVal: TourModel) => TourModel) | TourModel) => {
         if (screen.screen === "tour" && valOrUpdater) {
+          const updatedTour = callIfUpdater<TourModel>(screen.tour, valOrUpdater);
           setScreen({
             ...screen,
-            tour: callIfUpdater<TourModel>(screen.tour, valOrUpdater),
+            tour: updatedTour,
           });
+
+          if (updatedTour.waypoints.length !== screen.tour.waypoints.length || !updatedTour.waypoints.every((w, i) => w.lat === screen.tour.waypoints[i].lat && w.lng === screen.tour.waypoints[i].lng && w.control !== screen.tour.waypoints[i].control)) {
+            route(updatedTour.waypoints).then(path => setScreen(screen => {
+              if (screen.screen === "tour" && screen.tour.waypoints === updatedTour.waypoints) {
+                screen.tour.path = polyline.encode(path);
+                return { ...screen, tour: { ...screen.tour, path: polyline.encode(path) } };
+              } else {
+                return screen;
+              }
+            })).catch(err => {
+              console.error("Failed to calculate tour route", err);
+            });
+          }
         }
       };
       editor = <TourEditor tour={screen.tour} setTour={setTour} />;
