@@ -3,7 +3,7 @@ import Head from "next/head";
 import { useEffect, useRef, useState } from "react";
 import { FaRegFile, FaMapSigns, FaPlus, FaTrash, FaCog, FaFileExport } from "react-icons/fa";
 
-import { ToastContainer } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { createTour, deleteTour, exportProject, getTour, listTours, putTour } from "src/api";
 import { TourModel } from "src/data";
@@ -78,7 +78,7 @@ export default function Project() {
         {editor}
       </div>
       <ToastContainer
-        position="bottom-left"
+        position="bottom-right"
         autoClose={5000}
         hideProgressBar={false}
         newestOnTop={false}
@@ -170,8 +170,15 @@ function ProjectSidebar({ screen, setScreen }: {
 }
 
 function ProjectButtons() {
-  async function handleExport() {
-    await exportProject();
+  function handleExport() {
+    toast.promise(
+      exportProject(),
+      {
+        pending: "Exporting tour...",
+        success: "Tour successfully exported!",
+        error: "Failed to export tour!"
+      }
+    );
   }
 
   return (
