@@ -5,7 +5,7 @@
 
 use std::{
     fs,
-    io::{self, prelude::*, BufWriter},
+    io::{self, prelude::*},
     path::PathBuf,
     sync::Mutex,
 };
@@ -21,6 +21,8 @@ use lotyr::Lotyr;
 fn main() {
     tauri::Builder::default()
         .setup(|app| {
+            app.manage(Mutex::new(create_lotyr_instance(&app.handle())));
+
             fs::create_dir_all(projects_dir(&app.handle())?)?;
 
             Ok(())
@@ -44,7 +46,6 @@ fn main() {
             export,
         ])
         .register_uri_scheme_protocol("otb-asset", otb_asset_protocol)
-        .manage(Mutex::new(create_lotyr_instance()))
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
@@ -526,18 +527,27 @@ fn otb_asset_protocol(
     }
 }
 
-fn create_lotyr_instance() -> Lotyr {
+fn create_lotyr_instance(app: &AppHandle<impl tauri::Runtime>) -> Lotyr {
+    // Determine the path to the dylib
+    let mut lotyr_resource_path = PathBuf::new();
+    lotyr_resource_path.push("resources");
+    lotyr_resource_path.push(libloading::library_filename("lotyr"));
+    let lotyr_lib_path = app
+        .path_resolver()
+        .resolve_resource(lotyr_resource_path)
+        .unwrap();
+
     // Load the dynamic library
-    let current_dir = std::env::current_dir().unwrap();
-    let mut lotyr_lib_path = current_dir.clone();
-    lotyr_lib_path.push("dev-install/lotyr");
-    lotyr_lib_path.push(libloading::library_filename("lotyr"));
     lotyr::load_library(lotyr_lib_path.as_os_str()).expect("Failed to load Lotyr library");
 
+    // Determine the path to the tiles
+    let valhalla_tiles_path = app
+        .path_resolver()
+        .resolve_resource("resources/valhalla_tiles.tar")
+        .unwrap();
+
     // Create the instance
-    let mut valhalla_base_path = current_dir;
-    valhalla_base_path.push("dev-install/lotyr");
-    Lotyr::new(valhalla_config(valhalla_base_path.to_str().unwrap()))
+    Lotyr::new(valhalla_config(valhalla_tiles_path.to_str().unwrap()))
         .expect("Failed to create Lotyr instance")
 }
 
@@ -590,7 +600,7 @@ fn assets_dir(app: &AppHandle<impl tauri::Runtime>, project: &str) -> Result<Pat
     Ok(assets_dir)
 }
 
-fn valhalla_config(valhalla_base_path: &str) -> String {
+fn valhalla_config(tiles_path: &str) -> String {
     json!({
         "loki": {
             "actions": [
@@ -711,7 +721,7 @@ fn valhalla_config(valhalla_base_path: &str) -> String {
             "max_concurrent_reader_users": 1,
             "reclassify_links": true,
             "shortcuts": true,
-            "tile_extract": format!("{valhalla_base_path}/valhalla_tiles.tar"),
+            "tile_extract": tiles_path,
             "use_lru_mem_cache": false,
             "use_simple_mem_cache": false
         },
