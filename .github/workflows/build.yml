@@ -48,14 +48,14 @@ jobs:
         with:
           repository: "opentourbuilder/lotyr"
           latest: true
-          out-file-path: "src-tauri/resources"
+          out-file-path: "src-tauri/bundle/resources"
 
       - name: Download Valhalla Tiles Release
         uses: robinraju/release-downloader@v1.7
         with:
           repository: "opentourbuilder/valhalla-tile"
           latest: true
-          out-file-path: "src-tauri/resources"
+          out-file-path: "src-tauri/bundle/resources"
       
       - name: Build
         uses: JonasKruckenberg/tauri-build@v1
