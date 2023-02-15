@@ -38,8 +38,7 @@
         "signingIdentity": null
       },
       "resources": [
-        "lotyr/*",
-        "tile/*"
+        "resources/*"
       ],
       "shortDescription": "",
       "targets": "all",
