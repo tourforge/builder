@@ -32,19 +32,17 @@ export default function Project() {
   screenRef.current = screen;
 
   useEffect(() => {
-    if (screenRef.current.screen === "tour") {
-      let prevTour = screenRef.current.tour;
-      const timer = setInterval(async () => {
-        if (screenRef.current.screen === "tour" && screenRef.current.tour !== prevTour) {
-          prevTour = screenRef.current.tour;
+    let prevTour = screenRef.current.screen === "tour" ? screenRef.current.tour : null;
+    const timer = setInterval(async () => {
+      if (screenRef.current.screen === "tour" && screenRef.current.tour !== prevTour) {
+        prevTour = screenRef.current.tour;
 
-          await putTour(screenRef.current.tourId, screenRef.current.tour);
-          setScreen({ ...screenRef.current, written: {} });
-        }
-      }, 1000);
+        await putTour(screenRef.current.tourId, screenRef.current.tour);
+        setScreen({ ...screenRef.current, written: {} });
+      }
+    }, 1000);
 
-      return () => clearInterval(timer);
-    }
+    return () => clearInterval(timer);
   }, []);
 
   let editor;
@@ -62,13 +60,14 @@ export default function Project() {
           setScreen({
             ...screen,
             tour: updatedTour,
+            written: {},
           });
 
           if (updatedTour.waypoints.length !== screen.tour.waypoints.length || !updatedTour.waypoints.every((w, i) => w.lat === screen.tour.waypoints[i].lat && w.lng === screen.tour.waypoints[i].lng && w.control !== screen.tour.waypoints[i].control)) {
             route(updatedTour.waypoints).then(path => setScreen(screen => {
               if (screen.screen === "tour" && screen.tour.waypoints === updatedTour.waypoints) {
                 screen.tour.path = polyline.encode(path);
-                return { ...screen, tour: { ...screen.tour, path: polyline.encode(path) } };
+                return { ...screen, tour: { ...screen.tour, path: polyline.encode(path) }, written: {} };
               } else {
                 return screen;
               }
