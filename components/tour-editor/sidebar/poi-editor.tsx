@@ -35,6 +35,14 @@ export default function PoiEditor({ poi, setPoi, remove }: {
     setPoi(poi => ({ ...poi, lat, lng }));
   }
 
+  function handleSiteLinkChange(ev: ChangeEvent<HTMLInputElement>) {
+    if (!ev.target.value) {
+      setPoi(poi => ({ ...poi, links: {} }));
+    } else {
+      setPoi(poi => ({ ...poi, links: { "Site Link": { href: ev.target.value } } }));
+    }
+  }
+
   return (
     <div className={`${styles.Waypoint} ${expanded ? styles.expanded : ""}`}>
       <div className={styles.waypointCardHeader}>
@@ -73,6 +81,16 @@ export default function PoiEditor({ poi, setPoi, remove }: {
             gallery: callIfUpdater(waypoint.gallery, newGallery)
           }))}
         />
+        <div className="column">
+          <label htmlFor={`${id}-site-link`} className="inline-label">Site Link</label>
+          <input
+            name="Site Link"
+            type="text"
+            id={`${id}-site-link`}
+            value={poi.links !== undefined ? poi.links["Site Link"]?.href ?? "" : ""}
+            onChange={handleSiteLinkChange}
+          />
+        </div>
       </section>
     </div>
   );

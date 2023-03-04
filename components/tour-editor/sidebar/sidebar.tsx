@@ -36,6 +36,14 @@ export default function Sidebar({ mapCenter, tour, setTour }: {
     setTour(current => ({ ...current, tiles }));
   }
 
+  function handleSiteLinkChange(ev: ChangeEvent<HTMLInputElement>) {
+    if (!ev.target.value) {
+      setTour(current => ({ ...current, links: {} }));
+    } else {
+      setTour(current => ({ ...current, links: { "Site Link": { href: ev.target.value } } }));
+    }
+  }
+
   return (
     <div className={styles.Sidebar}>
       <div className="column">
@@ -59,6 +67,16 @@ export default function Sidebar({ mapCenter, tour, setTour }: {
         ></textarea>
       </div>
       <AssetChooser name="Map Tiles" kind="tiles" value={tour.tiles} onChange={handleTilesChange} />
+      <div className="column">
+        <label htmlFor={`${id}-site-link`} className="inline-label">Site Link</label>
+        <input
+          name="Site Link"
+          type="text"
+          id={`${id}-site-link`}
+          value={tour.links !== undefined ? tour.links["Site Link"]?.href : ""}
+          onChange={handleSiteLinkChange}
+        />
+      </div>
       <GalleryEditor
         gallery={tour.gallery}
         setGallery={newGallery => setTour({

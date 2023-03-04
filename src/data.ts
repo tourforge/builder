@@ -11,6 +11,11 @@ export type TourModel = {
   path: string,
   pois: PoiModel[],
   tiles: string | undefined,
+  links?: {
+    [name: string]: {
+      href: string,
+    }
+  } | undefined,
 }
 
 export type WaypointModel = {
@@ -25,6 +30,11 @@ export type WaypointModel = {
   transcript: string | null,
   gallery: GalleryModel,
   control: "route" | "path",
+  links?: {
+    [name: string]: {
+      href: string,
+    }
+  } | undefined,
 }
 
 export type ControlPointModel = {
@@ -42,6 +52,11 @@ export type PoiModel = {
   lat: number,
   lng: number,
   gallery: GalleryModel,
+  links?: {
+    [name: string]: {
+      href: string,
+    }
+  } | undefined,
 }
 
 export type GalleryModel = string[]

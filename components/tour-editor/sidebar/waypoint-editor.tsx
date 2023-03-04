@@ -51,6 +51,14 @@ export default function WaypointEditor({ index, waypoint, setWaypoint, remove }:
     setWaypoint(waypoint => ({ ...waypoint, narration: narration.trim() === "" ? null : narration.trim() }));
   }
 
+  function handleSiteLinkChange(ev: ChangeEvent<HTMLInputElement>) {
+    if (!ev.target.value) {
+      setWaypoint(waypoint => ({ ...waypoint, links: {} }));
+    } else {
+      setWaypoint(waypoint => ({ ...waypoint, links: { "Site Link": { href: ev.target.value } } }));
+    }
+  }
+
   return (
     <div className={`${styles.Waypoint} ${expanded ? styles.expanded : ""}`}>
       <div className={styles.waypointCardHeader}>
@@ -87,7 +95,7 @@ export default function WaypointEditor({ index, waypoint, setWaypoint, remove }:
           <input
             name="Trigger Radius"
             type="text"
-            id={`${id}-desc`}
+            id={`${id}-trigger-rad`}
             defaultValue={waypoint.trigger_radius}
             onChange={handleTriggerRadChange}
           />
@@ -108,6 +116,16 @@ export default function WaypointEditor({ index, waypoint, setWaypoint, remove }:
             id={`${id}-transcript`}
             value={waypoint.transcript ?? ""}
             onChange={handleTranscriptChange}
+          />
+        </div>
+        <div className="column">
+          <label htmlFor={`${id}-site-link`} className="inline-label">Site Link</label>
+          <input
+            name="Site Link"
+            type="text"
+            id={`${id}-site-link`}
+            value={waypoint.links !== undefined ? waypoint.links["Site Link"]?.href ?? "" : ""}
+            onChange={handleSiteLinkChange}
           />
         </div>
       </section>
