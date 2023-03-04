@@ -8,6 +8,7 @@ import { replaceElementAtIndex, SetterOrUpdater } from "src/state";
 
 import MapLibreMap from "./maplibre_map";
 import { ControlPointModel, LatLng, TourModel, WaypointModel } from "src/data";
+import { circle } from "@turf/turf";
 
 export default function Map({ centerRef, tour, setTour }: {
   centerRef?: MutableRefObject<LatLng> | undefined,
@@ -97,6 +98,7 @@ export default function Map({ centerRef, tour, setTour }: {
     const map = mapRef.current;
     if (!map) return;
 
+    // waypoint symbols
     tour.waypoints.forEach(waypoint => {
       let index: number | null = tour.waypoints.filter(w => w.type === "waypoint").findIndex(w => w.id === waypoint.id);
       if (index === -1) index = null;
@@ -114,6 +116,7 @@ export default function Map({ centerRef, tour, setTour }: {
       }
     });
 
+    // poi symbols
     tour.pois.forEach(poi => {
       if (mapMarkersRef.current[poi.id]) {
         mapMarkersRef.current[poi.id].setLngLat(poi);
@@ -127,6 +130,7 @@ export default function Map({ centerRef, tour, setTour }: {
       }
     });
 
+    // manage the records on which markers are currently present
     for (const id in mapMarkersRef.current) {
       if (!tour.waypoints.some(waypoint => waypoint.id == id) && !tour.pois.some(poi => poi.id == id)) {
         mapMarkersRef.current[id].remove();
@@ -135,10 +139,44 @@ export default function Map({ centerRef, tour, setTour }: {
     }
   }, [tour, handleMarkerDragEnd, handlePoiMarkerDragEnd]);
 
-  // This effect manages the route on the map
+  // This effect manages the map's GeoJSON data
   useEffect(() => {
     const map = mapRef.current;
     if (!isLoaded || !map) return;
+
+    if (tour.waypoints.length > 0) {
+      const triggerRadiiGeoJson: GeoJSON.GeoJSON = {
+        "type": "FeatureCollection",
+        "features": tour.waypoints.filter(w => w.type === "waypoint").map(waypoint => (
+          circle(
+            [waypoint.lng, waypoint.lat],
+            waypoint.type === "waypoint" ? waypoint.trigger_radius : 0,
+            { steps: 80, units: "meters" },
+          )
+        )),
+      };
+
+      if (!map.getSource("trigger_radii")) {
+        map.addSource("trigger_radii", {
+          "type": "geojson",
+          "data": triggerRadiiGeoJson,
+        });
+      } else {
+        (map.getSource("trigger_radii") as GeoJSONSource).setData(triggerRadiiGeoJson);
+      }
+
+      if (!map.getLayer("trigger_radii_layer")) {
+        map.addLayer({
+          "id": "trigger_radii_layer",
+          "type": "fill",
+          "source": "trigger_radii",
+          "layout": {},
+          "paint": {
+            "fill-color": "rgba(239, 140, 47, 0.5)"
+          },
+        });
+      }
+    }
 
     if (tour.path.length > 0) {
       const route = polyline.decode(tour.path);
@@ -182,7 +220,7 @@ export default function Map({ centerRef, tour, setTour }: {
       if (map.getSource("route"))
         map.removeSource("route");
     }
-  }, [isLoaded, tour.path]);
+  }, [isLoaded, tour.path, tour.waypoints]);
 
   // Set up an event on the map for when the center changes
   useEffect(() => {

@@ -33,6 +33,12 @@ export default function WaypointEditor({ index, waypoint, setWaypoint, remove }:
     setWaypoint(waypoint => ({ ...waypoint, desc: ev.target.value }));
   }
 
+  function handleTriggerRadChange(ev: ChangeEvent<HTMLInputElement>) {
+    if (+ev.target.value) {
+      setWaypoint(waypoint => ({ ...waypoint, trigger_radius: +ev.target.value }));
+    }
+  }
+
   function handleLocationChange(lat: number, lng: number) {
     setWaypoint(waypoint => ({ ...waypoint, lat, lng }));
   }
@@ -74,6 +80,16 @@ export default function WaypointEditor({ index, waypoint, setWaypoint, remove }:
             id={`${id}-desc`}
             value={waypoint.desc}
             onChange={handleDescChange}
+          />
+        </div>
+        <div className="column">
+          <label htmlFor={`${id}-trigger-rad`} className="inline-label">Trigger Radius</label>
+          <input
+            name="Trigger Radius"
+            type="text"
+            id={`${id}-desc`}
+            defaultValue={waypoint.trigger_radius}
+            onChange={handleTriggerRadChange}
           />
         </div>
         <LocationChooser lat={waypoint.lat} lng={waypoint.lng} onChange={handleLocationChange} />
