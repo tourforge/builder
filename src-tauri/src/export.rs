@@ -32,6 +32,7 @@ struct TourModel {
     pub pois: Vec<PoiModel>,
     pub tiles: Option<AssetName>,
     pub path: String,
+    pub links: Option<HashMap<String, LinkModel>>,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -54,6 +55,7 @@ enum WaypointModel {
         transcript: Option<AssetName>,
         gallery: Vec<AssetName>,
         control: ControlMode,
+        links: Option<HashMap<String, LinkModel>>,
     },
     #[serde(rename = "control")]
     Control {
@@ -78,6 +80,12 @@ struct PoiModel {
     pub lat: f64,
     pub lng: f64,
     pub gallery: Vec<AssetName>,
+    pub links: Option<HashMap<String, LinkModel>>,
+}
+
+#[derive(Serialize, Deserialize)]
+struct LinkModel {
+    pub href: String,
 }
 
 pub fn export(

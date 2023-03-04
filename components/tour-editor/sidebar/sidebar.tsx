@@ -73,7 +73,7 @@ export default function Sidebar({ mapCenter, tour, setTour }: {
           name="Site Link"
           type="text"
           id={`${id}-site-link`}
-          value={tour.links !== undefined ? tour.links["Site Link"]?.href : ""}
+          value={tour.links !== undefined ? tour.links["Site Link"]?.href ?? "" : ""}
           onChange={handleSiteLinkChange}
         />
       </div>
