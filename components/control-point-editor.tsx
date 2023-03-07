@@ -3,7 +3,7 @@ import { ControlPointModel } from "src/data";
 import { SetterOrUpdater } from "src/state";
 
 import styles from "styles/tour-editor/WaypointEditor.module.css";
-import LocationChooser from "../location-chooser";
+import LocationChooser from "./location-chooser";
 
 export function ControlPointEditor({ point, setPoint, remove }: { point: ControlPointModel, setPoint: SetterOrUpdater<ControlPointModel>, remove: () => void }) {
   function handleLocationChange(lat: number, lng: number) {

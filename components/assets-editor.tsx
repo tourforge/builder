@@ -6,7 +6,7 @@ import { deleteAsset, getAssetMeta, listAssets, setAssetMeta } from "src/api";
 import { AssetMeta } from "src/data";
 
 import styles from "../styles/AssetsEditor.module.css";
-import Modal from "./tour-editor/modal";
+import Modal from "./modal";
 
 export default function AssetsEditor() {
   const [assets, setAssets] = useState<string[]>([]);

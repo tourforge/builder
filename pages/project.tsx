@@ -9,19 +9,19 @@ import "react-toastify/dist/ReactToastify.css";
 import * as polyline from "src/polyline";
 import { createTour, deleteTour, exportProject, getTour, listTours, putTour, route } from "src/api";
 import { TourModel } from "src/data";
-import { SetterOrUpdater, callIfUpdater } from "src/state";
+import { SetterOrUpdater, callIfUpdater, setterOrUpdater } from "src/state";
 
-import TourEditor from "../components/tour-editor/tour-editor";
+import TourEditor from "../components/tour-editor";
 
 import styles from "../styles/Project.module.css";
+import { TourDb } from "src/tour-db";
 
 type EditorScreen = {
   screen: "home"
 } | {
   screen: "tour",
-  tourId: string,
   tour: TourModel,
-  written: {},
+  db: TourDb,
 } | {
   screen: "assets"
 };
@@ -30,20 +30,6 @@ export default function Project() {
   const [screen, setScreen] = useState<EditorScreen>({ screen: "home" });
   const screenRef = useRef<EditorScreen>(screen);
   screenRef.current = screen;
-
-  useEffect(() => {
-    let prevTour = screenRef.current.screen === "tour" ? screenRef.current.tour : null;
-    const timer = setInterval(async () => {
-      if (screenRef.current.screen === "tour" && screenRef.current.tour !== prevTour) {
-        prevTour = screenRef.current.tour;
-
-        await putTour(screenRef.current.tourId, screenRef.current.tour);
-        setScreen({ ...screenRef.current, written: {} });
-      }
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, []);
 
   let editor;
   switch (screen.screen) {
@@ -54,30 +40,18 @@ export default function Project() {
       editor = <AssetsEditor />;
       break;
     case "tour":
-      const setTour = (valOrUpdater: ((currVal: TourModel) => TourModel) | TourModel) => {
-        if (screen.screen === "tour" && valOrUpdater) {
-          const updatedTour = callIfUpdater<TourModel>(screen.tour, valOrUpdater);
-          setScreen({
-            ...screen,
-            tour: updatedTour,
-            written: {},
-          });
+      editor = <TourEditor
+        tour={screen.tour}
+        setTour={v => {
+          const currentScreen = screenRef.current;
+          if (currentScreen.screen !== "tour") return;
 
-          if (updatedTour.waypoints.length !== screen.tour.waypoints.length || !updatedTour.waypoints.every((w, i) => w.lat === screen.tour.waypoints[i].lat && w.lng === screen.tour.waypoints[i].lng && w.control !== screen.tour.waypoints[i].control)) {
-            route(updatedTour.waypoints).then(path => setScreen(screen => {
-              if (screen.screen === "tour" && screen.tour.waypoints === updatedTour.waypoints) {
-                screen.tour.path = polyline.encode(path);
-                return { ...screen, tour: { ...screen.tour, path: polyline.encode(path) }, written: {} };
-              } else {
-                return screen;
-              }
-            })).catch(err => {
-              console.error("Failed to calculate tour route", err);
-            });
-          }
-        }
-      };
-      editor = <TourEditor tour={screen.tour} setTour={setTour} />;
+          const newTour = callIfUpdater(currentScreen.tour, v);
+
+          screen.db.set(newTour);
+          setScreen({ ...currentScreen, tour: newTour });
+        }}
+      />;
       break;
   }
 
@@ -112,13 +86,12 @@ function ProjectSidebar({ screen, setScreen }: {
   screen: EditorScreen,
   setScreen: SetterOrUpdater<EditorScreen>,
 }) {
-  const tourWritten = screen.screen === "tour" ? screen.written : null;
   const [toursChanged, setToursChanged] = useState({});
   const [toursList, setToursList] = useState<{ id: string, name: string }[]>([]);
 
   useEffect(() => {
     listTours().then(tours => setToursList(tours)).catch(console.error);
-  }, [toursChanged, tourWritten]);
+  }, [toursChanged]);
 
   function handleAssetsClick() {
     setScreen({ screen: "assets" });
@@ -143,12 +116,12 @@ function ProjectSidebar({ screen, setScreen }: {
 
   async function handleTourClick(id: string) {
     try {
-      const content = await getTour(id);
+      const db = new TourDb(id, { onSave: () => setToursChanged({}) });
+
       setScreen({
         screen: "tour",
-        tourId: id,
-        tour: content,
-        written: {},
+        db,
+        tour: await db.load(),
       });
     } catch (err) {
       console.error(err);

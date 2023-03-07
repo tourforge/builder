@@ -7,7 +7,7 @@ import * as polyline from "src/polyline";
 import { replaceElementAtIndex, SetterOrUpdater } from "src/state";
 
 import MapLibreMap from "./maplibre_map";
-import { ControlPointModel, LatLng, TourModel, WaypointModel } from "src/data";
+import { LatLng, TourModel } from "src/data";
 import { circle } from "@turf/turf";
 
 export default function Map({ centerRef, tour, setTour }: {

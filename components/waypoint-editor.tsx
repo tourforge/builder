@@ -6,9 +6,9 @@ import { FaChevronUp, FaTrash } from "react-icons/fa";
 import { WaypointModel } from "src/data";
 import { callIfUpdater, SetterOrUpdater } from "src/state";
 
-import AssetChooser from "../asset-chooser";
-import GalleryEditor from "../gallery-editor";
-import LocationChooser from "../location-chooser";
+import AssetChooser from "./asset-chooser";
+import GalleryEditor from "./gallery-editor";
+import LocationChooser from "./location-chooser";
 
 import styles from "styles/tour-editor/WaypointEditor.module.css";
 

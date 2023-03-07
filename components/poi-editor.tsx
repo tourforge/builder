@@ -6,8 +6,8 @@ import { FaChevronUp, FaTrash } from "react-icons/fa";
 import { PoiModel, } from "src/data";
 import { callIfUpdater, SetterOrUpdater } from "src/state";
 
-import GalleryEditor from "../gallery-editor";
-import LocationChooser from "../location-chooser";
+import GalleryEditor from "./gallery-editor";
+import LocationChooser from "./location-chooser";
 
 import styles from "styles/tour-editor/WaypointEditor.module.css";
 

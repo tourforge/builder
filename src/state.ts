@@ -1,5 +1,15 @@
 export type SetterOrUpdater<T> = (valOrUpdater: T | ((currVal: T) => T)) => void
 
+export function setterOrUpdater<T>(getVal: () => T, setVal: (val: T) => void): SetterOrUpdater<T> {
+  return valOrUpdater => {
+    if (typeof valOrUpdater === "function") {
+      setVal((valOrUpdater as any)(getVal()));
+    } else {
+      setVal(valOrUpdater);
+    }
+  };
+}
+
 export function callIfUpdater<T>(currVal: T, valOrUpdater: ((currVal: T) => T) | T): T {
   if (typeof valOrUpdater === "function") {
     return (valOrUpdater as any)(currVal);

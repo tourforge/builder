@@ -5,11 +5,11 @@ import { nanoid } from "nanoid";
 import { ControlPointModel, LatLng, PoiModel, TourModel, WaypointModel } from "src/data";
 import { callIfUpdater, insertElementAtIndex, removeElementAtIndex, replaceElementAtIndex, SetterOrUpdater } from "src/state";
 
-import GalleryEditor from "../gallery-editor";
+import GalleryEditor from "./gallery-editor";
 
 import styles from "styles/tour-editor/Sidebar.module.css";
 import WaypointEditor from "./waypoint-editor";
-import AssetChooser from "../asset-chooser";
+import AssetChooser from "./asset-chooser";
 import { ControlPointEditor } from "./control-point-editor";
 import AddPointButton from "./add-point-button";
 import { useState } from "react";
