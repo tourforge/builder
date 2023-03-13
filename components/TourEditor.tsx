@@ -1,3 +1,4 @@
+import { MapController, MapControllerContext } from "hooks/mapController";
 import { useRef, useState } from "react";
 import { FaArrowLeft } from "react-icons/fa";
 import { ControlPointModel, LatLng, PoiModel, TourModel, WaypointModel } from "src/data";
@@ -22,7 +23,7 @@ export type Panel = {
 
 export default function TourEditor({ tour, setTour }: { tour: TourModel, setTour: SetterOrUpdater<TourModel> }) {
   const [panel, setPanel] = useState<Panel>({ which: "tour" });
-  const mapCenter = useRef<LatLng | undefined>();
+  const mapController = useRef<MapController>({ center: { lat: 0, lng: 0 } });
 
   let panelElement;
   if (panel.which === "waypoint") {
@@ -68,22 +69,24 @@ export default function TourEditor({ tour, setTour }: { tour: TourModel, setTour
 
   return (
     <div className={styles.TourEditor}>
-      <div style={{ display: panel.which === "tour" ? undefined : "none" }}>
-        <TourPanel
-          tour={tour}
-          setTour={setTour}
-          displayPanel={setPanel}
-        />
-      </div>
-      {panel.which !== "tour" ? (
-        <Subpanel
-          title={panel.which === "waypoint" ? "Editing Waypoint" : "Editing POI"}
-          close={() => setPanel({ which: "tour" })}
-        >
-          {panelElement}
-        </Subpanel>
-      ) : null}
-      <Map tour={tour} setTour={setTour} onCenterChanged={c => mapCenter.current = c} />
+      <MapControllerContext.Provider value={mapController}>
+        <div style={{ display: panel.which === "tour" ? undefined : "none" }}>
+          <TourPanel
+            tour={tour}
+            setTour={setTour}
+            displayPanel={setPanel}
+          />
+        </div>
+        {panel.which !== "tour" ? (
+          <Subpanel
+            title={panel.which === "waypoint" ? "Editing Waypoint" : "Editing POI"}
+            close={() => setPanel({ which: "tour" })}
+          >
+            {panelElement}
+          </Subpanel>
+        ) : null}
+      </MapControllerContext.Provider>
+      <Map tour={tour} setTour={setTour} controllerRef={mapController} />
     </div>
   );
 }

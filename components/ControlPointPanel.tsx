@@ -1,5 +1,5 @@
 import * as RadioGroup from "@radix-ui/react-radio-group";
-import { FaCrosshairs, FaMapMarker, FaMapMarkerAlt, FaMapPin, FaMarker, FaRoute, FaTimes, FaTrash } from "react-icons/fa";
+import { FaMapMarkerAlt, FaRoute } from "react-icons/fa";
 import { ControlPointModel } from "src/data";
 import { SetterOrUpdater } from "src/state";
 

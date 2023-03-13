@@ -1,4 +1,5 @@
 import clsx from "clsx";
+import useMapController from "hooks/mapController";
 import useShowDialog, { DialogProvider } from "hooks/showDialog";
 import { nanoid } from "nanoid";
 import { ChangeEvent, useId, useState } from "react";
@@ -118,6 +119,7 @@ function WaypointList({ waypoints, setWaypoints, onEdit }: {
   onEdit: (id: string) => void,
 }) {
   const showDialog = useShowDialog<boolean>();
+  const map = useMapController();
 
   async function addWaypoint() {
     const newWaypoint: WaypointModel = {
@@ -125,8 +127,8 @@ function WaypointList({ waypoints, setWaypoints, onEdit }: {
       id: nanoid(),
       name: "Untitled",
       desc: "",
-      lat: 0,
-      lng: 0,
+      lat: map.current?.center.lat ?? 0,
+      lng: map.current?.center.lng ?? 0,
       narration: null,
       trigger_radius: 30.0,
       transcript: null,
@@ -141,8 +143,8 @@ function WaypointList({ waypoints, setWaypoints, onEdit }: {
     const newWaypoint: ControlPointModel = {
       type: "control",
       id: nanoid(),
-      lat: 0,
-      lng: 0,
+      lat: map.current?.center.lat ?? 0,
+      lng: map.current?.center.lng ?? 0,
       control: "route",
     };
 
@@ -216,14 +218,15 @@ function PoiList({ pois, setPois, onEdit }: {
   onEdit: (id: string) => void,
 }) {
   const showDialog = useShowDialog<boolean>();
+  const map = useMapController();
 
   async function addPoi() {
     const newPoi: PoiModel = {
       id: nanoid(),
       name: "Untitled",
       desc: "",
-      lat: 0,
-      lng: 0,
+      lat: map.current?.center.lat ?? 0,
+      lng: map.current?.center.lng ?? 0,
       gallery: [],
     };
 
