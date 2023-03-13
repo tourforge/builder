@@ -7,7 +7,7 @@ import { replaceElementAtIndex, removeElementAtIndex, SetterOrUpdater } from "sr
 import AssetChooser from "./AssetChooser";
 import Modal from "./Modal";
 
-import styles from "styles/tour-editor/GalleryEditor.module.css";
+import styles from "styles/GalleryEditor.module.css";
 
 export default function GalleryEditor({ gallery, setGallery }: {
   gallery: string[],

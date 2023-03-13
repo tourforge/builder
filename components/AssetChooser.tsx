@@ -7,7 +7,7 @@ import { AssetKind, chooseFile, ChosenFile, importAsset, listAssets } from "src/
 
 import Modal from "./Modal";
 
-import styles from "styles/tour-editor/AssetChooser.module.css";
+import styles from "styles/AssetChooser.module.css";
 
 export default function AssetChooser({ id, kind, value, onChange = () => {} }: {
   id?: string | undefined,

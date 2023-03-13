@@ -1,6 +1,6 @@
 import { ChangeEvent, useEffect, useId, useState } from "react";
 
-import styles from "styles/tour-editor/LocationChooser.module.css";
+import styles from "styles/LocationChooser.module.css";
 
 export default function LocationChooser({ lat, lng, onChange }: {
   lat?: number | undefined,
