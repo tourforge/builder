@@ -7,3 +7,59 @@
 
   height: 100vh;
 }
+
+.Sidebar {
+  --sidebar-width: var(--sidebar-width);
+
+  display: flex;
+  flex-direction: column;
+
+  padding: 10px;
+  gap: 4px;
+  overflow: auto;
+
+  border-right: 1px solid lightgray;
+}
+
+.waypointsHeader {
+  display: flex;
+  justify-content: center;
+  gap: 64px;
+
+  margin-left: 30px;
+  margin-right: 30px;
+  margin-top: 10px;
+  margin-bottom: 4px;
+  padding-bottom: 5px;
+
+  text-align: center;
+
+  font-size: 13px;
+  color: rgb(54, 147, 170);
+  border-bottom: 1px solid rgb(54, 147, 170);
+}
+
+.waypointsHeader>button {
+  all: unset;
+  user-select: none;
+  cursor: pointer;
+}
+
+.waypointsHeader>button:last-child,
+.waypointsHeader.pois>button:first-child {
+  color: rgb(160, 160, 160);
+}
+
+.waypointsHeader.pois>button:last-child {
+  color: rgb(54, 147, 170);
+}
+
+.waypointsList {
+  display: flex;
+  flex-direction: column;
+}
+
+.addWaypoint {
+  margin: 10px auto !important;
+}
+

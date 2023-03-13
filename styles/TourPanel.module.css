@@ -1,14 +1,10 @@
-.Sidebar {
-  --sidebar-width: var(--sidebar-width);
-
+.TourPanel {
+  width: 384px;
+  padding: 16px;
+  border-right: 1px solid lightgray;
   display: flex;
   flex-direction: column;
-
-  padding: 10px;
-  gap: 4px;
-  overflow: auto;
-
-  border-right: 1px solid lightgray;
+  gap: 5px;
 }
 
 .waypointsHeader {
@@ -47,6 +43,29 @@
 .waypointsList {
   display: flex;
   flex-direction: column;
+  gap: 8px;
+}
+
+.waypointCard {
+  display: flex;
+  background-color: rgb(203, 233, 254);
+  color: rgb(11, 58, 91);
+  border-radius: 12px;
+  padding: 0 8px;
+}
+
+.waypointName {
+  flex: 1;
+
+  padding: 12px 8px;
+}
+
+.waypointButton {
+  all: unset;
+  cursor: pointer;
+  user-select: none;
+
+  padding: 12px 8px;
 }
 
 .addWaypoint {

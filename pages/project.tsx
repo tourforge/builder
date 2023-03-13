@@ -1,4 +1,4 @@
-import AssetsEditor from "components/assets-editor";
+import AssetsEditor from "components/AssetsEditor";
 import Head from "next/head";
 import { useEffect, useRef, useState } from "react";
 import { FaRegFile, FaMapSigns, FaPlus, FaTrash, FaCog, FaFileExport } from "react-icons/fa";
@@ -11,7 +11,7 @@ import { createTour, deleteTour, exportProject, getTour, listTours, putTour, rou
 import { TourModel } from "src/data";
 import { SetterOrUpdater, callIfUpdater, setterOrUpdater } from "src/state";
 
-import TourEditor from "../components/tour-editor";
+import TourEditor from "../components/TourEditor";
 
 import styles from "../styles/Project.module.css";
 import { TourDb } from "src/tour-db";

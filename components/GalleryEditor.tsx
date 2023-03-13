@@ -4,8 +4,8 @@ import { useEffect, useState } from "react";
 import { imageAssetUrl } from "src/api";
 import { replaceElementAtIndex, removeElementAtIndex, SetterOrUpdater } from "src/state";
 
-import AssetChooser from "./asset-chooser";
-import Modal from "./modal";
+import AssetChooser from "./AssetChooser";
+import Modal from "./Modal";
 
 import styles from "styles/tour-editor/GalleryEditor.module.css";
 
@@ -53,14 +53,13 @@ export default function GalleryEditor({ gallery, setGallery }: {
 
   return (
     <div className={styles.GalleryEditor}>
-      <label>Gallery</label>
       <div className={`${styles.items}`}>
         {gallery.map((item, index) => <GalleryItem key={item} item={item} onClick={() => handleGalleryItemClick(index)} />)}
         <button className="secondary" onClick={handleAddButtonClick}>Add</button>
         <Modal isOpen={typeof openItem !== "undefined"}>
           <header>Gallery image</header>
           Choose an asset for this image in the gallery.
-          <AssetChooser name="Gallery image" kind="image" value={openItemChosenAsset} onChange={setOpenItemChosenAsset} />
+          <AssetChooser kind="image" value={openItemChosenAsset} onChange={setOpenItemChosenAsset} />
           <div className={styles.modalActionButtons}>
             {openItem !== "new" ? <button className="danger" onClick={handleModalDeleteButtonClick}>Delete</button> : <></>}
             <button className="secondary" onClick={handleModalCancelButtonClick}>Cancel</button>

@@ -5,18 +5,16 @@ import { toast } from "react-toastify";
 
 import { AssetKind, chooseFile, ChosenFile, importAsset, listAssets } from "src/api";
 
-import Modal from "./modal";
+import Modal from "./Modal";
 
 import styles from "styles/tour-editor/AssetChooser.module.css";
 
-export default function AssetChooser({ name, kind, value, onChange = () => {} }: {
-  name: string,
+export default function AssetChooser({ id, kind, value, onChange = () => {} }: {
+  id?: string | undefined,
   kind: AssetKind,
   value?: string | undefined,
   onChange?: (value: string) => void,
 }) {
-  const id = useId();
-
   const inputRef = useRef<HTMLInputElement>(null);
   const resultsRef = useRef<HTMLDivElement>(null);
   const [results, setResults] = useState<string[]>([]);
@@ -101,12 +99,10 @@ export default function AssetChooser({ name, kind, value, onChange = () => {} }:
 
   return (
     <div className={`${styles.AssetChooser} ${results.length != 0 ? styles.hasResults : ""}`}>
-      <label htmlFor={id} className="inline-label">{name}</label>
       <div className={styles.assetNameContainer}>
         <div className={styles.assetNameContainerInner}>
           <input
             type="text"
-            name={name}
             placeholder="Asset Name"
             id={id}
             ref={inputRef}

@@ -25,7 +25,7 @@ export default function MapLibreMap({ mapRef, onLoaded }: {
       center: [-79, 34], // starting position [lng, lat]
       zoom: 5, // starting zoom
     }).on("load", () => { setIsLoaded(true); });
-  }, []);
+  }, [mapId, mapRef]);
 
   useEffect(() => {
     if (isLoaded) onLoaded();

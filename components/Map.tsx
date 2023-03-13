@@ -1,4 +1,4 @@
-import { MutableRefObject, useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import type { GeoJSONSource } from "maplibre-gl";
 import { Marker } from "maplibre-gl";
@@ -6,14 +6,14 @@ import { Marker } from "maplibre-gl";
 import * as polyline from "src/polyline";
 import { replaceElementAtIndex, SetterOrUpdater } from "src/state";
 
-import MapLibreMap from "./maplibre_map";
+import MapLibreMap from "./MaplibreMap";
 import { LatLng, TourModel } from "src/data";
 import { circle } from "@turf/turf";
 
-export default function Map({ centerRef, tour, setTour }: {
-  centerRef?: MutableRefObject<LatLng> | undefined,
+export default function Map({ tour, setTour, onCenterChanged }: {
   tour: TourModel,
   setTour: SetterOrUpdater<TourModel>,
+  onCenterChanged: (center: LatLng) => void,
 }) {
   // we depend on the tour and need a ref with it for `handleMarkerDragEnd` to work
   const tourRef = useRef(tour);
@@ -227,18 +227,15 @@ export default function Map({ centerRef, tour, setTour }: {
     const map = mapRef.current;
     if (!map) return;
 
-    if (centerRef)
-      centerRef.current = map.getCenter();
+    onCenterChanged(map.getCenter());
 
     map.on("move", () => {
-      if (centerRef) {
-        centerRef.current = {
-          "lat": map.getCenter().lat,
-          "lng": map.getCenter().lng,
-        };
-      }
+      onCenterChanged({
+        "lat": map.getCenter().lat,
+        "lng": map.getCenter().lng,
+      });
     });
-  }, [centerRef, isLoaded]);
+  }, [onCenterChanged, isLoaded]);
 
   return (
     <MapLibreMap mapRef={mapRef} onLoaded={() => setIsLoaded(true)} />
