@@ -68,20 +68,21 @@ export default function TourEditor({ tour, setTour }: { tour: TourModel, setTour
 
   return (
     <div className={styles.TourEditor}>
-      {panel.which === "tour" ? (
+      <div style={{ display: panel.which === "tour" ? undefined : "none" }}>
         <TourPanel
           tour={tour}
           setTour={setTour}
           displayPanel={setPanel}
         />
-      ) : (
+      </div>
+      {panel.which !== "tour" ? (
         <Subpanel
           title={panel.which === "waypoint" ? "Editing Waypoint" : "Editing POI"}
           close={() => setPanel({ which: "tour" })}
         >
           {panelElement}
         </Subpanel>
-      )}
+      ) : null}
       <Map tour={tour} setTour={setTour} onCenterChanged={c => mapCenter.current = c} />
     </div>
   );
