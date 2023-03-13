@@ -97,7 +97,7 @@ export async function importAsset(file: ChosenFile, name: string) {
   });
 }
 
-export async function route(points: (ControlPointModel | WaypointModel)[]): Promise<LatLng[]> {
+export async function route(points: (LatLng & { control: "path" | "route" })[]): Promise<LatLng[]> {
   const fullPath: LatLng[] = [];
   for (let i = 0; i < points.length - 1; i++) {
     const a = points[i];

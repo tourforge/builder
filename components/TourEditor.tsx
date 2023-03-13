@@ -1,7 +1,7 @@
 import { MapController, MapControllerContext } from "hooks/mapController";
 import { useRef, useState } from "react";
 import { FaArrowLeft } from "react-icons/fa";
-import { ControlPointModel, LatLng, PoiModel, TourModel, WaypointModel } from "src/data";
+import { ControlPointModel, PoiModel, TourModel, WaypointModel } from "src/data";
 import { SetterOrUpdater, replaceElementAtIndex, setterOrUpdater } from "src/state";
 
 import styles from "styles/TourEditor.module.css";
@@ -10,6 +10,7 @@ import Map from "./Map";
 import PoiPanel from "./PoiPanel";
 import TourPanel from "./TourPanel";
 import WaypointPanel from "./WaypointPanel";
+import useRouteCalculator from "hooks/routeCalculator";
 
 export type Panel = {
   which: "tour",
@@ -24,6 +25,9 @@ export type Panel = {
 export default function TourEditor({ tour, setTour }: { tour: TourModel, setTour: SetterOrUpdater<TourModel> }) {
   const [panel, setPanel] = useState<Panel>({ which: "tour" });
   const mapController = useRef<MapController>({ center: { lat: 0, lng: 0 } });
+
+  // calculate the tour route as the tour is changed
+  useRouteCalculator(tour, setTour);
 
   let panelElement;
   if (panel.which === "waypoint") {
