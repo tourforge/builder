@@ -6,14 +6,15 @@ import { Marker } from "maplibre-gl";
 import * as polyline from "src/polyline";
 import { replaceElementAtIndex, SetterOrUpdater } from "src/state";
 
-import MapLibreMap from "./maplibre_map";
-import { LatLng, TourModel } from "src/data";
+import MapLibreMap from "./MaplibreMap";
+import { TourModel } from "src/data";
 import { circle } from "@turf/turf";
+import { MapController } from "hooks/mapController";
 
-export default function Map({ centerRef, tour, setTour }: {
-  centerRef?: MutableRefObject<LatLng> | undefined,
+export default function Map({ tour, setTour, controllerRef }: {
   tour: TourModel,
   setTour: SetterOrUpdater<TourModel>,
+  controllerRef: MutableRefObject<MapController>
 }) {
   // we depend on the tour and need a ref with it for `handleMarkerDragEnd` to work
   const tourRef = useRef(tour);
@@ -227,18 +228,15 @@ export default function Map({ centerRef, tour, setTour }: {
     const map = mapRef.current;
     if (!map) return;
 
-    if (centerRef)
-      centerRef.current = map.getCenter();
+    controllerRef.current.center = map.getCenter();
 
     map.on("move", () => {
-      if (centerRef) {
-        centerRef.current = {
-          "lat": map.getCenter().lat,
-          "lng": map.getCenter().lng,
-        };
-      }
+      controllerRef.current.center = {
+        "lat": map.getCenter().lat,
+        "lng": map.getCenter().lng,
+      };
     });
-  }, [centerRef, isLoaded]);
+  }, [controllerRef, isLoaded]);
 
   return (
     <MapLibreMap mapRef={mapRef} onLoaded={() => setIsLoaded(true)} />

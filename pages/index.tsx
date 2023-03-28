@@ -1,4 +1,4 @@
-import Modal from "components/modal";
+import Modal from "components/Modal";
 import Head from "next/head";
 import Link from "next/link";
 import { ChangeEvent, useEffect, useId, useState } from "react";

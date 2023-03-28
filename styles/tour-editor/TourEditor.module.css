@@ -1,9 +1,0 @@
-.main {
-  --sidebar-width: 400px;
-
-  display: grid;
-  grid-template-rows: 1fr;
-  grid-template-columns: var(--sidebar-width) 1fr;
-
-  height: 100vh;
-}

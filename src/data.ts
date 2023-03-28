@@ -1,9 +1,9 @@
-export type AssetMeta = {
+export interface AssetMeta {
   alt?: string | undefined,
   attrib?: string | undefined,
 }
 
-export type TourModel = {
+export interface TourModel {
   name: string,
   desc: string,
   waypoints: (WaypointModel | ControlPointModel)[],
@@ -18,7 +18,7 @@ export type TourModel = {
   } | undefined,
 }
 
-export type WaypointModel = {
+export interface WaypointModel {
   type: "waypoint",
   id: string,
   name: string,
@@ -29,7 +29,7 @@ export type WaypointModel = {
   trigger_radius: number,
   transcript: string | null,
   gallery: GalleryModel,
-  control: "route" | "path",
+  control: "route" | "path" | "none",
   links?: {
     [name: string]: {
       href: string,
@@ -37,7 +37,7 @@ export type WaypointModel = {
   } | undefined,
 }
 
-export type ControlPointModel = {
+export interface ControlPointModel {
   type: "control",
   id: string,
   lat: number,
@@ -45,7 +45,7 @@ export type ControlPointModel = {
   control: "route" | "path",
 }
 
-export type PoiModel = {
+export interface PoiModel {
   id: string,
   name: string,
   desc: string,
@@ -61,4 +61,4 @@ export type PoiModel = {
 
 export type GalleryModel = string[]
 
-export type LatLng = { "lat": number, "lng": number }
+export type LatLng = { lat: number, lng: number }

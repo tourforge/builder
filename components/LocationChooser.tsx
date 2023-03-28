@@ -1,6 +1,6 @@
 import { ChangeEvent, useEffect, useId, useState } from "react";
 
-import styles from "styles/tour-editor/LocationChooser.module.css";
+import styles from "styles/LocationChooser.module.css";
 
 export default function LocationChooser({ lat, lng, onChange }: {
   lat?: number | undefined,
@@ -64,12 +64,12 @@ export default function LocationChooser({ lat, lng, onChange }: {
 
   return (
     <div className={styles.LocationChooser}>
-      <div>
-        <label htmlFor={`${id}-lat`} className="inline-label">Latitude</label>
+      <div className="field">
+        <label htmlFor={`${id}-lat`}>Latitude</label>
         <input type="text" name="Latitude" value={latTxt} id={`${id}-lat`} onChange={handleLatChange} />
       </div>
-      <div>
-        <label htmlFor={`${id}-lng`} className="inline-label">Longitude</label>
+      <div className="field">
+        <label htmlFor={`${id}-lng`}>Longitude</label>
         <input type="text" name="Longitude" value={lngTxt} id={`${id}-lng`} onChange={handleLngChange} />
       </div>
     </div>

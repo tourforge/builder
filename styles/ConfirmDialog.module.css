@@ -1,0 +1,19 @@
+.ConfirmDialog {
+  display: flex;
+  flex-direction: column;
+  width: 400px;
+}
+
+.header {
+  font-size: 18px;
+}
+
+.buttons {
+  display: flex;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.buttons>* {
+  flex: 1;
+}

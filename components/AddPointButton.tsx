@@ -1,7 +1,7 @@
 import clsx from "clsx";
 import { FaPlus } from "react-icons/fa";
 
-import styles from "styles/tour-editor/AddPointButton.module.css";
+import styles from "styles/AddPointButton.module.css";
 
 export default function AddPointButton({ addWaypoint, addPoi, addControlPoint, alwaysVisible = false }: {
   addWaypoint?: (() => void) | undefined,
