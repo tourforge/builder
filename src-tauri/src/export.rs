@@ -71,6 +71,8 @@ enum ControlMode {
     Route,
     #[serde(rename = "path")]
     Path,
+    #[serde(rename = "none")]
+    None,
 }
 
 #[derive(Serialize, Deserialize)]

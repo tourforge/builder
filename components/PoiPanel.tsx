@@ -51,6 +51,7 @@ export default function PoiPanel({ poi, setPoi }: {
       <div className="field">
         <label htmlFor={`${id}-desc`}>Description</label>
         <textarea
+          rows={8}
           name="POI Description"
           id={`${id}-desc`}
           value={poi.desc}

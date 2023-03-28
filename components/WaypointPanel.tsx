@@ -72,6 +72,7 @@ export default function WaypointPanel({ waypoint, setWaypoint }: {
       <div className="field">
         <label htmlFor={`${id}-desc`}>Description</label>
         <textarea
+          rows={8}
           name="Waypoint Description"
           id={`${id}-desc`}
           value={waypoint.desc}
@@ -106,6 +107,7 @@ export default function WaypointPanel({ waypoint, setWaypoint }: {
       <div className="field"> 
         <label htmlFor={`${id}-transcript`}>Transcript</label>
         <textarea
+          rows={8}
           name="Narration Transcript"
           id={`${id}-transcript`}
           value={waypoint.transcript ?? ""}

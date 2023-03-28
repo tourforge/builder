@@ -55,7 +55,7 @@ export default function TourPanel({ tour, setTour, displayPanel }: {
       <div className="field">
         <label htmlFor={`${id}-desc`}>Description</label>
         <textarea
-          rows={3}
+          rows={8}
           name="Tour Description"
           id={`${id}-desc`}
           value={tour.desc}

@@ -160,7 +160,7 @@ function ProjectSidebar({ screen, setScreen }: {
 function ProjectButtons() {
   function handleExport() {
     toast.promise(
-      exportProject(),
+      exportProject().catch(e => console.error(e)),
       {
         pending: "Exporting tour...",
         success: "Tour successfully exported!",

@@ -74,7 +74,7 @@ export default function TourEditor({ tour, setTour }: { tour: TourModel, setTour
   return (
     <div className={styles.TourEditor}>
       <MapControllerContext.Provider value={mapController}>
-        <div style={{ display: panel.which === "tour" ? undefined : "none" }}>
+        <div className={styles.tourPanelContainer} style={{ display: panel.which === "tour" ? undefined : "none" }}>
           <TourPanel
             tour={tour}
             setTour={setTour}
