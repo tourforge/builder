@@ -20,3 +20,17 @@ from django.urls import path
 urlpatterns = [
     path('admin/', admin.site.urls),
 ]
+
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
+from .views import ProjectViewSet, TourViewSet, UserViewSet, ProjectMemberViewSet
+
+router = DefaultRouter()
+router.register(r'projects', ProjectViewSet)
+router.register(r'tours', TourViewSet)
+router.register(r'users', UserViewSet)
+router.register(r'projectMembers', ProjectMemberViewSet)
+
+urlpatterns = [
+    path('', include(router.urls)),
+]
