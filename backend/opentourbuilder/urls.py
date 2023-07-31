@@ -16,16 +16,17 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from rest_framework.routers import DefaultRouter
-from .views import ProjectViewSet, TourViewSet, ProjectMemberViewSet
+from rest_framework import routers
+from .views import *
 
-router = DefaultRouter()
+router = routers.DefaultRouter()
 router.register(r'projects', ProjectViewSet)
 router.register(r'tours', TourViewSet)
-router.register(r'projectMembers', ProjectMemberViewSet)
+router.register(r'project_members', ProjectMemberViewSet)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include(router.urls)),
-    path("", include("django_nextjs.urls")),
+
+    path('api/', include(router.urls)),
+    path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
 ]

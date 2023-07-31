@@ -39,7 +39,6 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'opentourbuilder',
     'rest_framework',
-    'django-nextjs'
 ]
 
 MIDDLEWARE = [
