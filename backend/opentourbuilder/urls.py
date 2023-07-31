@@ -27,4 +27,5 @@ router.register(r'projectMembers', ProjectMemberViewSet)
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include(router.urls)),
+    path("", include("django_nextjs.urls")),
 ]
