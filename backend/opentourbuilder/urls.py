@@ -16,17 +16,20 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from rest_framework import routers
+from rest_framework_nested import routers
 from .views import *
 
 router = routers.DefaultRouter()
-router.register(r'projects', ProjectViewSet, basename='project')
-router.register(r'tours', TourViewSet)
-router.register(r'project_members', ProjectMemberViewSet)
 router.register(r'users', UserViewSet)
+router.register(r'projects', ProjectViewSet, basename='project')
+
+projects_router = routers.NestedDefaultRouter(router, r'projects', lookup='project')
+projects_router.register(r'tours', TourViewSet, basename='tour')
+projects_router.register(r'members', ProjectMemberViewSet, basename='projectmember')
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include(router.urls)),
+    path('api/', include(projects_router.urls)),
     path('auth/', include('rest_framework.urls', namespace='rest_framework')),
 ]

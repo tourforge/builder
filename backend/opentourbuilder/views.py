@@ -1,29 +1,39 @@
 from .models import *
 from .serializers import *
 from .permissions import *
-from rest_framework import viewsets, permissions, views
-from rest_framework.response import Response
+from rest_framework import viewsets, permissions
+from rest_framework.viewsets import ModelViewSet
 
-class ProjectViewSet(viewsets.ModelViewSet):
+class ProjectViewSet(ModelViewSet):
     serializer_class = ProjectSerializer
     permission_classes = [permissions.IsAuthenticated & IsProjectMember]
 
     def get_queryset(self):
-        return Project.objects.all().filter(projectmember__user = self.request.user)
+        return Project.objects.filter(projectmember__user=self.request.user)
 
     def perform_create(self, serializer):
         project = serializer.save()
         ProjectMember.objects.create(user=self.request.user, project=project, admin=True)
 
-class TourViewSet(viewsets.ModelViewSet):
-    queryset = Tour.objects.all()
+class TourViewSet(ModelViewSet):
     serializer_class = TourSerializer
     permission_classes = [permissions.IsAuthenticated & IsProjectMember]
 
-class ProjectMemberViewSet(viewsets.ModelViewSet):
-    queryset = ProjectMember.objects.all()
+    def get_queryset(self):
+        return Tour.objects.filter(project=self.kwargs['project_pk'])
+    
+    def perform_create(self, serializer):
+        serializer.save(project_id=self.kwargs['project_pk'])
+
+class ProjectMemberViewSet(ModelViewSet):
     serializer_class = ProjectMemberSerializer
     permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return ProjectMember.objects.filter(project=self.kwargs['project_pk'])
+    
+    def perform_create(self, serializer):
+        serializer.save(project_id=self.kwargs['project_pk'])
 
 class UserViewSet(viewsets.mixins.RetrieveModelMixin, viewsets.GenericViewSet):
     queryset = User.objects.all()
