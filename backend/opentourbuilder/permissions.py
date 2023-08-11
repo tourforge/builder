@@ -1,18 +1,11 @@
 
 from rest_framework import permissions
-
-class IsSuperUser(permissions.BasePermission):
-    def has_permission(self, request, view):
-        return request.user.is_superuser
+from .models import Project, ProjectMember
 
 class IsAdminProjectMember(permissions.BasePermission):
-    def has_permission(self, request, view):
-        # Simplified. You'd actually need to look at the ProjectMember 
-        # instance for the current project and check its 'admin' field.
-        return request.user.is_admin
+    def has_object_permission(self, request, _, obj):
+        return type(obj) is not Project or ProjectMember.objects.filter(user=request.user, project=obj, admin=True).exists()
 
 class IsProjectMember(permissions.BasePermission):
-    def has_permission(self, request, view):
-        # Simplified. You'd actually need to check if the user is a member 
-        # of the project they're trying to access.
-        return request.user.is_project_member
+    def has_object_permission(self, request, _, obj):
+        return type(obj) is not Project or ProjectMember.objects.filter(user=request.user, project=obj, admin=True).exists()
