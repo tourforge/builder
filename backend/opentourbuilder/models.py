@@ -13,3 +13,6 @@ class ProjectMember(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
     admin = models.BooleanField(default=False)
+
+    class Meta:
+        unique_together = [('user', 'project')]
