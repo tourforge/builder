@@ -1,9 +1,12 @@
 from rest_framework import viewsets, permissions
 from rest_framework.viewsets import ModelViewSet
+from django.contrib.auth import get_user_model
 
 from .models import *
 from .serializers import *
 from .permissions import *
+
+User = get_user_model()
 
 class ProjectViewSet(ModelViewSet):
     serializer_class = ProjectSerializer
