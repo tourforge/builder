@@ -1,3 +1,4 @@
+import re
 
 from django.db import models
 from django.contrib.auth.models import AbstractUser
@@ -25,3 +26,19 @@ class ProjectMember(models.Model):
 
     class Meta:
         unique_together = [('user', 'project')]
+
+_EXTENSION_REGEX = re.compile(r'^.*(\.[a-zA-Z0-9-]+)$')
+def _asset_path(instance, filename: str):
+    result = _EXTENSION_REGEX.search(filename)
+    ext = result.group(1) if result is not None else ''
+
+    return f"{instance.project.id}/{instance.id}{ext}"
+
+class Asset(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    project = models.ForeignKey(Project, on_delete=models.CASCADE)
+    name = models.CharField(max_length=100)
+    file = models.FileField(upload_to=_asset_path)
+
+    class Meta:
+        unique_together = [('project', 'name')]

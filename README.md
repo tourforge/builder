@@ -1,7 +1,6 @@
 # OpenTourBuilder
 
-This repository holds the source code for the part of OpenTourBuilder that lets you build custom
-tours on a desktop computer.
+This repository holds the sourcecode for the OpenTourBuilder server as well as the OpenTourBuilder editor.
 
 ## Development
 

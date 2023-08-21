@@ -1,0 +1,5 @@
+[otb_editor/*]
+indent_size = 2
+
+[otb_server/*]
+indent_size = 4
