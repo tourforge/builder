@@ -24,7 +24,7 @@ export const Gallery: Component<{
   };
 
   const handleUploadClick = (asset: ApiAsset | undefined, i: number) => async (query: string, file: File) => {
-    if (asset) {
+    if (asset?.name === query) {
       await api.updateAssetFile(props.pid, asset.id, file);
     } else {
       await api.createAsset(props.pid, query, file);
