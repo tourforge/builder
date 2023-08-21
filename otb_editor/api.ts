@@ -148,6 +148,7 @@ export class ApiClient {
   async createAsset(pid: string, name: string, file: Blob) {
     const form = new FormData();
     form.set("name", name);
+    form.set("project", pid);
     form.set("file", file);
     return await this.apiRequest(`/projects/${pid}/assets`, "POST", form) as ApiAsset;
   }
