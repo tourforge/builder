@@ -144,10 +144,10 @@ const GalleryItem: Component<{
           {(asset) => <option value={asset.name} />}
         </For>
       </datalist>
-      <button class="primary" title={resolved() ? "Change Image" : "Create New Asset"} onClick={() => document.getElementById(fileInputId)?.click()}><FiUpload /></button>
-      <button class="danger" title="Remove Item" onClick={props.onDeleteClick}><FiTrash /></button>
-      <button class="secondary" title="Move Up" onClick={props.onUpClick}><FiArrowUp /></button>
-      <button class="secondary" title="Move Down" onClick={props.onDownClick}><FiArrowDown /></button>
+      <button class={styles.GalleryItemButton} title="Move Up" onClick={props.onUpClick}><FiArrowUp /></button>
+      <button class={styles.GalleryItemButton} title="Move Down" onClick={props.onDownClick}><FiArrowDown /></button>
+      <button class={styles.GalleryItemButton} title={resolved() ? "Change Image" : "Create New Asset"} onClick={() => document.getElementById(fileInputId)?.click()}><FiUpload /></button>
+      <button class={styles.GalleryItemButton} title="Remove Item" onClick={props.onDeleteClick}><FiTrash /></button>
       <input type="file" style="display: none" id={fileInputId} onInput={handleFileInput} />
     </div>
   );

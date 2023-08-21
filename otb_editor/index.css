@@ -18,8 +18,8 @@ label {
   display: block;
 }
 
-input[type="text"],
-input[type="number"],
+:where(input[type="text"]),
+:where(input[type="number"]),
 textarea {
   all: unset;
 
