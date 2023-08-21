@@ -1,4 +1,4 @@
-import { Component, createSignal, createUniqueId, onMount } from "solid-js";
+import { Accessor, Component, Setter, createContext, createSignal, createUniqueId, onMount, useContext, JSX } from "solid-js";
 
 import * as maplibregl from "maplibre-gl";
 
@@ -6,7 +6,7 @@ import styles from "./MapLibreMap.module.css";
 
 export const MapLibreMap: Component = () => {
   const mapId = createUniqueId();
-  const [map, setMap] = createSignal<maplibregl.Map>();
+  const [_, setMap] = useContext(MapContext)!;
 
   onMount(() => {
     setMap(new maplibregl.Map({
@@ -18,4 +18,26 @@ export const MapLibreMap: Component = () => {
   });
 
   return <div id={mapId} class={styles.MapLibreMapContainer}></div>;
+};
+
+const MapContext = createContext<[Accessor<maplibregl.Map | undefined>, Setter<maplibregl.Map | undefined>]>();
+
+export const useMapController = () => {
+  const result = useContext(MapContext);
+
+  if (!result) {
+    throw Error("Attempted to call useMapController outside of the MapContext");
+  } else {
+    return result[0];
+  }
+};
+
+export const MapContextProvider: Component<{ children: JSX.Element }> = (props) => {
+  const [map, setMap] = createSignal<maplibregl.Map>();
+
+  return (
+    <MapContext.Provider value={[map, setMap]}>
+      {props.children}
+    </MapContext.Provider>
+  );
 };

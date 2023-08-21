@@ -1,11 +1,12 @@
+import { useParams } from "@solidjs/router";
 import { type Component } from "solid-js";
 
+import { MapContextProvider } from "./MapLibreMap";
+import { TourProvider } from "./TourContext";
 import { TourEditorMap } from "./TourEditorMap";
 import { TourEditorSidebar } from "./TourEditorSidebar";
 
 import styles from "./TourEditor.module.css";
-import { TourProvider } from "./TourContext";
-import { useParams } from "@solidjs/router";
 
 export const TourEditor: Component = () => {
   const params = useParams();
@@ -13,8 +14,10 @@ export const TourEditor: Component = () => {
   return (
     <div class={styles.TourEditor}>
       <TourProvider pid={params.pid} tid={params.tid}>
-        <TourEditorSidebar />
-        <TourEditorMap />
+        <MapContextProvider>
+          <TourEditorSidebar />
+          <TourEditorMap />
+        </MapContextProvider>
       </TourProvider>
     </div>
   );

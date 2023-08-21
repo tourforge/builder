@@ -8,3 +8,65 @@
 
   padding: 16px;
 }
+
+.PointsHeader {
+  display: flex;
+  justify-content: center;
+  gap: 64px;
+
+  margin-left: 30px;
+  margin-right: 30px;
+  margin-top: 10px;
+  margin-bottom: 4px;
+  padding-bottom: 5px;
+
+  text-align: center;
+
+  font-size: 13px;
+  color: rgb(54, 147, 170);
+  border-bottom: 1px solid rgb(54, 147, 170);
+}
+
+.PointsHeader>button {
+  all: unset;
+  user-select: none;
+  cursor: pointer;
+}
+
+.PointsHeader>button:last-child,
+.PointsHeader.Pois>button:first-child {
+  color: rgb(160, 160, 160);
+}
+
+.PointsHeader.Pois>button:last-child {
+  color: rgb(54, 147, 170);
+}
+
+.PointsList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.PointCard {
+  display: flex;
+  background-color: rgb(203, 233, 254);
+  color: rgb(11, 58, 91);
+  border-radius: 12px;
+  padding: 0 8px;
+}
+
+.PointName {
+  flex: 1;
+
+  padding: 12px 8px;
+}
+
+.PointButton {
+  all: unset;
+  cursor: pointer;
+  user-select: none;
+
+  padding: 12px 8px;
+}
