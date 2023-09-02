@@ -4,7 +4,7 @@ import * as maplibregl from "maplibre-gl";
 
 import styles from "./MapLibreMap.module.css";
 
-export const MapLibreMap: Component = () => {
+export const MapLibreMap: Component<{ onLoad: () => void }> = (props) => {
   const mapId = createUniqueId();
   const [_, setMap] = useContext(MapContext)!;
 
@@ -14,7 +14,7 @@ export const MapLibreMap: Component = () => {
       style: "https://api.maptiler.com/maps/streets-v2/style.json?key=LBk0jSklMmNKwGftcTqc", // stylesheet location
       center: [-79, 34], // starting position [lng, lat]
       zoom: 5, // starting zoom
-    }))
+    }).on("load", props.onLoad))
   });
 
   return <div id={mapId} class={styles.MapLibreMapContainer}></div>;
