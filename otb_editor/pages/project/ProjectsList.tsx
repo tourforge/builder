@@ -1,7 +1,7 @@
 import { A } from "@solidjs/router";
 import { createResource, type Component } from "solid-js";
 
-import { useApiClient } from "./api";
+import { useApiClient } from "../../api";
 
 export const ProjectsList: Component = () => {
   const api = useApiClient();

@@ -1,6 +1,6 @@
 import { createUniqueId, type Component, createSignal, JSX } from "solid-js";
 
-import { useApiClient } from "./api";
+import { useApiClient } from "../../api";
 
 import styles from "./Login.module.css";
 

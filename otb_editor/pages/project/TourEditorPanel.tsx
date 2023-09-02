@@ -4,14 +4,14 @@ import { v4 as uuidv4 } from "uuid";
 
 import { useTour } from "./TourContext";
 
-import { Field } from "./Field";
-import { Gallery } from "./Gallery";
+import { Field } from "../../components/Field";
+import { Gallery } from "../../components/Gallery";
 import { useMapController } from "./MapLibreMap";
-import { ControlPointModel, GalleryModel, WaypointModel } from "./data";
+import { ControlPointModel, GalleryModel, WaypointModel } from "../../data";
 
 import styles from "./TourEditorPanel.module.css";
 import { WaypointEditorPanel } from "./WaypointEditorPanel";
-import { ApiTour } from "./api";
+import { ApiTour } from "../../api";
 
 type Panel = {
   which: "main",

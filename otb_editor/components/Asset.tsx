@@ -1,7 +1,7 @@
 import { FiArrowDown, FiArrowUp, FiImage, FiTrash, FiUpload } from "solid-icons/fi";
 import { Component, createEffect, createResource, createSignal, createUniqueId, For, JSX, Show } from "solid-js";
 
-import { ApiAsset, useApiClient } from "./api";
+import { ApiAsset, useApiClient } from "../api";
 
 import styles from "./Asset.module.css";
 

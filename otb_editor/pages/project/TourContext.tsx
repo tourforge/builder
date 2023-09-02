@@ -1,5 +1,5 @@
 import { Component, createContext, createResource, createSignal, JSX, onCleanup, useContext, type Resource, createEffect } from "solid-js";
-import { ApiTour, useApiClient } from "./api";
+import { ApiTour, useApiClient } from "../../api";
 
 export const TourContext = createContext<[Resource<ApiTour>, (newValue: ApiTour) => void]>();
 

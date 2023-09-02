@@ -1,11 +1,11 @@
 import { Component, Show, JSX } from "solid-js";
-import { WaypointModel } from "./data";
+import { WaypointModel } from "../../data";
 
 import styles from "./WaypointEditorPanel.module.css";
-import { Field } from "./Field";
-import { Gallery } from "./Gallery";
-import { Asset } from "./Asset";
-import { LatLngEditor } from "./LatLngEditor";
+import { Field } from "../../components/Field";
+import { Gallery } from "../../components/Gallery";
+import { Asset } from "../../components/Asset";
+import { LatLngEditor } from "../../components/LatLngEditor";
 
 export const WaypointEditorPanel: Component<{ pid: string, waypoint: () => WaypointModel | undefined, onChange: (newWaypoint: WaypointModel) => void }> = (props) => {
   const handleTitleChange: JSX.EventHandlerUnion<HTMLInputElement, InputEvent> = (ev) => {

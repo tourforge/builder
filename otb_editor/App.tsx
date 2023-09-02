@@ -1,12 +1,12 @@
 import { Route, Routes } from "@solidjs/router";
 import type { Component } from "solid-js";
 
-import { ProjectAssetsEditor } from "./ProjectAssetsEditor";
-import { Home } from "./Home";
-import { Login } from "./Login";
-import { ProjectEditor } from "./ProjectEditor";
-import { ProjectsList } from "./ProjectsList";
-import { TourEditor } from "./TourEditor";
+import { ProjectAssetsEditor } from "./pages/project/ProjectAssetsEditor";
+import { Home } from "./pages/home/Home";
+import { Login } from "./pages/login/Login";
+import { ProjectEditor } from "./pages/project/ProjectEditor";
+import { ProjectsList } from "./pages/project/ProjectsList";
+import { TourEditor } from "./pages/project/TourEditor";
 
 const App: Component = () => {
   return (

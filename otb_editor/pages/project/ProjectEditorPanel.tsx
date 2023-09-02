@@ -1,7 +1,7 @@
 import { A, useParams } from "@solidjs/router";
 import { Component, For, createResource } from "solid-js";
 
-import { useApiClient } from "./api";
+import { useApiClient } from "../../api";
 
 import styles from "./ProjectEditorPanel.module.css";
 

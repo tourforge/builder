@@ -1,8 +1,8 @@
 import { Component, createEffect, createResource, JSX, For, createUniqueId, createSignal, Index, Show } from "solid-js";
 import { FiArrowDown, FiArrowUp, FiImage, FiTrash, FiUpload } from "solid-icons/fi";
 
-import { GalleryModel } from "./data";
-import { ApiAsset, useApiClient } from "./api";
+import { GalleryModel } from "../data";
+import { ApiAsset, useApiClient } from "../api";
 
 import styles from "./Gallery.module.css";
 import { Asset } from "./Asset";
