@@ -2,7 +2,7 @@ import { createSignal, type Component, createEffect } from "solid-js";
 import * as maplibregl from "maplibre-gl";
 import circle from "@turf/circle";
 
-import * as polyline from "./polyline";
+import * as polyline from "../../polyline";
 import { MapLibreMap, useMapController } from "./MapLibreMap";
 import { useTour } from "./TourContext";
 
