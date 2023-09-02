@@ -1,12 +1,27 @@
-import { createUniqueId, type Component, JSX } from "solid-js";
+import { createUniqueId, type Component, JSX, Show } from "solid-js";
 
 import styles from "./Field.module.css";
 
-export const Field: Component<{ label: JSX.Element, children: (id: string) => JSX.Element }> = ({ label, children }) => {
+export const Field: Component<{ set?: boolean, label?: JSX.Element, children: (id: string) => JSX.Element }> = (props) => {
   const id = createUniqueId();
 
-  return <div class={styles.Field}>
-    <label for={id}>{label}</label>
-    {children(id)}
-  </div>
+  if (props.set) {
+    return (
+      <fieldset class={styles.Field}>
+        <Show when={props.label}>
+          <legend class={styles.FieldLabel}>{props.label}</legend>
+        </Show>
+        {props.children(id)}
+      </fieldset>
+    );
+  } else {
+    return (
+      <div class={styles.Field}>
+        <Show when={props.label}>
+          <label class={styles.FieldLabel} for={id}>{props.label}</label>
+        </Show>
+        {props.children(id)}
+      </div>
+    );
+  }
 };

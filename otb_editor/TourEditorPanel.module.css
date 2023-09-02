@@ -1,4 +1,6 @@
-.TourEditorSidebar {
+/* --- main panel --- */
+
+.MainPanel {
   display: flex;
   flex-direction: column;
   width: 320px;
@@ -7,6 +9,10 @@
   border-right: 1px solid lightgray;
 
   padding: 16px;
+}
+
+.MainPanel.Hidden {
+  display: none;
 }
 
 .PointsHeader {
@@ -70,4 +76,37 @@
   user-select: none;
 
   padding: 12px 8px;
+}
+
+/* --- subpanel --- */
+
+.SubPanel {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  grid-template-columns: 1fr;
+  height: 100%;
+}
+
+.SubPanel.Hidden {
+  display: none;
+}
+
+.SubPanelBar {
+  padding: 12px 16px;
+  border-bottom: 1px solid lightgray;
+  border-right: 1px solid lightgray;
+
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.SubPanelClose {
+  all: unset;
+  cursor: pointer;
+  user-select: none;
+  display: inline;
+
+  padding: 4px;
+  margin-top: 4px;
 }

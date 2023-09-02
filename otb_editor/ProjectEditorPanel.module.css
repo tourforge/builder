@@ -1,0 +1,10 @@
+.ProjectEditorPanel {
+  display: flex;
+  flex-direction: column;
+  width: 270px;
+  overflow-y: auto;
+
+  border-right: 1px solid lightgray;
+
+  padding: 16px;
+}

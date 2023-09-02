@@ -1,11 +1,11 @@
+import { A, useParams } from "@solidjs/router";
 import { Component, For, createResource } from "solid-js";
 
 import { useApiClient } from "./api";
 
-import styles from "./ProjectEditorSidebar.module.css";
-import { A, useParams } from "@solidjs/router";
+import styles from "./ProjectEditorPanel.module.css";
 
-export const ProjectEditorSidebar: Component = () => {
+export const ProjectEditorPanel: Component = () => {
   const params = useParams();
   const api = useApiClient();
   const [project] = createResource(async () => await api.getProject(params.pid));
@@ -28,7 +28,7 @@ export const ProjectEditorSidebar: Component = () => {
   };
 
   return (
-    <div class={styles.ProjectEditorSidebar}>
+    <div class={styles.ProjectEditorPanel}>
       <div>
         {project.loading && "Loading project..."}
         {project.error && `Error loading project: ${project.error}`}

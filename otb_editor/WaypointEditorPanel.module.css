@@ -1,7 +1,7 @@
-.ProjectEditorSidebar {
+.WaypointEditorPanel {
   display: flex;
   flex-direction: column;
-  width: 270px;
+  width: 320px;
   overflow-y: auto;
 
   border-right: 1px solid lightgray;

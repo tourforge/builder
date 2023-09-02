@@ -1,5 +1,5 @@
-import { FiArrowDown, FiArrowUp, FiEdit, FiTrash } from "solid-icons/fi";
-import { For, JSX, Show, createSignal, type Component } from "solid-js";
+import { FiArrowDown, FiArrowLeft, FiArrowUp, FiEdit, FiTrash } from "solid-icons/fi";
+import { For, JSX, Show, createSignal, type Component, Setter, Accessor, children, Resource } from "solid-js";
 import { v4 as uuidv4 } from "uuid";
 
 import { useTour } from "./TourContext";
@@ -9,23 +9,75 @@ import { Gallery } from "./Gallery";
 import { useMapController } from "./MapLibreMap";
 import { ControlPointModel, GalleryModel, WaypointModel } from "./data";
 
-import styles from "./TourEditorSidebar.module.css";
+import styles from "./TourEditorPanel.module.css";
+import { WaypointEditorPanel } from "./WaypointEditorPanel";
+import { ApiTour } from "./api";
 
-export const TourEditorSidebar: Component = () => {
+type Panel = {
+  which: "main",
+} | {
+  which: "waypoint",
+  id: string,
+} | {
+  which: "poi",
+  id: string,
+};
+
+export const TourEditorPanel: Component<{ pid: string }> = (props) => {
   const [tour, setTour] = useTour();
+  const [panel, setPanel] = createSignal<Panel>({ which: "main" });
+
+  const waypointPanelWaypoint = () => {
+    let curPanel = panel();
+    let found = tour()?.content.waypoints.find(w => curPanel.which === "waypoint" && w.type === "waypoint" && w.id === curPanel.id);
+    if (found && found.type === "waypoint") {
+      return found;
+    } else {
+      return undefined;
+    }
+  };
+
+  const handleWaypointPanelWaypointChange = (newWaypoint: WaypointModel) => {
+    let foundIdx = tour()?.content.waypoints.findIndex(w => w.type === "waypoint" && w.id === newWaypoint.id);
+    if (foundIdx === undefined || foundIdx < 0) return;
+
+    setTour({
+      ...tour()!,
+      content: {
+        ...tour()!.content,
+        waypoints: [...tour()!.content.waypoints.slice(0, foundIdx), newWaypoint, ...tour()!.content.waypoints.slice(foundIdx + 2)],
+      }
+    });
+  };
+
+  return (
+    <>
+      <MainPanel show={panel().which === "main"} setPanel={setPanel} tour={tour} onChange={setTour} />
+      <SubPanel
+        show={panel().which !== "main"}
+        title={panel().which === "waypoint" ? "Edit Waypoint" : "Edit POI"}
+        onClose={() => setPanel({ which: "main" })}
+      >
+        <WaypointEditorPanel pid={props.pid} waypoint={waypointPanelWaypoint} onChange={handleWaypointPanelWaypointChange} />
+      </SubPanel>
+    </>
+  );
+};
+
+const MainPanel: Component<{ show: boolean, tour: Resource<ApiTour>, onChange: (newTour: ApiTour) => void, setPanel: Setter<Panel> }> = (props) => {
   const [currentTab, setCurrentTab] = createSignal<"waypoints" | "pois">("waypoints");
 
   const handleTourTitleInput: JSX.EventHandlerUnion<HTMLInputElement, InputEvent> = (event) => {
-    const currentTour = tour()!;
-    setTour({
+    const currentTour = props.tour()!;
+    props.onChange({
       ...currentTour,
       title: event.currentTarget.value,
     });
   };
 
   const handleTourDescInput: JSX.EventHandlerUnion<HTMLTextAreaElement, InputEvent> = (event) => {
-    const currentTour = tour()!;
-    setTour({
+    const currentTour = props.tour()!;
+    props.onChange({
       ...currentTour,
       content: {
         ...currentTour.content,
@@ -35,8 +87,8 @@ export const TourEditorSidebar: Component = () => {
   };
 
   const handleTourSiteLinkInput: JSX.EventHandlerUnion<HTMLInputElement, InputEvent> = (event) => {
-    const currentTour = tour()!;
-    setTour({
+    const currentTour = props.tour()!;
+    props.onChange({
       ...currentTour,
       content: {
         ...currentTour.content,
@@ -46,8 +98,8 @@ export const TourEditorSidebar: Component = () => {
   };
 
   const handleTourGalleryChange = (newGallery: GalleryModel) => {
-    const currentTour = tour()!;
-    setTour({
+    const currentTour = props.tour()!;
+    props.onChange({
       ...currentTour,
       content: {
         ...currentTour.content,
@@ -57,8 +109,8 @@ export const TourEditorSidebar: Component = () => {
   };
 
   const handleWaypointsChange = (newWaypoints: (WaypointModel | ControlPointModel)[]) => {
-    const currentTour = tour()!;
-    setTour({
+    const currentTour = props.tour()!;
+    props.onChange({
       ...currentTour,
       content: {
         ...currentTour.content,
@@ -68,28 +120,28 @@ export const TourEditorSidebar: Component = () => {
   };
 
   return (
-    <div class={styles.TourEditorSidebar}>
-      {tour.loading && "Loading tour..."}
-      {tour.error != null && `Error loading tour: ${tour.error}`}
-      <Show when={tour()}>
+    <div class={styles.MainPanel} classList={{ [styles.Hidden]: !props.show }}>
+      {props.tour.loading && "Loading tour..."}
+      {props.tour.error != null && `Error loading tour: ${props.tour.error}`}
+      <Show when={props.tour()}>
         <Field label="Tour Title">
           {(id) => (
-            <input type="text" id={id} value={tour()!.title} onInput={handleTourTitleInput} />
+            <input type="text" id={id} value={props.tour()!.title} onInput={handleTourTitleInput} />
           )}
         </Field>
         <Field label="Tour Description">
           {(id) => (
-            <textarea id={id} value={tour()!.content.desc} onInput={handleTourDescInput}></textarea>
+            <textarea id={id} value={props.tour()!.content.desc} onInput={handleTourDescInput}></textarea>
           )}
         </Field>
         <Field label="Site Link">
           {(id) => (
-            <input type="text" id={id} value={tour()!.content.links?.["Site Link"].href ?? ""} onInput={handleTourSiteLinkInput} />
+            <input type="text" id={id} value={props.tour()!.content.links?.["Site Link"].href ?? ""} onInput={handleTourSiteLinkInput} />
           )}
         </Field>
         <Field label="Gallery">
           {(id) => (
-            <Gallery id={id} pid={tour()!.project} value={tour()!.content.gallery} onChange={handleTourGalleryChange} />
+            <Gallery id={id} pid={props.tour()!.project} value={props.tour()!.content.gallery} onChange={handleTourGalleryChange} />
           )}
         </Field>
         <header classList={{ [styles.PointsHeader]: true, [styles.Pois]: currentTab() === "pois" }}>
@@ -98,9 +150,9 @@ export const TourEditorSidebar: Component = () => {
         </header>
         <Show when={currentTab() === "waypoints"}>
             <WaypointsList
-              waypoints={() => tour()!.content.waypoints}
+              waypoints={() => props.tour()!.content.waypoints}
               onChange={handleWaypointsChange}
-              onWaypointClick={() => {}}
+              onEditClick={(id) => props.setPanel({ which: "waypoint", id: id })}
             />
         </Show>
         <Show when={currentTab() === "pois"}>
@@ -114,7 +166,7 @@ export const TourEditorSidebar: Component = () => {
 const WaypointsList: Component<{
   waypoints: () => (WaypointModel | ControlPointModel)[],
   onChange: (newWaypoints: (WaypointModel | ControlPointModel)[]) => void,
-  onWaypointClick: (id: string) => void,
+  onEditClick: (id: string) => void,
 }> = (props) => {
   const map = useMapController();
 
@@ -165,7 +217,7 @@ const WaypointsList: Component<{
 
   const handleDelete = (id: string) => {
     const index = props.waypoints().findIndex(w => w.id === id);
-    props.onChange([...props.waypoints().slice(0, index), ...props.waypoints().slice(index + 1)]);
+    props.onChange([...props.waypoints().slice(0, index), ...props.waypoints().slice(index + 2)]);
   }
 
   return (
@@ -182,7 +234,7 @@ const WaypointsList: Component<{
           <button class={styles.PointButton} onClick={() => handleMove(waypoint.id, "down")}>
             <FiArrowDown />
           </button>
-          <button class={styles.PointButton} onClick={() => props.onWaypointClick(waypoint.id)}>
+          <button class={styles.PointButton} onClick={() => props.onEditClick(waypoint.id)}>
             <FiEdit />
           </button>
           <button class={styles.PointButton} onClick={() => handleDelete(waypoint.id)}>
@@ -200,3 +252,17 @@ const WaypointsList: Component<{
     </div>
   );
 }
+
+const SubPanel: Component<{ show: boolean, title: JSX.Element, onClose: () => void, children: JSX.Element }> = (props) => {
+  return (
+    <div class={styles.SubPanel} classList={{ [styles.Hidden]: !props.show }}>
+      <div class={styles.SubPanelBar}>
+        <button class={styles.SubPanelClose} onClick={props.onClose}>
+          <FiArrowLeft />
+        </button>
+        <div class={styles.SubPanelTitle}>{props.title}</div>
+      </div>
+      {props.children}
+    </div>
+  );
+};

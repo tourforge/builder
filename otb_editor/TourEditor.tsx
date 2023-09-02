@@ -4,7 +4,7 @@ import { type Component } from "solid-js";
 import { MapContextProvider } from "./MapLibreMap";
 import { TourProvider } from "./TourContext";
 import { TourEditorMap } from "./TourEditorMap";
-import { TourEditorSidebar } from "./TourEditorSidebar";
+import { TourEditorPanel } from "./TourEditorPanel";
 
 import styles from "./TourEditor.module.css";
 
@@ -12,13 +12,13 @@ export const TourEditor: Component = () => {
   const params = useParams();
 
   return (
-    <div class={styles.TourEditor}>
-      <TourProvider pid={params.pid} tid={params.tid}>
-        <MapContextProvider>
-          <TourEditorSidebar />
+    <TourProvider pid={params.pid} tid={params.tid}>
+      <MapContextProvider>
+        <div class={styles.TourEditor}>
+          <TourEditorPanel pid={params.pid} />
           <TourEditorMap />
-        </MapContextProvider>
-      </TourProvider>
-    </div>
+        </div>
+      </MapContextProvider>
+    </TourProvider>
   );
 };

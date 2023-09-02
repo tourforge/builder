@@ -12,12 +12,6 @@ code {
     monospace;
 }
 
-label {
-  font-weight: bold;
-  margin-bottom: 2px;
-  display: block;
-}
-
 :where(input[type="text"]),
 :where(input[type="number"]),
 textarea {

@@ -1,5 +1,13 @@
 .Field {
+  all: unset;
+
   display: flex;
   flex-direction: column;
   margin-bottom: 16px;
+}
+
+.FieldLabel {
+  font-weight: bold;
+  margin-bottom: 2px;
+  display: block;
 }

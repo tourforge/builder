@@ -1,0 +1,9 @@
+.LatLngEditor {
+  display: flex;
+  gap: 8px;
+}
+
+.LatLngEditor>* {
+  flex: 1;
+  min-width: 0;
+}
