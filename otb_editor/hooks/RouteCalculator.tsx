@@ -12,7 +12,6 @@ export function useRouteCalculator() {
   const [prevLatLongs, setPrevLatLongs] = createSignal<(LatLng & { control: "path" | "route" })[]>([]);
 
   createEffect(() => {
-    console.log("tour change");
     if (!tour()) return;
 
     const latLongs = tour()!.content.waypoints
@@ -29,22 +28,18 @@ export function useRouteCalculator() {
       return ll.lat === pll?.lat && ll.lng === pll?.lng && ll.control === pll?.control;
     });
 
-    console.log(sameLength(), sameContents());
     if (sameLength() && sameContents()) return;
 
     setPrevLatLongs(latLongs);
 
     api.route(latLongs)
-      .then(route => {
-        console.log(route);
-        return setTour(({
-          ...tour()!,
-          content: {
-            ...tour()!.content,
-            path: polyline.encode(route),
-          },
-        }));
-      })
+      .then(route => setTour(({
+        ...tour()!,
+        content: {
+          ...tour()!.content,
+          path: polyline.encode(route),
+        },
+      })))
       .catch(err => {
         console.error(err);
       });

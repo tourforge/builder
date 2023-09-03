@@ -89,6 +89,23 @@ const MainPanel: Component<{ show: boolean, tour: Resource<ApiTour>, onChange: (
     });
   };
 
+  const handleTypeInput: JSX.EventHandlerUnion<HTMLInputElement, InputEvent> = (ev) => {
+    if (!ev.currentTarget.checked) return;
+
+    const type = ev.currentTarget.value;
+    if (type === "driving" || type === "walking") {
+      props.onChange(({
+        ...props.tour()!,
+        content: {
+          ...props.tour()!.content,
+          type: type,
+        },
+      }));
+    } else {
+      console.error("Unexpected value:", type);
+    }
+  }
+
   const handleTourSiteLinkInput: JSX.EventHandlerUnion<HTMLInputElement, InputEvent> = (event) => {
     const currentTour = props.tour()!;
     props.onChange({
@@ -136,6 +153,32 @@ const MainPanel: Component<{ show: boolean, tour: Resource<ApiTour>, onChange: (
           {(id) => (
             <textarea id={id} value={props.tour()!.content.desc} onInput={handleTourDescInput}></textarea>
           )}
+        </Field>
+        <Field set label="Tour Type">
+          {(id) => (<>
+            <div>
+              <input
+                type="radio"
+                name="control"
+                id={`${id}-driving`}
+                value="driving"
+                checked={props.tour()!.content.type === "driving"} 
+                onInput={handleTypeInput}
+              />
+              <label for={`${id}-driving`}>Driving</label>
+            </div>
+            <div>
+              <input
+                type="radio"
+                name="control"
+                id={`${id}-walking`}
+                value="walking"
+                checked={props.tour()!.content.type === "walking"} 
+                onInput={handleTypeInput}
+              />
+              <label for={`${id}-walking`}>Walking</label>
+            </div>
+          </>)}
         </Field>
         <Field label="Site Link">
           {(id) => (

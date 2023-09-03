@@ -4,6 +4,7 @@ export interface AssetMeta {
 }
 
 export interface TourModel {
+  type: "driving" | "walking" | "hybrid",
   desc: string,
   waypoints: (WaypointModel | ControlPointModel)[],
   gallery: GalleryModel,
