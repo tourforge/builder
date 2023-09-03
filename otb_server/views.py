@@ -128,7 +128,6 @@ class AssetViewSet(ModelViewSet):
                 content_type = ''
         response = FileResponse(file_handle, content_type=content_type)
         response['Content-Length'] = instance.file.size
-        response['Content-Disposition'] = 'attachment; filename="%s"' % instance.file.name
 
         return response
 
@@ -153,12 +152,11 @@ class RouteView(APIView):
                     if type(loc[0]) is float and type(loc[1]) is float:
                         locations.append([loc[1], loc[0]])
                     else:
-                        return HttpResponseBadRequest("A")
-                    pass
+                        return HttpResponseBadRequest()
                 else:
-                    return HttpResponseBadRequest("B")
+                    return HttpResponseBadRequest()
         else:
-            return HttpResponseBadRequest("C")
+            return HttpResponseBadRequest()
 
         route = self._client.directions(locations=locations, profile="auto")
         
