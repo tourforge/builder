@@ -45,6 +45,7 @@ class _SignedFileField(serializers.FileField):
 
 class AssetSerializer(ModelSerializer):
     file = _SignedFileField()
+    hash = serializers.CharField(read_only=True)
 
     class Meta:
         model = Asset

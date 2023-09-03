@@ -1,6 +1,7 @@
 import json
+import hashlib
 
-from rest_framework import viewsets, permissions, renderers
+from rest_framework import viewsets, permissions, renderers, status
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -36,6 +37,10 @@ class ProjectViewSet(ModelViewSet):
     def perform_create(self, serializer):
         project = serializer.save()
         ProjectMember.objects.create(user=self.request.user, project=project, admin=True)
+
+    @action(methods=['get'], detail=True)
+    def export(self):
+        pass
 
 class TourViewSet(ModelViewSet):
     serializer_class = TourSerializer
@@ -76,9 +81,37 @@ class AssetViewSet(ModelViewSet):
                 project__id=self.kwargs['project_pk'],
                 project__projectmember__user=self.request.user,
             )
-    
-    def perform_create(self, serializer):
-        serializer.save(project_id=self.kwargs['project_pk'])
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save(project_id=self.kwargs['project_pk'], hash=self.calc_hash(serializer.validated_data["file"]))
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        serializer.save(hash=self.calc_hash(serializer.validated_data["file"]))
+
+        if getattr(instance, '_prefetched_objects_cache', None):
+            # If 'prefetch_related' has been applied to a queryset, we need to
+            # forcibly invalidate the prefetch cache on the instance.
+            instance._prefetched_objects_cache = {}
+
+        return Response(serializer.data)
+
+    def calc_hash(self, file):
+        try:
+            h = hashlib.sha256()
+            for chunk in file.chunks():
+                h.update(chunk)
+            return h.hexdigest()
+        except e:
+            print("ERROR: failed to calculate file hash:", e)
+            return ""
 
     @action(methods=['get'], detail=True)
     def download(self, *args, **kwargs):

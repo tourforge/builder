@@ -38,6 +38,7 @@ class Asset(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
     name = models.CharField(max_length=100)
+    hash = models.CharField(max_length=64)
     file = models.FileField(upload_to=_asset_path)
 
     class Meta:
