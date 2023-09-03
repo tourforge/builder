@@ -48,7 +48,7 @@ export const TourEditorPanel: Component<{ pid: string }> = (props) => {
       ...tour()!,
       content: {
         ...tour()!.content,
-        waypoints: [...tour()!.content.waypoints.slice(0, foundIdx), newWaypoint, ...tour()!.content.waypoints.slice(foundIdx + 2)],
+        waypoints: [...tour()!.content.waypoints.slice(0, foundIdx), newWaypoint, ...tour()!.content.waypoints.slice(foundIdx + 1)],
       }
     });
   };
