@@ -78,6 +78,7 @@ export const Asset: Component<{
         classList={{ [styles.Error]: !imageLoaded() }}
         onLoad={handleImageLoad}
         onError={handleImageError}
+        onClick={() => window.open(asset()?.file, "_blank")}
       />
       <Show when={!imageLoaded()}>
         <div title="Image not found" class={styles.AssetThumbnail}><FiImage /></div>
