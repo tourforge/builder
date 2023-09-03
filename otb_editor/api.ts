@@ -183,6 +183,10 @@ export class ApiClient {
     return fullPath;
   }
 
+  async export(pid: string) {
+    return await this.apiRequest(`/projects/${pid}/export`) as Blob;
+  }
+
   async apiRequest(path: string, method: string = "GET", body?: any): Promise<unknown> {
     const extraHeaders: { [_: string]: string } = {};
     if (body instanceof FormData) {
@@ -204,7 +208,11 @@ export class ApiClient {
       });
       
       if (resp.status >= 200 && resp.status <= 299) {
-        return await resp.json();
+        if (resp.headers.get("Content-Type") === "application/json") {
+          return await resp.json();
+        } else {
+          return await resp.blob();
+        }
       } else if (resp.status == 401) {
         this.navigate("/login");
       } else {

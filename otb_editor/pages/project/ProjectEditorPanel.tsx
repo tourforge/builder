@@ -21,10 +21,16 @@ export const ProjectEditorPanel: Component = () => {
         path: "",
         pois: [],
         tiles: undefined,
+        type: "driving"
       },
     });
 
     await refetchTours();
+  };
+
+  const handleExportProjectClick = async () => {
+    const blob = await api.export(params.pid);
+    window.open(URL.createObjectURL(blob), "_blank");
   };
 
   return (
@@ -45,6 +51,8 @@ export const ProjectEditorPanel: Component = () => {
         )}
       </For>
       <button class="primary" onClick={handleCreateTourClick}>Create Tour</button>
+      <div style="flex:1"></div>
+      <button class="primary" onClick={handleExportProjectClick}>Export Project</button>
     </div>
   );
 };

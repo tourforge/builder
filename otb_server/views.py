@@ -1,5 +1,8 @@
 import json
 import hashlib
+import zipfile
+import tempfile
+import shutil
 
 from rest_framework import viewsets, permissions, renderers, status
 from rest_framework.request import Request
@@ -9,7 +12,7 @@ from rest_framework.viewsets import ModelViewSet, ViewSet
 from rest_framework.authentication import BasicAuthentication
 from rest_framework.decorators import action
 from django.contrib.auth import get_user_model
-from django.http import FileResponse, HttpResponseBadRequest
+from django.http import FileResponse, HttpResponseBadRequest, FileResponse
 
 from knox.auth import TokenAuthentication
 from knox.views import LoginView as KnoxLoginView
@@ -39,8 +42,76 @@ class ProjectViewSet(ModelViewSet):
         ProjectMember.objects.create(user=self.request.user, project=project, admin=True)
 
     @action(methods=['get'], detail=True)
-    def export(self):
-        pass
+    def export(self, *args, **kwargs):
+        project = self.get_object()
+        tours = Tour.objects.filter(project=project)
+        required_assets = {}
+
+        def visit_asset(asset_id):
+            asset = Asset.objects.filter(id=asset_id).first()
+            if asset is None:
+                return None
+
+            split = asset.file.name.split(".", maxsplit=1)
+            if len(split) == 2:
+                ext = f".{split[1]}"
+            else:
+                ext = ""
+            new_filename = f"assets/{asset.hash}{ext}"
+            required_assets[new_filename] = asset
+            return new_filename
+
+        def visit_assets(asset_ids):
+            return list(filter(lambda it: it is not None, map(visit_asset, asset_ids)))
+
+        temp_fd, temp_path = tempfile.mkstemp()
+        with zipfile.ZipFile(open(temp_fd, mode="wb"), mode="w") as zf:
+            tours_content = []
+            for tour in tours:
+                tour: Tour = tour
+                content = {**tour.content, "title": tour.title}
+                tours_content.append(content)
+
+                if "gallery" in content:
+                    content["gallery"] = visit_assets(content["gallery"])
+                if "tiles" in content:
+                    content["tiles"] = visit_asset(content["tiles"])
+                if "waypoints" in content:
+                    for waypoint in content["waypoints"]:
+                        if "gallery" in waypoint:
+                            waypoint["gallery"] = visit_assets(waypoint["gallery"])
+                        if "narration" in waypoint:
+                            waypoint["narration"] = visit_asset(waypoint["narration"])
+                if "pois" in content:
+                    for poi in content["pois"]:
+                        if "gallery" in poi:
+                            poi["gallery"] = visit_assets(waypoint["gallery"])
+
+                content_str = json.dumps(content)
+                h = hashlib.sha256()
+                h.update(bytes(content_str, "UTF-8"))
+                content_hash = h.hexdigest()
+                content_filename = f"{content_hash}.json"
+                zf.writestr(content_filename, content_str)
+
+            index = {
+                "tours": [{
+                    "title": tour["title"] if "title" in tour else None,
+                    "thumbnail": next(iter(tour["gallery"]), None),
+                    "type": tour["type"] if "type" in tour else None,
+                } for tour in tours_content],
+            }
+            index_str = json.dumps(index)
+            zf.writestr("index.json", index_str)
+
+            for filename, asset in required_assets.items():
+                filename: str = filename
+                asset: Asset = asset
+                with zf.open(filename, "w") as asset_file:
+                    shutil.copyfileobj(asset.file, asset_file)
+
+        # zipfile closes the zip, so now we have to reopen the temp path
+        return FileResponse(open(temp_path, mode="rb"), as_attachment=True, filename="export.zip", content_type="application/zip")
 
 class TourViewSet(ModelViewSet):
     serializer_class = TourSerializer
