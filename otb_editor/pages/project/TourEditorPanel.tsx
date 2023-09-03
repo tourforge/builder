@@ -1,17 +1,18 @@
 import { FiArrowDown, FiArrowLeft, FiArrowUp, FiEdit, FiTrash } from "solid-icons/fi";
-import { For, JSX, Show, createSignal, type Component, Setter, Accessor, children, Resource } from "solid-js";
+import { For, JSX, Resource, Setter, Show, createSignal, type Component } from "solid-js";
 import { v4 as uuidv4 } from "uuid";
 
-import { useTour } from "./TourContext";
+import { useTour } from "../../hooks/TourContext";
 
+import { ApiTour } from "../../api";
 import { Field } from "../../components/Field";
 import { Gallery } from "../../components/Gallery";
-import { useMapController } from "./MapLibreMap";
 import { ControlPointModel, GalleryModel, WaypointModel } from "../../data";
+import { useRouteCalculator } from "../../hooks/RouteCalculator";
+import { useMapController } from "./MapLibreMap";
+import { WaypointEditorPanel } from "./WaypointEditorPanel";
 
 import styles from "./TourEditorPanel.module.css";
-import { WaypointEditorPanel } from "./WaypointEditorPanel";
-import { ApiTour } from "../../api";
 
 type Panel = {
   which: "main",
@@ -26,6 +27,8 @@ type Panel = {
 export const TourEditorPanel: Component<{ pid: string }> = (props) => {
   const [tour, setTour] = useTour();
   const [panel, setPanel] = createSignal<Panel>({ which: "main" });
+
+  useRouteCalculator();
 
   const waypointPanelWaypoint = () => {
     let curPanel = panel();

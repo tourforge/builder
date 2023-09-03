@@ -1,5 +1,8 @@
 import { Navigator, useNavigate } from "@solidjs/router";
-import { TourModel } from "./data";
+
+import * as polyline from "./polyline";
+
+import { LatLng, TourModel } from "./data";
 
 const apiUrl = "http://127.0.0.1:8000/api";
 
@@ -155,6 +158,29 @@ export class ApiClient {
 
   async deleteAsset(pid: string, id: string) {
     await this.apiRequest(`/projects/${pid}/assets/${id}`, "DELETE");
+  }
+
+  async route(points: (LatLng & { control: "path" | "route" })[]) {
+    const fullPath: LatLng[] = [];
+    for (let i = 0; i < points.length - 1; i++) {
+      const a = points[i];
+      const b = points[i + 1];
+
+  
+      if (a.control !== "path" || b.control !== "path") {
+        const resp = await this.apiRequest(`/route`, "POST", [[a.lat, a.lng], [b.lat, b.lng]]) as { path: string };
+        const path: LatLng[] = polyline.decode(resp.path);
+        
+        if (a.control === "path") path.unshift(a);
+        if (b.control === "path") path.push(b);
+  
+        fullPath.push(...path);
+      } else {
+        fullPath.push(a, b);
+      }
+    }
+  
+    return fullPath;
   }
 
   async apiRequest(path: string, method: string = "GET", body?: any): Promise<unknown> {

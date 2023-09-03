@@ -1,13 +1,20 @@
+import json
+
 from rest_framework import viewsets, permissions, renderers
+from rest_framework.request import Request
 from rest_framework.response import Response
+from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet, ViewSet
 from rest_framework.authentication import BasicAuthentication
 from rest_framework.decorators import action
 from django.contrib.auth import get_user_model
-from django.http import FileResponse
+from django.http import FileResponse, HttpResponseBadRequest
 
 from knox.auth import TokenAuthentication
 from knox.views import LoginView as KnoxLoginView
+
+import routingpy
+import polyline
 
 from .models import *
 from .serializers import *
@@ -96,3 +103,34 @@ class UserViewSet(viewsets.mixins.RetrieveModelMixin, viewsets.GenericViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     authentication_classes = [TokenAuthentication]
+
+class RouteView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+
+    _client = routingpy.routers.Valhalla()
+
+    def post(self, request: Request):
+        locations = []
+
+        req_json = json.loads(request.body)
+        if type(req_json) is list:
+            for loc in req_json:
+                if type(loc) is list and len(loc) == 2:
+                    if type(loc[0]) is float and type(loc[1]) is float:
+                        locations.append([loc[1], loc[0]])
+                    else:
+                        return HttpResponseBadRequest("A")
+                    pass
+                else:
+                    return HttpResponseBadRequest("B")
+        else:
+            return HttpResponseBadRequest("C")
+
+        route = self._client.directions(locations=locations, profile="auto")
+        
+        response = {
+            "path": polyline.encode(route.geometry, geojson=True)
+        }
+
+        return Response(data=response, content_type="application/json")

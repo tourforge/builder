@@ -2,7 +2,7 @@ import { useParams } from "@solidjs/router";
 import { type Component } from "solid-js";
 
 import { MapContextProvider } from "./MapLibreMap";
-import { TourProvider } from "./TourContext";
+import { TourProvider } from "../../hooks/TourContext";
 import { TourEditorMap } from "./TourEditorMap";
 import { TourEditorPanel } from "./TourEditorPanel";
 

@@ -4,7 +4,7 @@ import circle from "@turf/circle";
 
 import * as polyline from "../../polyline";
 import { MapLibreMap, useMapController } from "./MapLibreMap";
-import { useTour } from "./TourContext";
+import { useTour } from "../../hooks/TourContext";
 
 import styles from "./TourEditorMap.module.css";
 

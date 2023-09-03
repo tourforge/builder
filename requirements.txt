@@ -8,3 +8,5 @@ sqlparse==0.4.4
 typing_extensions==4.7.1
 django-rest-knox==4.2.0
 django-cors-headers==4.2.0
+routingpy==1.3.0
+polyline==2.0.0
