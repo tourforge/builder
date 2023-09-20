@@ -14,7 +14,7 @@ export function useRouteCalculator() {
   createEffect(() => {
     if (!tour()) return;
 
-    const latLongs = tour()!.content.waypoints
+    const latLongs = tour()!.content.route
       .filter(w => w.control !== "none")
       .map(w => ({
         lat: w.lat,

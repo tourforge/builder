@@ -37,21 +37,21 @@ export const TourEditorMap: Component = () => {
     const marker = markers()[id];
     if (!marker) return;
 
-    const idx = tour()!.content.waypoints.findIndex(w => w.id === id);
+    const idx = tour()!.content.route.findIndex(w => w.id === id);
     if (idx < 0) return;
 
     setTour({
       ...tour()!,
       content: {
         ...tour()!.content,
-        waypoints: [
-          ...tour()!.content.waypoints.slice(0, idx),
+        route: [
+          ...tour()!.content.route.slice(0, idx),
           {
-            ...tour()!.content.waypoints[idx],
+            ...tour()!.content.route[idx],
             lat: marker.getLngLat().lat,
             lng: marker.getLngLat().lng,
           },
-          ...tour()!.content.waypoints.slice(idx + 1),
+          ...tour()!.content.route.slice(idx + 1),
         ],
       },
     });
@@ -68,7 +68,7 @@ export const TourEditorMap: Component = () => {
     const marker = markers()[id];
     if (!marker) return;
 
-    const idx = tour()!.content.waypoints.findIndex(w => w.id === id);
+    const idx = tour()!.content.route.findIndex(w => w.id === id);
     if (idx < 0) return;
 
     setTour({
@@ -95,8 +95,8 @@ export const TourEditorMap: Component = () => {
     if (!tour()) return;
 
     // waypoint symbols
-    tour()!.content.waypoints.forEach(waypoint => {
-      let index: number | null = tour()!.content.waypoints.filter(w => w.type === "waypoint").findIndex(w => w.id === waypoint.id);
+    tour()!.content.route.forEach(waypoint => {
+      let index: number | null = tour()!.content.route.filter(w => w.type === "stop").findIndex(w => w.id === waypoint.id);
       if (index === -1) index = null;
 
       if (markers()[waypoint.id]) {
@@ -134,7 +134,7 @@ export const TourEditorMap: Component = () => {
 
     // manage the records on which markers are currently present
     for (const id in markers()) {
-      if (!tour()!.content.waypoints.some(waypoint => waypoint.id == id) && !tour()!.content.pois.some(poi => poi.id == id)) {
+      if (!tour()!.content.route.some(waypoint => waypoint.id == id) && !tour()!.content.pois.some(poi => poi.id == id)) {
         markers()[id].remove();
         const { [id]: _, ...newMarkers } = markers();
         setMarkers(newMarkers);
@@ -148,13 +148,13 @@ export const TourEditorMap: Component = () => {
     if (!isLoaded() || !map) return;
     if (!tour()) return;
 
-    if (tour()!.content.waypoints.length > 0) {
+    if (tour()!.content.route.length > 0) {
       const triggerRadiiGeoJson: GeoJSON.GeoJSON = {
         "type": "FeatureCollection",
-        "features": tour()!.content.waypoints.filter(w => w.type === "waypoint").map(waypoint => (
+        "features": tour()!.content.route.filter(w => w.type === "stop").map(waypoint => (
           circle(
             [waypoint.lng, waypoint.lat],
-            waypoint.type === "waypoint" ? waypoint.trigger_radius : 0,
+            waypoint.type === "stop" ? waypoint.trigger_radius : 0,
             { steps: 80, units: "meters" },
           )
         )),

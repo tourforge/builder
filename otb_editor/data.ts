@@ -1,16 +1,12 @@
-export interface AssetMeta {
-  alt?: string | undefined,
-  attrib?: string | undefined,
-}
-
 export interface TourModel {
-  type: "driving" | "walking" | "hybrid",
+  version: "1",
+  type: "driving" | "walking",
   desc: string,
-  waypoints: (WaypointModel | ControlPointModel)[],
   gallery: GalleryModel,
-  path: string,
-  pois: PoiModel[],
   tiles: string | undefined,
+  route: (StopModel | ControlPointModel)[],
+  pois: PoiModel[],
+  path: string,
   links?: {
     [name: string]: {
       href: string,
@@ -18,18 +14,18 @@ export interface TourModel {
   } | undefined,
 }
 
-export interface WaypointModel {
-  type: "waypoint",
+export interface StopModel {
+  type: "stop",
+  control: "route" | "path" | "none",
   id: string,
-  title: string,
-  desc: string,
   lat: number,
   lng: number,
-  narration: string | null,
   trigger_radius: number,
+  title: string,
+  desc: string,
   transcript: string | null,
   gallery: GalleryModel,
-  control: "route" | "path" | "none",
+  narration: string | null,
   links?: {
     [name: string]: {
       href: string,
@@ -39,18 +35,18 @@ export interface WaypointModel {
 
 export interface ControlPointModel {
   type: "control",
+  control: "route" | "path",
   id: string,
   lat: number,
   lng: number,
-  control: "route" | "path",
 }
 
 export interface PoiModel {
   id: string,
-  title: string,
-  desc: string,
   lat: number,
   lng: number,
+  title: string,
+  desc: string,
   gallery: GalleryModel,
   links?: {
     [name: string]: {

@@ -15,8 +15,9 @@ export const ProjectEditorPanel: Component = () => {
     await api.createTour(params.pid, {
       title: "Untitled Tour",
       content: {
+        version: "1",
         desc: "",
-        waypoints: [],
+        route: [],
         gallery: [],
         path: "",
         pois: [],
