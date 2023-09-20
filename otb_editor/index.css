@@ -13,6 +13,7 @@ code {
 }
 
 :where(input[type="text"]),
+:where(input[type="password"]),
 :where(input[type="number"]),
 textarea {
   all: unset;
@@ -25,12 +26,13 @@ textarea {
   background-color: rgb(252, 252, 252);
 }
 
-button.primary {
+.primary {
   all: unset;
   user-select: none;
   cursor: pointer;
   display: flex;
   justify-content: center;
+  text-align: center;
 
   background-color: rgb(20, 123, 196);
   color: rgb(238, 251, 255);
@@ -42,17 +44,18 @@ button.primary {
   font-weight: bold;
 }
 
-button.primary:disabled {
+.primary:disabled {
   cursor: not-allowed;
   background-color: rgb(128, 193, 240);
 }
 
-button.secondary {
+.secondary {
   all: unset;
   user-select: none;
   cursor: pointer;
   display: flex;
   justify-content: center;
+  text-align: center;
 
   background-color: rgb(215, 246, 255);
   color: rgb(20 160 196);
@@ -64,18 +67,19 @@ button.secondary {
   font-weight: bold;
 }
 
-button.secondary:disabled {
+.secondary:disabled {
   cursor: not-allowed;
   background-color: rgb(227, 249, 255);
   color: rgb(99, 203, 229);
 }
 
-button.danger {
+.danger {
   all: unset;
   user-select: none;
   cursor: pointer;
   display: flex;
   justify-content: center;
+  text-align: center;
 
   background-color: rgb(196, 20, 20);
   color: rgb(255, 238, 238);
@@ -87,11 +91,11 @@ button.danger {
   font-weight: bold;
 }
 
-button.danger:disabled {
+.danger:disabled {
   cursor: not-allowed;
   background-color: rgb(240, 128, 128);
 }
 
-button.compact {
+.compact {
   padding: 4px 6px;
 }

@@ -1,12 +1,14 @@
 import { createUniqueId, type Component, createSignal, JSX } from "solid-js";
+import { useNavigate, useRouteData } from "@solidjs/router";
 
 import { useApiClient } from "../../api";
 
 import styles from "./Login.module.css";
+import { Field } from "../../components/Field";
 
 export const Login: Component = () => {
   const api = useApiClient();
-  const id = createUniqueId();
+  const navigate = useNavigate();
   const [username, setUsername] = createSignal<string>("");
   const [password, setPassword] = createSignal<string>("");
 
@@ -18,21 +20,31 @@ export const Login: Component = () => {
     setPassword(event.currentTarget.value);
   };
 
-  const handleLoginClick = async () => {
+  const handleSubmit: JSX.EventHandlerUnion<HTMLFormElement, SubmitEvent> = async (ev) => {
+    ev.preventDefault();
+
     try {
       await api.login(username(), password());
+      const redirect = new URLSearchParams(window.location.search).get("redirect");
+      if (redirect) {
+        navigate(redirect);
+      } else {
+        navigate("/projects");
+      }
     } catch (e) {
       alert("Failed to login: " + e);
     }
   };
 
   return (
-    <div>
-      <label for={id+"-username"}>Username</label>
-      <input type="text" id={id+"-username"} onInput={handleUsernameInput} />
-      <label for={id+"-password"}>Password</label>
-      <input type="password" id={id+"-password"} onInput={handlePasswordInput} />
-      <button onClick={handleLoginClick}>Login</button>
-    </div>
+    <form class={styles.Login} onSubmit={handleSubmit}>
+      <Field label="Username">
+        {(id) => <input type="text" id={id} onInput={handleUsernameInput} />}
+      </Field>
+      <Field label="Password">
+        {(id) => <input type="password" id={id} onInput={handlePasswordInput} />}
+      </Field>
+      <input type="submit" class="button primary" value="Log In" />
+    </form>
   );
 };

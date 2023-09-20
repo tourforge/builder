@@ -263,7 +263,7 @@ const WaypointsList: Component<{
 
   const handleDelete = (id: string) => {
     const index = props.waypoints().findIndex(w => w.id === id);
-    props.onChange([...props.waypoints().slice(0, index), ...props.waypoints().slice(index + 2)]);
+    props.onChange([...props.waypoints().slice(0, index), ...props.waypoints().slice(index + 1)]);
   }
 
   return (

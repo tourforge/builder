@@ -1,7 +1,5 @@
 .ProjectEditor {
   display: grid;
-  grid-template-rows: 1fr;
-  grid-template-columns: auto 1fr;
-  height: 100vh;
-  overflow: hidden;
+  grid-template-rows: minmax(0, 1fr);
+  grid-template-columns: auto minmax(0, 1fr);
 }

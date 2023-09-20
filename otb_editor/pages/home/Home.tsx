@@ -7,7 +7,6 @@ export const Home: Component = () => {
   return (
     <>
       <div>Welcome to OpenTourBuilder!</div>
-      <A href="/projects">Click here to view projects.</A>
     </>
   );
 };

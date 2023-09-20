@@ -58,9 +58,27 @@ type ApiTokenResponse = {
 
 export class ApiClient {
   private navigate: Navigator;
+  private bc: BroadcastChannel = new BroadcastChannel("auth");
+  private cbs: (() => void)[] = [];
 
   constructor(navigate: Navigator) {
     this.navigate = navigate;
+    this.bc.addEventListener("message", ({ data }) => {
+      if (data.type === "update") {
+        for (const cb of this.cbs) {
+          cb();
+        }
+      }
+    });
+  }
+
+  addLoginStatusListener(cb: () => void) {
+    this.cbs.push(cb);
+    cb();
+  }
+
+  loggedInUsername() {
+    return window.localStorage.getItem("otbUsername");
   }
 
   async listProjects() {
@@ -202,7 +220,7 @@ export class ApiClient {
         credentials: "same-origin",
         headers: {
           "Accept": "application/json",
-          "Authorization": `Token ${window.sessionStorage.getItem("otbLoginToken")}`,
+          "Authorization": `Token ${window.localStorage.getItem("otbLoginToken")}`,
           ...extraHeaders,
         }
       });
@@ -214,7 +232,7 @@ export class ApiClient {
           return await resp.blob();
         }
       } else if (resp.status == 401) {
-        this.navigate("/login");
+        this.navigate(`/login?redirect=${encodeURIComponent(window.location.pathname)}`);
       } else {
         throw Error("Unexpected API failure: " + resp.statusText);
       }
@@ -233,10 +251,25 @@ export class ApiClient {
 
     if (resp.status >= 200 && resp.status <= 299) {
       const data = await resp.json() as ApiTokenResponse;
-      window.sessionStorage.setItem("otbLoginToken", data.token);
+      window.localStorage.setItem("otbUsername", username);
+      window.localStorage.setItem("otbLoginToken", data.token);
+      this.authUpdateMessage();
     } else {
       throw Error("Failed to login: " + resp.statusText);
     }
+  }
+
+  logout() {
+    window.localStorage.removeItem("otbUsername");
+    window.localStorage.removeItem("otbLoginToken");
+    this.authUpdateMessage();
+  }
+
+  authUpdateMessage() {
+    for (const cb of this.cbs) {
+      cb();
+    }
+    this.bc.postMessage({ type: "update" });
   }
 }
 
