@@ -9,4 +9,21 @@
   border-right: 1px solid lightgray;
 
   padding: 16px;
+  gap: 8px;
+}
+
+.ProjectName {
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.SidebarHeader {
+  font-weight: bold;
+  margin-top: 16px;
+}
+
+.BottomButtons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
 }

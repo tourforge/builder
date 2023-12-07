@@ -42,6 +42,7 @@ export const Gallery: Component<{
           <Asset
             pid={props.pid}
             asset={asset()}
+            type="image"
             onIdChange={handleAssetIdChange(i)}
             onDeleteClick={handleDeleteClick(i)}
             onUpClick={handleUpClick(i)}

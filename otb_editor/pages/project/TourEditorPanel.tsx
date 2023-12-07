@@ -4,7 +4,7 @@ import { v4 as uuidv4 } from "uuid";
 
 import { useTour } from "../../hooks/TourContext";
 
-import { ApiTour } from "../../api";
+import { ApiTour, useApiClient } from "../../api";
 import { Field } from "../../components/Field";
 import { Gallery } from "../../components/Gallery";
 import { ControlPointModel, GalleryModel, StopModel } from "../../data";
@@ -13,6 +13,7 @@ import { useMapController } from "./MapLibreMap";
 import { WaypointEditorPanel } from "./WaypointEditorPanel";
 
 import styles from "./TourEditorPanel.module.css";
+import { useNavigate } from "@solidjs/router";
 
 type Panel = {
   which: "main",
@@ -24,7 +25,7 @@ type Panel = {
   id: string,
 };
 
-export const TourEditorPanel: Component<{ pid: string }> = (props) => {
+export const TourEditorPanel: Component = () => {
   const [tour, setTour] = useTour();
   const [panel, setPanel] = createSignal<Panel>({ which: "main" });
 
@@ -61,13 +62,15 @@ export const TourEditorPanel: Component<{ pid: string }> = (props) => {
         title={panel().which === "stop" ? "Edit Waypoint" : "Edit POI"}
         onClose={() => setPanel({ which: "main" })}
       >
-        <WaypointEditorPanel pid={props.pid} waypoint={waypointPanelWaypoint} onChange={handleWaypointPanelWaypointChange} />
+        <WaypointEditorPanel pid={tour()!.project} waypoint={waypointPanelWaypoint} onChange={handleWaypointPanelWaypointChange} />
       </SubPanel>
     </>
   );
 };
 
 const MainPanel: Component<{ show: boolean, tour: Resource<ApiTour>, onChange: (newTour: ApiTour) => void, setPanel: Setter<Panel> }> = (props) => {
+  const api = useApiClient();
+  const navigate = useNavigate();
   const [currentTab, setCurrentTab] = createSignal<"waypoints" | "pois">("waypoints");
 
   const handleTourTitleInput: JSX.EventHandlerUnion<HTMLInputElement, InputEvent> = (event) => {
@@ -139,6 +142,14 @@ const MainPanel: Component<{ show: boolean, tour: Resource<ApiTour>, onChange: (
     });
   };
 
+  const handleDeleteClick = async () => {
+    if (confirm("Are you sure you want to delete the tour? This action canot be undone.")) {
+      const tour = props.tour()!;
+      await api.deleteTour(tour.project, tour.id);
+      navigate(`/projects/${tour.project}`)
+    }
+  };
+
   return (
     <div class={styles.MainPanel} classList={{ [styles.Hidden]: !props.show }}>
       {props.tour.loading && "Loading tour..."}
@@ -204,6 +215,8 @@ const MainPanel: Component<{ show: boolean, tour: Resource<ApiTour>, onChange: (
         <Show when={currentTab() === "pois"}>
 
         </Show>
+        <div style="flex:1"></div>
+        <button onClick={handleDeleteClick} class="danger" style="margin-top: 32px">Delete Tour</button>
       </Show>
     </div>
   );

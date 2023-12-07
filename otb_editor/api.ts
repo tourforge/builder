@@ -4,7 +4,9 @@ import * as polyline from "./polyline";
 
 import { LatLng, TourModel } from "./data";
 
-const apiUrl = "http://127.0.0.1:8000/api";
+export const apiBase = "http://127.0.0.1:8000";
+
+const apiUrl = apiBase + "/api";
 
 export type AssetKind = "any" | "narration" | "image" | "tiles";
 
@@ -141,9 +143,9 @@ export class ApiClient {
     await this.apiRequest(`/projects/${pid}/members/${id}`, "DELETE");
   }
 
-  async listAssets(pid: string, query: string = "") {
+  async listAssets(pid: string, query: string = "", type?: "image" | "audio") {
     const lowerQuery = query.toLowerCase();
-    const allAssets = await this.apiRequest(`/projects/${pid}/assets`) as ApiAssetsList;
+    const allAssets = await this.apiRequest(`/projects/${pid}/assets${type ? "?type="+type : ""}`) as ApiAssetsList;
     return allAssets.filter(asset => query === "" || asset.name.toLowerCase().includes(lowerQuery));
   }
 
@@ -214,7 +216,7 @@ export class ApiClient {
     }
 
     try {
-      const resp = await fetch(`${apiUrl}${path}${!path.endsWith("/") && "/"}`, {
+      const resp = await fetch(`${apiUrl}${path}`, {
         method: method,
         body: body,
         credentials: "same-origin",
@@ -242,7 +244,7 @@ export class ApiClient {
   }
 
   async login(username: string, password: string): Promise<void> {
-    const resp = await fetch(`${apiUrl}/login/`, {
+    const resp = await fetch(`${apiUrl}/login`, {
       method: "POST",
       headers: {
         Authorization: `Basic ${window.btoa(`${username}:${password}`)}`

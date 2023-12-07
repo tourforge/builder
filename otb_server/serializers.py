@@ -36,7 +36,7 @@ class _SignedFileField(serializers.FileField):
         request = self.context.get('request', None)
         if request is None:
             return None
-        url = request.build_absolute_uri(f"/api/projects/{instance.project.id}/assets/{instance.id}/download/")
+        url = request.build_absolute_uri(f"/api/projects/{instance.project.id}/assets/{instance.id}/download")
 
         expiry = time.time() + 600
         url += f"?expiry={signing.b62_encode(int(expiry))}"

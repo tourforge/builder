@@ -1,0 +1,50 @@
+.AssetsEditor {
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+    padding: 16px;
+    gap: 16px;
+    overflow: scroll;
+}
+
+.AssetsList {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: start;
+    gap: 16px;
+}
+
+.AssetCard {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid gray;
+    border-radius: 8px;
+    align-items: center;
+}
+
+.AssetName {
+    font-weight: bold;
+    margin-top: 8px;
+}
+
+.AssetCardButtons {
+    display: flex;
+}
+
+.AssetCard>img {
+    cursor: pointer;
+    object-fit: cover;
+    width: 192px;
+    height: 192px;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+    border-bottom: 1px solid gray;
+}
+
+.AssetButton {
+  all: unset;
+  cursor: pointer;
+  user-select: none;
+
+  padding: 12px 8px;
+}

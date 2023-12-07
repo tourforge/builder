@@ -13,6 +13,7 @@ from rest_framework.authentication import BasicAuthentication
 from rest_framework.decorators import action
 from django.contrib.auth import get_user_model
 from django.http import FileResponse, HttpResponseBadRequest, FileResponse
+from django.db.models import Q
 
 from knox.auth import TokenAuthentication
 from knox.views import LoginView as KnoxLoginView
@@ -147,11 +148,18 @@ class AssetViewSet(ModelViewSet):
         if self.action == "download":
             return Asset.objects.all()
         else:
-            return Asset.objects.filter(
+            results = Asset.objects.filter(
                 project=self.kwargs['project_pk'],
                 project__id=self.kwargs['project_pk'],
                 project__projectmember__user=self.request.user,
             )
+
+            if self.request.GET.get('type') == "image":
+                return results.filter(Q(file__endswith=".png") | Q(file__endswith=".jpg") | Q(file__endswith=".jpeg"))
+            elif self.request.GET.get('type') == "audio":
+                return results.filter(Q(file__endswith=".mp3"))
+            else:
+                return results
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)

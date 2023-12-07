@@ -96,7 +96,6 @@ MEDIA_URL = '/api/'
 
 AUTH_USER_MODEL = "otb_server.User"
 
-
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
 

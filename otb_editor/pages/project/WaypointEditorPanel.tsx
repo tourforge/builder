@@ -119,6 +119,7 @@ export const WaypointEditorPanel: Component<{ pid: string, waypoint: () => StopM
             <Asset
               id={id}
               pid={props.pid}
+              type="audio"
               asset={props.waypoint()!.narration ?? undefined}
               onIdChange={handleNarrationChange}
             />

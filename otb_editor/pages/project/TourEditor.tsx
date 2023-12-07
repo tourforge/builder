@@ -15,7 +15,7 @@ export const TourEditor: Component = () => {
     <TourProvider pid={params.pid} tid={params.tid}>
       <MapContextProvider>
         <div class={styles.TourEditor}>
-          <TourEditorPanel pid={params.pid} />
+          <TourEditorPanel />
           <TourEditorMap />
         </div>
       </MapContextProvider>

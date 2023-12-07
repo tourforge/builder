@@ -1,13 +1,14 @@
 import { FiArrowDown, FiArrowUp, FiImage, FiTrash, FiUpload } from "solid-icons/fi";
 import { Component, createEffect, createResource, createSignal, createUniqueId, For, JSX, Show } from "solid-js";
 
-import { ApiAsset, useApiClient } from "../api";
+import { useApiClient } from "../api";
 
 import styles from "./Asset.module.css";
 
 export const Asset: Component<{
   id?: string,
   pid: string,
+  type: "image" | "audio",
   asset: string | undefined,
   onIdChange: (newId: string) => void,
   onDeleteClick?: () => void,
@@ -18,7 +19,7 @@ export const Asset: Component<{
   const fileInputId = createUniqueId();
   const api = useApiClient();
   const [imageLoaded, setImageLoaded] = createSignal(false);
-  const [assets, { refetch: refetchAssets }] = createResource(async () => await api.listAssets(props.pid), { });
+  const [assets, { refetch: refetchAssets }] = createResource(async () => await api.listAssets(props.pid, "", props.type), { });
   const [query, setQuery] = createSignal("");
   const asset = () => assets()?.find(a => a.id === props.asset);
 

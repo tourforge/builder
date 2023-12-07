@@ -20,11 +20,11 @@ from rest_framework_nested import routers
 import knox.views as knox_views
 from .views import *
 
-router = routers.SimpleRouter()
+router = routers.SimpleRouter(trailing_slash=False)
 router.register(r'users', UserViewSet)
 router.register(r'projects', ProjectViewSet, basename='project')
 
-projects_router = routers.NestedSimpleRouter(router, r'projects', lookup='project')
+projects_router = routers.NestedSimpleRouter(router, r'projects', lookup='project', trailing_slash=False)
 projects_router.register(r'tours', TourViewSet, basename='tour')
 projects_router.register(r'members', ProjectMemberViewSet, basename='projectmember')
 projects_router.register(r'assets', AssetViewSet, basename='asset')
@@ -33,8 +33,8 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include(router.urls)),
     path('api/', include(projects_router.urls)),
-    path('api/route/', RouteView.as_view(), name='route'),
-    path('api/login/', LoginView.as_view(), name='knox_login'),
-    path('api/logout/', knox_views.LogoutView.as_view(), name='knox_logout'),
-    path('api/logoutall/', knox_views.LogoutAllView.as_view(), name='knox_logoutall'),
+    path('api/route', RouteView.as_view(), name='route'),
+    path('api/login', LoginView.as_view(), name='knox_login'),
+    path('api/logout', knox_views.LogoutView.as_view(), name='knox_logout'),
+    path('api/logoutall', knox_views.LogoutAllView.as_view(), name='knox_logoutall'),
 ]

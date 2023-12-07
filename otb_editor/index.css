@@ -12,11 +12,22 @@ code {
     monospace;
 }
 
+.hint {
+  color: rgb(78, 78, 78);
+  font-size: 14px;
+}
+
 :where(input[type="text"]),
 :where(input[type="password"]),
 :where(input[type="number"]),
 textarea {
-  all: unset;
+  /* all of these have same purpose as "all: unset" without breaking newlines in <textarea>s */
+  font-family: inherit;
+  font-size: inherit;
+  border: none;
+  background-color: transparent;
+  resize: vertical;
+  outline: none;
 
   padding: 10px;
 
