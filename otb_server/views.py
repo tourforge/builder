@@ -100,6 +100,7 @@ class ProjectViewSet(ModelViewSet):
                     "title": tour["title"] if "title" in tour else None,
                     "thumbnail": next(iter(tour["gallery"]), None),
                     "type": tour["type"] if "type" in tour else None,
+                    "stops": sum(w["type"] == "stop" for w in tour["route"]),
                 } for tour in tours_content],
             }
             index_str = json.dumps(index)
