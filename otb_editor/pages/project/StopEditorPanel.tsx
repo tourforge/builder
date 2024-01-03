@@ -1,13 +1,13 @@
 import { Component, Show, JSX } from "solid-js";
 import { StopModel } from "../../data";
 
-import styles from "./WaypointEditorPanel.module.css";
+import styles from "./StopEditorPanel.module.css";
 import { Field } from "../../components/Field";
 import { Gallery } from "../../components/Gallery";
 import { Asset } from "../../components/Asset";
 import { LatLngEditor } from "../../components/LatLngEditor";
 
-export const WaypointEditorPanel: Component<{ pid: string, waypoint: () => StopModel | undefined, onChange: (newWaypoint: StopModel) => void }> = (props) => {
+export const StopEditorPanel: Component<{ pid: string, waypoint: () => StopModel | undefined, onChange: (newWaypoint: StopModel) => void }> = (props) => {
   const handleTitleChange: JSX.EventHandlerUnion<HTMLInputElement, InputEvent> = (ev) => {
     props.onChange(({ ...props.waypoint()!, title: ev.currentTarget.value }));
   }
@@ -59,13 +59,13 @@ export const WaypointEditorPanel: Component<{ pid: string, waypoint: () => StopM
 
   return (
     <Show when={props.waypoint()}>
-      <div class={styles.WaypointEditorPanel}>
+      <div class={styles.StopEditorPanel}>
         <Field label="Title">
           {(id) => (
             <input
               id={id}
               type="text"
-              placeholder="Waypoint Title"
+              placeholder="Title"
               value={props.waypoint()!.title}
               onInput={handleTitleChange}
             />
@@ -75,7 +75,7 @@ export const WaypointEditorPanel: Component<{ pid: string, waypoint: () => StopM
           {(id) => (
             <textarea
               id={id}
-              placeholder="Waypoint Description"
+              placeholder="Description"
               value={props.waypoint()!.desc}
               onInput={handleDescChange}
             ></textarea>
@@ -130,7 +130,7 @@ export const WaypointEditorPanel: Component<{ pid: string, waypoint: () => StopM
             <textarea
               rows={8}
               id={id}
-              placeholder="Waypoint Transcript"
+              placeholder="Transcript"
               value={props.waypoint()!.transcript ?? ""}
               onInput={handleTranscriptChange}
             ></textarea>

@@ -10,10 +10,11 @@ import { Gallery } from "../../components/Gallery";
 import { ControlPointModel, GalleryModel, StopModel } from "../../data";
 import { useRouteCalculator } from "../../hooks/RouteCalculator";
 import { useMapController } from "./MapLibreMap";
-import { WaypointEditorPanel } from "./WaypointEditorPanel";
+import { StopEditorPanel } from "./StopEditorPanel";
 
 import styles from "./TourEditorPanel.module.css";
 import { useNavigate } from "@solidjs/router";
+import { ControlPointEditorPanel } from "./ControlPointEditorPanel";
 
 type Panel = {
   which: "main",
@@ -21,7 +22,7 @@ type Panel = {
   which: "stop",
   id: string,
 } | {
-  which: "poi",
+  which: "control",
   id: string,
 };
 
@@ -54,15 +55,45 @@ export const TourEditorPanel: Component = () => {
     });
   };
 
+  const controlPanelControlPoint = () => {
+    let curPanel = panel();
+    let found = tour()?.content.route.find(w => curPanel.which === "control" && w.type === "control" && w.id === curPanel.id);
+    if (found && found.type === "control") {
+      return found;
+    } else {
+      return undefined;
+    }
+  };
+
+  const handleControlPanelControlChange = (newControlPoint: ControlPointModel) => {
+    let foundIdx = tour()?.content.route.findIndex(w => w.type === "control" && w.id === newControlPoint.id);
+    if (foundIdx === undefined || foundIdx < 0) return;
+
+    setTour({
+      ...tour()!,
+      content: {
+        ...tour()!.content,
+        route: [...tour()!.content.route.slice(0, foundIdx), newControlPoint, ...tour()!.content.route.slice(foundIdx + 1)],
+      }
+    });
+  };
+
   return (
     <>
       <MainPanel show={panel().which === "main"} setPanel={setPanel} tour={tour} onChange={setTour} />
       <SubPanel
-        show={panel().which !== "main"}
-        title={panel().which === "stop" ? "Edit Waypoint" : "Edit POI"}
+        show={panel().which === "stop"}
+        title="Edit Stop"
         onClose={() => setPanel({ which: "main" })}
       >
-        <WaypointEditorPanel pid={tour()!.project} waypoint={waypointPanelWaypoint} onChange={handleWaypointPanelWaypointChange} />
+        <StopEditorPanel pid={tour()!.project} waypoint={waypointPanelWaypoint} onChange={handleWaypointPanelWaypointChange} />
+      </SubPanel>
+      <SubPanel
+        show={panel().which === "control"}
+        title="Edit Control Point"
+        onClose={() => setPanel({ which: "main" })}
+      >
+        <ControlPointEditorPanel pid={tour()!.project} controlPoint={controlPanelControlPoint} onChange={handleControlPanelControlChange} />
       </SubPanel>
     </>
   );
@@ -209,11 +240,11 @@ const MainPanel: Component<{ show: boolean, tour: Resource<ApiTour>, onChange: (
             <WaypointsList
               waypoints={() => props.tour()!.content.route}
               onChange={handleWaypointsChange}
-              onEditClick={(id) => props.setPanel({ which: "stop", id: id })}
+              onEditClick={(id, type) => props.setPanel({ which: type, id: id })}
             />
         </Show>
         <Show when={currentTab() === "pois"}>
-
+            Points of interest are not currently implemented.
         </Show>
         <div style="flex:1"></div>
         <button onClick={handleDeleteClick} class="danger" style="margin-top: 32px">Delete Tour</button>
@@ -225,11 +256,11 @@ const MainPanel: Component<{ show: boolean, tour: Resource<ApiTour>, onChange: (
 const WaypointsList: Component<{
   waypoints: () => (StopModel | ControlPointModel)[],
   onChange: (newWaypoints: (StopModel | ControlPointModel)[]) => void,
-  onEditClick: (id: string) => void,
+  onEditClick: (id: string, type: "stop" | "control") => void,
 }> = (props) => {
   const map = useMapController();
 
-  const addWaypoint = () => {
+  const addStop = () => {
     const newWaypoint: StopModel = {
       type: "stop",
       id: uuidv4(),
@@ -293,7 +324,7 @@ const WaypointsList: Component<{
           <button class={styles.PointButton} onClick={() => handleMove(waypoint.id, "down")}>
             <FiArrowDown />
           </button>
-          <button class={styles.PointButton} onClick={() => props.onEditClick(waypoint.id)}>
+          <button class={styles.PointButton} onClick={() => props.onEditClick(waypoint.id, waypoint.type)}>
             <FiEdit />
           </button>
           <button class={styles.PointButton} onClick={() => handleDelete(waypoint.id)}>
@@ -302,8 +333,8 @@ const WaypointsList: Component<{
         </div>
         )}
       </For>
-      <button class="primary" style={{ margin: "auto" }} onClick={addWaypoint}>
-        Add Waypoint
+      <button class="primary" style={{ margin: "auto" }} onClick={addStop}>
+        Add Stop
       </button>
       <button class="primary" style={{ margin: "auto" }} onClick={addControlPoint}>
         Add Control Point
