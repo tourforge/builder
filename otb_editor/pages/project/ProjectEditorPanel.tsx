@@ -29,13 +29,20 @@ export const ProjectEditorPanel: Component = () => {
     await refetchTours();
   };
 
-  const handleExportProjectClick = async () => {
-    const blob = await api.export(params.pid);
-    window.open(URL.createObjectURL(blob), "_blank");
+  const handlePublishProjectClick = async () => {
+    await api.publish(params.pid);
   };
 
-  const handleManageProjectClick = async () => {
+  const publishedTime = () => {
+    if (!project()) return;
+    const date = new Date(project()!.last_published+"Z");
+    return date.toLocaleTimeString(undefined, { timeZoneName: 'short' });
+  };
 
+  const publishedDate = () => {
+    if (!project()) return;
+    const date = new Date(project()!.last_published+"Z");
+    return date.toLocaleDateString();
   };
 
   return (
@@ -65,10 +72,10 @@ export const ProjectEditorPanel: Component = () => {
       <A href={`/projects/${params.pid}/assets`} class="primary">Assets Editor</A>
 
       <div style="flex:1"></div>
-      <span class="hint">You can export the whole project to a .zip file to be uploaded to a webserver for the app to download.</span>
+      <span class="hint">You can publish the project at any time. This project was last published at {publishedTime()} on {publishedDate()}.</span>
 
       <div class={styles.BottomButtons}>
-        <button class="primary" onClick={handleExportProjectClick}>Export</button>
+        <button class="primary" onClick={handlePublishProjectClick}>Publish</button>
         <A class="secondary" href={`/projects/${params.pid}/manage`}>Manage</A>
       </div>      
     </div>

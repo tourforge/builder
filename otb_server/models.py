@@ -8,9 +8,13 @@ import uuid
 class User(AbstractUser):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 
+def _published_bundle_path(instance, filename: str):
+    return f"published-bundles/{instance.id}.zip"
+
 class Project(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=200)
+    published_bundle = models.FileField(upload_to=_published_bundle_path, default=None, null=True)
 
 class Tour(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)

@@ -1,7 +1,10 @@
 import time
 import re
+import os
+from datetime import datetime
 
 from django.core import signing
+from django.conf import settings
 from rest_framework import relations
 from rest_framework import serializers
 from rest_framework.serializers import ModelSerializer
@@ -9,9 +12,24 @@ from rest_framework.serializers import ModelSerializer
 from .models import Project, Tour, ProjectMember, User, Asset
 
 class ProjectSerializer(ModelSerializer):
+    last_published = serializers.SerializerMethodField()
+
     class Meta:
         model = Project
-        fields = '__all__'
+        exclude = ['published_bundle']
+    
+    def get_last_published(self, project):
+        if project.published_bundle:
+            try:
+                # Get the full path of the file
+                file_path = os.path.join(settings.MEDIA_ROOT, project.published_bundle.name)
+                # Get the modification time of the file
+                mod_time = os.path.getmtime(file_path)
+                return datetime.fromtimestamp(mod_time)
+            except OSError:
+                # Handle errors if file doesn't exist
+                return None
+        return None
 
 class TourSerializer(ModelSerializer):
     class Meta:

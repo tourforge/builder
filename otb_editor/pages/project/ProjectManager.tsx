@@ -14,7 +14,7 @@ export const ProjectManager: Component = () => {
   const handleProjectTitleInput: JSX.EventHandlerUnion<HTMLInputElement, InputEvent> = async (event) => {
     const newTitle = event.currentTarget.value;
     const currentProject = project()!;
-    mutateProject(() => ({ id: currentProject.id, name: newTitle }));
+    mutateProject(() => ({ id: currentProject.id, name: newTitle, last_published: currentProject.last_published }));
     await api.updateProject(currentProject.id, { name: newTitle });
   };
 
@@ -32,7 +32,7 @@ export const ProjectManager: Component = () => {
         )}
       </Field>
 
-      {/*<Field set label="Project Members">
+      <Field set label="Project Members">
         {() => <>
           <span class="hint" style="margin-bottom: 6px">
             The members of a project are the users who are authorized to edit tours within the project.
@@ -49,7 +49,7 @@ export const ProjectManager: Component = () => {
             )}
           </For>
         </>}
-      </Field>*/}
+      </Field>
 
       <div style="flex:1"></div>
       <span class="hint">WARNING: Project deletion cannot be undone. All project data - tours, images, and audio files - will be permanently deleted. Perform this action with caution.</span>

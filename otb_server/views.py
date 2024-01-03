@@ -1,3 +1,4 @@
+import os
 import json
 import hashlib
 import zipfile
@@ -12,8 +13,10 @@ from rest_framework.viewsets import ModelViewSet, ViewSet
 from rest_framework.authentication import BasicAuthentication
 from rest_framework.decorators import action
 from django.contrib.auth import get_user_model
-from django.http import FileResponse, HttpResponseBadRequest, FileResponse
+from django.http import FileResponse, HttpResponseBadRequest, FileResponse, HttpResponse, Http404
 from django.db.models import Q
+from django.shortcuts import get_object_or_404
+from django.core.files import File
 
 from knox.auth import TokenAuthentication
 from knox.views import LoginView as KnoxLoginView
@@ -42,8 +45,8 @@ class ProjectViewSet(ModelViewSet):
         project = serializer.save()
         ProjectMember.objects.create(user=self.request.user, project=project, admin=True)
 
-    @action(methods=['get'], detail=True)
-    def export(self, *args, **kwargs):
+    @action(methods=['post'], detail=True)
+    def publish(self, *args, **kwargs):
         project = self.get_object()
         tours = Tour.objects.filter(project=project)
         required_assets = {}
@@ -112,8 +115,11 @@ class ProjectViewSet(ModelViewSet):
                 with zf.open(filename, "w") as asset_file:
                     shutil.copyfileobj(asset.file, asset_file)
 
-        # zipfile closes the zip, so now we have to reopen the temp path
-        return FileResponse(open(temp_path, mode="rb"), as_attachment=True, filename="export.zip", content_type="application/zip")
+        with open(temp_path, mode="rb") as f:
+            project.published_bundle.delete()
+            project.published_bundle.save(project.id, File(f), save=True)
+        
+        return HttpResponse()
 
 class TourViewSet(ModelViewSet):
     serializer_class = TourSerializer
@@ -245,3 +251,15 @@ class RouteView(APIView):
         }
 
         return Response(data=response, content_type="application/json")
+
+def download_project_file(request, project_id, file_path):
+    project = get_object_or_404(Project, pk=project_id)
+
+    with zipfile.ZipFile(project.published_bundle.path, 'r') as zip_ref:
+        if file_path not in zip_ref.namelist():
+            raise Http404("File not found in published bundle.")
+
+        # Extract and serve the file
+        with zip_ref.open(file_path) as file:
+            response = HttpResponse(file.read(), content_type='application/octet-stream')
+            return response

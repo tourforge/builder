@@ -15,7 +15,7 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path, include
+from django.urls import path, re_path, include
 from rest_framework_nested import routers
 import knox.views as knox_views
 from .views import *
@@ -30,6 +30,7 @@ projects_router.register(r'members', ProjectMemberViewSet, basename='projectmemb
 projects_router.register(r'assets', AssetViewSet, basename='asset')
 
 urlpatterns = [
+    re_path(r'^download/(?P<project_id>[^/]+)/(?P<file_path>.+)$', download_project_file, name='download_project_file'),
     path('admin/', admin.site.urls),
     path('api/', include(router.urls)),
     path('api/', include(projects_router.urls)),

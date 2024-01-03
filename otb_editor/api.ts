@@ -19,6 +19,7 @@ export function useApiClient() {
 export type ApiProjectsList = ApiProject[];
 export type ApiProject = {
   id: string;
+  last_published: string;
 } & ApiProjectData;
 export type ApiProjectData = {
   name: string;
@@ -203,8 +204,8 @@ export class ApiClient {
     return fullPath;
   }
 
-  async export(pid: string) {
-    return await this.apiRequest(`/projects/${pid}/export`) as Blob;
+  async publish(pid: string) {
+    return await this.apiRequest(`/projects/${pid}/publish`, "POST");
   }
 
   async apiRequest(path: string, method: string = "GET", body?: any): Promise<unknown> {
