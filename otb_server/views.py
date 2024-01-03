@@ -77,8 +77,8 @@ class ProjectViewSet(ModelViewSet):
                     content["gallery"] = visit_assets(content["gallery"])
                 if "tiles" in content:
                     content["tiles"] = visit_asset(content["tiles"])
-                if "waypoints" in content:
-                    for waypoint in content["waypoints"]:
+                if "route" in content:
+                    for waypoint in content["route"]:
                         if "gallery" in waypoint:
                             waypoint["gallery"] = visit_assets(waypoint["gallery"])
                         if "narration" in waypoint:

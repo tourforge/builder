@@ -35,6 +35,8 @@ export const TourProvider: Component<{ children: JSX.Element, pid: string, tid: 
   });
 
   const updateTour = async (pid = props.pid, tid = props.tid) => {
+    if (!pid || !tid) return;
+
     clearTimeout(timerId());
     setTimerId(undefined);
 

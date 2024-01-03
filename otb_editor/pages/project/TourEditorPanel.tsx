@@ -102,7 +102,7 @@ export const TourEditorPanel: Component = () => {
 const MainPanel: Component<{ show: boolean, tour: Resource<ApiTour>, onChange: (newTour: ApiTour) => void, setPanel: Setter<Panel> }> = (props) => {
   const api = useApiClient();
   const navigate = useNavigate();
-  const [currentTab, setCurrentTab] = createSignal<"waypoints" | "pois">("waypoints");
+  const [currentTab, setCurrentTab] = createSignal<"route" | "pois">("route");
 
   const handleTourTitleInput: JSX.EventHandlerUnion<HTMLInputElement, InputEvent> = (event) => {
     const currentTour = props.tour()!;
@@ -162,13 +162,13 @@ const MainPanel: Component<{ show: boolean, tour: Resource<ApiTour>, onChange: (
     });
   };
 
-  const handleWaypointsChange = (newWaypoints: (StopModel | ControlPointModel)[]) => {
+  const handleRouteChange = (newRoute: (StopModel | ControlPointModel)[]) => {
     const currentTour = props.tour()!;
     props.onChange({
       ...currentTour,
       content: {
         ...currentTour.content,
-        route: newWaypoints,
+        route: newRoute,
       },
     });
   };
@@ -233,13 +233,13 @@ const MainPanel: Component<{ show: boolean, tour: Resource<ApiTour>, onChange: (
           )}
         </Field>
         <header classList={{ [styles.PointsHeader]: true, [styles.Pois]: currentTab() === "pois" }}>
-          <button onClick={() => setCurrentTab("waypoints")}>Waypoints</button>
+          <button onClick={() => setCurrentTab("route")}>Route</button>
           <button onClick={() => setCurrentTab("pois")}>POIs</button>
         </header>
-        <Show when={currentTab() === "waypoints"}>
-            <WaypointsList
-              waypoints={() => props.tour()!.content.route}
-              onChange={handleWaypointsChange}
+        <Show when={currentTab() === "route"}>
+            <RouteList
+              route={() => props.tour()!.content.route}
+              onChange={handleRouteChange}
               onEditClick={(id, type) => props.setPanel({ which: type, id: id })}
             />
         </Show>
@@ -253,9 +253,9 @@ const MainPanel: Component<{ show: boolean, tour: Resource<ApiTour>, onChange: (
   );
 };
 
-const WaypointsList: Component<{
-  waypoints: () => (StopModel | ControlPointModel)[],
-  onChange: (newWaypoints: (StopModel | ControlPointModel)[]) => void,
+const RouteList: Component<{
+  route: () => (StopModel | ControlPointModel)[],
+  onChange: (newRoute: (StopModel | ControlPointModel)[]) => void,
   onEditClick: (id: string, type: "stop" | "control") => void,
 }> = (props) => {
   const map = useMapController();
@@ -275,7 +275,7 @@ const WaypointsList: Component<{
       control: "route",
     };
 
-    props.onChange([...props.waypoints(), newWaypoint]);
+    props.onChange([...props.route(), newWaypoint]);
   }
 
   const addControlPoint = () => {
@@ -287,32 +287,32 @@ const WaypointsList: Component<{
       control: "route",
     };
 
-    props.onChange([...props.waypoints(), newWaypoint]);
+    props.onChange([...props.route(), newWaypoint]);
   }
 
   const handleMove = (id: string, dir: "up" | "down") => {
-    const index = props.waypoints().findIndex(w => w.id === id);
+    const index = props.route().findIndex(w => w.id === id);
     if (index === -1) return;
 
     if (dir === "up") {
       if (index === 0) return;
 
-      props.onChange([...props.waypoints().slice(0, index - 1), props.waypoints()[index], props.waypoints()[index - 1], ...props.waypoints().slice(index + 1)]);
+      props.onChange([...props.route().slice(0, index - 1), props.route()[index], props.route()[index - 1], ...props.route().slice(index + 1)]);
     } else if (dir === "down") {
-      if (index === props.waypoints().length - 1) return;
+      if (index === props.route().length - 1) return;
 
-      props.onChange([...props.waypoints().slice(0, index), props.waypoints()[index + 1], props.waypoints()[index], ...props.waypoints().slice(index + 2)]);
+      props.onChange([...props.route().slice(0, index), props.route()[index + 1], props.route()[index], ...props.route().slice(index + 2)]);
     }
   }
 
   const handleDelete = (id: string) => {
-    const index = props.waypoints().findIndex(w => w.id === id);
-    props.onChange([...props.waypoints().slice(0, index), ...props.waypoints().slice(index + 1)]);
+    const index = props.route().findIndex(w => w.id === id);
+    props.onChange([...props.route().slice(0, index), ...props.route().slice(index + 1)]);
   }
 
   return (
     <div class={styles.PointsList}>
-      <For each={props.waypoints()}>
+      <For each={props.route()}>
         {(waypoint) => (
         <div class={styles.PointCard}>
           <div class={styles.PointName}>
