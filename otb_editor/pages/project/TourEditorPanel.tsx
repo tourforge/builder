@@ -307,6 +307,9 @@ const RouteList: Component<{
 
   const handleDelete = (id: string) => {
     const index = props.route().findIndex(w => w.id === id);
+    const wp = props.route()[index];
+    const name = wp.type === "control" ? "Control Point" : wp.title;
+    if (!confirm(`Are you sure you want to delete the waypoint "${name}"? This action cannot be undone.`)) return;
     props.onChange([...props.route().slice(0, index), ...props.route().slice(index + 1)]);
   }
 
