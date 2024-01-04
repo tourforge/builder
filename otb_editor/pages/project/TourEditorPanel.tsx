@@ -186,17 +186,17 @@ const MainPanel: Component<{ show: boolean, tour: Resource<ApiTour>, onChange: (
       {props.tour.loading && "Loading tour..."}
       {props.tour.error != null && `Error loading tour: ${props.tour.error}`}
       <Show when={props.tour()}>
-        <Field label="Tour Title">
+        <Field label="Title">
           {(id) => (
             <input type="text" id={id} value={props.tour()!.title} onInput={handleTourTitleInput} />
           )}
         </Field>
-        <Field label="Tour Description">
+        <Field label="Description">
           {(id) => (
             <textarea id={id} value={props.tour()!.content.desc} onInput={handleTourDescInput}></textarea>
           )}
         </Field>
-        <Field set label="Tour Type">
+        <Field set label="Type">
           {(id) => (<>
             <div>
               <input
