@@ -64,10 +64,21 @@ class _SignedFileField(serializers.FileField):
 class AssetSerializer(ModelSerializer):
     file = _SignedFileField()
     hash = serializers.CharField(read_only=True)
+    type = serializers.SerializerMethodField()
 
     class Meta:
         model = Asset
         fields = '__all__'
+    
+    def get_type(self, asset):
+        split = asset.file.path.split(".")
+        match split:
+            case [*_, "png" | "jpg" | "jpeg"]:
+                return "image"
+            case [*_, "mp3"]:
+                return "audio"
+            case _:
+                return None
 
 class UserSerializer(ModelSerializer):
     class Meta:

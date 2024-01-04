@@ -1,4 +1,4 @@
-import { FiArrowDown, FiArrowUp, FiImage, FiTrash, FiUpload } from "solid-icons/fi";
+import { FiArrowDown, FiArrowUp, FiImage, FiMusic, FiTrash, FiUpload } from "solid-icons/fi";
 import { Component, createEffect, createResource, createSignal, createUniqueId, For, JSX, Show } from "solid-js";
 
 import { useApiClient } from "../api";
@@ -73,16 +73,21 @@ export const Asset: Component<{
 
   return (
     <div id={props.id} class={styles.Asset}>
-      <img
-        src={asset()?.file}
-        class={styles.AssetThumbnail}
-        classList={{ [styles.Error]: !imageLoaded() }}
-        onLoad={handleImageLoad}
-        onError={handleImageError}
-        onClick={() => window.open(asset()?.file, "_blank")}
-      />
-      <Show when={!imageLoaded()}>
-        <div title="Image not found" class={styles.AssetThumbnail}><FiImage /></div>
+      <Show when={props.type === "image"}>
+        <img
+          src={asset()?.file}
+          class={styles.AssetThumbnail}
+          classList={{ [styles.Error]: !imageLoaded() }}
+          onLoad={handleImageLoad}
+          onError={handleImageError}
+          onClick={() => window.open(asset()?.file, "_blank")}
+        />
+        <Show when={!imageLoaded()}>
+          <div title="Image not found" class={styles.AssetThumbnail} onClick={() => window.open(asset()?.file, "_blank")}><FiImage /></div>
+        </Show>
+      </Show>
+      <Show when={props.type === "audio"}>
+        <div class={styles.AssetThumbnail} onClick={() => window.open(asset()?.file, "_blank")}><FiMusic /></div>
       </Show>
       <input class={styles.AssetInput} type="text" value={query()} onInput={handleQueryInput} placeholder="Type a name here..." list={datalistId} />
       <datalist id={datalistId}>

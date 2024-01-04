@@ -52,6 +52,7 @@ export type ApiAsset = {
   project: string;
   name: string;
   file: string;
+  type: "image" | "audio";
 };
 
 type ApiTokenResponse = {

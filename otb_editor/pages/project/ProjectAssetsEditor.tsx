@@ -1,6 +1,6 @@
 import { createResource, type Component, For, createUniqueId, JSX, Show } from "solid-js";
 import { useParams } from "@solidjs/router";
-import { FiTrash, FiUpload, FiDownload, FiEdit } from "solid-icons/fi";
+import { FiTrash, FiUpload, FiDownload, FiMusic } from "solid-icons/fi";
 
 import { ApiAsset, ApiClient, useApiClient } from "../../api";
 
@@ -55,11 +55,18 @@ const AssetCard: Component<{ asset: ApiAsset, api: ApiClient, pid: string, refet
 
   return (
     <div class={styles.AssetCard}>
-      <img
-        src={props.asset.file}
-        class={styles.AssetThumbnail}
-        onClick={() => window.open(props.asset.file, "_blank")}
-      />
+      <Show when={props.asset.type === "image"}>
+        <img
+          src={props.asset.file}
+          class={styles.AssetThumbnail}
+          onClick={() => window.open(props.asset.file, "_blank")}
+        />
+      </Show>
+      <Show when={props.asset.type === "audio"}>
+        <div class={styles.AssetThumbnail} onClick={() => window.open(props.asset.file, "_blank")}>
+          <FiMusic />
+        </div>
+      </Show>
       <div class={styles.AssetName}>{props.asset.name}</div>
       <div class={styles.AssetCardButtons}>
         <button class={styles.AssetButton} onClick={handleDownloadClick} title="Download Asset File"><FiDownload /></button>
