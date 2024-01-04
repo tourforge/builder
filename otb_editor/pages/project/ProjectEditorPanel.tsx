@@ -30,6 +30,7 @@ export const ProjectEditorPanel: Component = () => {
   };
 
   const handlePublishProjectClick = async () => {
+    if (!confirm("Are you sure you want to publish this project, immediately updating it for all users and making it available for free download by anyone on the internet?")) return;
     await api.publish(params.pid);
   };
 
