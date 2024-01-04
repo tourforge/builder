@@ -27,8 +27,10 @@ class Project(models.Model):
             try:
                 old_file = Project.objects.get(id=self.id).published_bundle
                 if old_file != self.published_bundle:
-                    _delete_file(published_bundle.path)
+                    _delete_file(old_file.path)
             except Project.DoesNotExist:
+                pass
+            except ValueError:
                 pass
 
         super(Project, self).save(*args, **kwargs)
@@ -70,6 +72,8 @@ class Asset(models.Model):
                 if old_file != self.file:
                     _delete_file(old_file.path)
             except Asset.DoesNotExist:
+                pass
+            except ValueError:
                 pass
 
         super(Asset, self).save(*args, **kwargs)
