@@ -1,4 +1,5 @@
 import re
+import os
 
 from django.db import models
 from django.contrib.auth.models import AbstractUser
@@ -11,10 +12,26 @@ class User(AbstractUser):
 def _published_bundle_path(instance, filename: str):
     return f"published-bundles/{instance.id}.zip"
 
+def _delete_file(path):
+   if os.path.isfile(path):
+       os.remove(path)
+
 class Project(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=200)
     published_bundle = models.FileField(upload_to=_published_bundle_path, default=None, null=True)
+
+    def save(self, *args, **kwargs):
+        # Check if the file is being updated
+        if self.id:
+            try:
+                old_file = Project.objects.get(id=self.id).published_bundle
+                if old_file != self.published_bundle:
+                    _delete_file(published_bundle.path)
+            except Project.DoesNotExist:
+                pass
+
+        super(Project, self).save(*args, **kwargs)
 
 class Tour(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -44,6 +61,18 @@ class Asset(models.Model):
     name = models.CharField(max_length=100)
     hash = models.CharField(max_length=64)
     file = models.FileField(upload_to=_asset_path)
+
+    def save(self, *args, **kwargs):
+        # Check if the file is being updated
+        if self.id:
+            try:
+                old_file = Asset.objects.get(id=self.id).file
+                if old_file != self.file:
+                    _delete_file(old_file.path)
+            except Asset.DoesNotExist:
+                pass
+
+        super(Asset, self).save(*args, **kwargs)
 
     class Meta:
         unique_together = [('project', 'name')]
