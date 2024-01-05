@@ -1,15 +1,17 @@
 import { A, useParams } from "@solidjs/router";
-import { Component, For, Show, createResource } from "solid-js";
+import { Component, For, Show } from "solid-js";
 
 import { useApiClient } from "../../api";
 
 import styles from "./ProjectEditorPanel.module.css";
+import { useProject } from "../../hooks/ProjectContext";
+import { useToursList } from "../../hooks/TourListContext";
 
 export const ProjectEditorPanel: Component = () => {
   const params = useParams();
   const api = useApiClient();
-  const [project] = createResource(async () => await api.getProject(params.pid));
-  const [tours, { refetch: refetchTours }] = createResource(async () => await api.listTours(params.pid));
+  const [project, _] = useProject();
+  const [tours, refetchTours] = useToursList();
 
   const handleCreateTourClick = async () => {
     await api.createTour(params.pid, {
@@ -29,23 +31,6 @@ export const ProjectEditorPanel: Component = () => {
     await refetchTours();
   };
 
-  const handlePublishProjectClick = async () => {
-    if (!confirm("Are you sure you want to publish this project, immediately updating it for all users and making it available for free download by anyone on the internet?")) return;
-    await api.publish(params.pid);
-  };
-
-  const publishedTime = () => {
-    if (!project()) return;
-    const date = new Date(project()!.last_published+"Z");
-    return date.toLocaleTimeString(undefined, { timeZoneName: 'short' });
-  };
-
-  const publishedDate = () => {
-    if (!project()) return;
-    const date = new Date(project()!.last_published+"Z");
-    return date.toLocaleDateString();
-  };
-
   return (
     <div class={styles.ProjectEditorPanel}>
       {project.loading && "Loading project..."}
@@ -55,9 +40,9 @@ export const ProjectEditorPanel: Component = () => {
         <span class="hint">You are currently viewing the <em>{project()?.name}</em> project.</span>
       </Show>
 
-      {tours.loading && "Loading tours..."}
+      
       {tours.error && `Error loading tours: ${tours.error}`}
-      {tours() != null && <span class={styles.SidebarHeader}>Tours</span>}
+      {tours() != null && <span class={styles.SidebarHeader}>Tours{tours.loading && " (Loading updates...)"}</span>}
       <Show when={tours() != null}>
         <span class="hint">Below is the list of tours in the project. Click to edit, and create new tours with the Create Tour button.</span>
       </Show>
@@ -73,11 +58,9 @@ export const ProjectEditorPanel: Component = () => {
       <A href={`/projects/${params.pid}/assets`} class="primary">Assets Editor</A>
 
       <div style="flex:1"></div>
-      <span class="hint">You can publish the project at any time. This project was last published at {publishedTime()} on {publishedDate()}.</span>
 
       <div class={styles.BottomButtons}>
-        <button class="primary" onClick={handlePublishProjectClick}>Publish</button>
-        <A class="secondary" href={`/projects/${params.pid}/manage`}>Manage</A>
+        <A class="secondary" href={`/projects/${params.pid}/manage`}>Manage Project</A>
       </div>      
     </div>
   );

@@ -120,6 +120,12 @@ class ProjectViewSet(ModelViewSet):
             project.published_bundle.save(project.id, File(f), save=True)
         
         return HttpResponse()
+    
+    @action(methods=['post'], detail=True)
+    def unpublish(self, *args, **kwargs):
+        project = self.get_object()
+        project.published_bundle.delete()
+        return HttpResponse()
 
 class TourViewSet(ModelViewSet):
     serializer_class = TourSerializer

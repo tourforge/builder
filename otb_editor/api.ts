@@ -209,6 +209,10 @@ export class ApiClient {
     return await this.apiRequest(`/projects/${pid}/publish`, "POST");
   }
 
+  async unpublish(pid: string) {
+    return await this.apiRequest(`/projects/${pid}/unpublish`, "POST");
+  }
+
   async apiRequest(path: string, method: string = "GET", body?: any): Promise<unknown> {
     const extraHeaders: { [_: string]: string } = {};
     if (body instanceof FormData) {

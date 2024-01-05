@@ -1,5 +1,6 @@
 import { Component, createContext, createResource, createSignal, JSX, onCleanup, useContext, type Resource, createEffect } from "solid-js";
 import { ApiTour, useApiClient } from "../api";
+import { ToursListContext } from "./TourListContext";
 
 export const TourContext = createContext<[Resource<ApiTour>, (newValue: ApiTour) => void]>();
 
@@ -17,6 +18,7 @@ export const TourProvider: Component<{ children: JSX.Element, pid: string, tid: 
   const autosaveInterval = 500;
 
   const api = useApiClient();
+  const toursListContext = useContext(ToursListContext);
   const [tour, { mutate: mutateTour, refetch: refetchTour }] = createResource(() => [props.pid, props.tid], async ([pid, tid]) => await api.getTour(pid, tid));
   const [timerId, setTimerId] = createSignal<number | undefined>();
 
@@ -48,6 +50,12 @@ export const TourProvider: Component<{ children: JSX.Element, pid: string, tid: 
     console.log("Updating tour...");
 
     const _ = await api.updateTour(pid, tid, curTour);
+
+    // tell the tours list to refetch
+    if (toursListContext) {
+      const [_, refetchToursList] = toursListContext;
+      refetchToursList();
+    }
 
     // TODO: merge the updated tour returned from updateTour with our local version,
     //       or at least detect if they are out of sync.
