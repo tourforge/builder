@@ -229,17 +229,11 @@ class AssetViewSet(ModelViewSet):
 
         return response
 
-class UserViewSet(ModelViewSet):
+class UserViewSet(viewsets.GenericViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     authentication_classes = [TokenAuthentication]
-    
-    def get_permissions(self):
-        if self.action == 'by_username':
-            permission_classes = [permissions.IsAuthenticated]
-        else:
-            permission_classes = []
-        return [permission() for permission in permission_classes]
+    permission_classes = [permissions.IsAuthenticated]
 
     @action(detail=False, methods=['get'], url_path='by_username/(?P<username>[^/]+)')
     def by_username(self, request, username):
