@@ -138,6 +138,9 @@ class TourViewSet(ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(project_id=self.kwargs['project_pk'])
 
+    def perform_update(self, serializer):
+        serializer.save(project_id=self.kwargs['project_pk'])
+
 class ProjectMemberViewSet(ModelViewSet):
     serializer_class = ProjectMemberSerializer
     authentication_classes = [TokenAuthentication]
@@ -150,6 +153,9 @@ class ProjectMemberViewSet(ModelViewSet):
         )
     
     def perform_create(self, serializer):
+        serializer.save(project_id=self.kwargs['project_pk'])
+
+    def perform_update(self, serializer):
         serializer.save(project_id=self.kwargs['project_pk'])
 
 class AssetViewSet(ModelViewSet):
@@ -223,10 +229,22 @@ class AssetViewSet(ModelViewSet):
 
         return response
 
-class UserViewSet(viewsets.mixins.RetrieveModelMixin, viewsets.GenericViewSet):
+class UserViewSet(ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     authentication_classes = [TokenAuthentication]
+    
+    def get_permissions(self):
+        if self.action == 'by_username':
+            permission_classes = [permissions.IsAuthenticated]
+        else:
+            permission_classes = []
+        return [permission() for permission in permission_classes]
+
+    @action(detail=False, methods=['get'], url_path='by_username/(?P<username>[^/]+)')
+    def by_username(self, request, username):
+        user = get_object_or_404(User, username=username)
+        return Response(UserSerializer(user).data, status=status.HTTP_200_OK)
 
 class RouteView(APIView):
     authentication_classes = [TokenAuthentication]

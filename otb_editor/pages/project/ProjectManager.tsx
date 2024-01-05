@@ -15,7 +15,7 @@ export const ProjectManager: Component = () => {
     setUsername(api.loggedInUsername());
   });
   const [project, setProject, refetchProject] = useProject();
-  const [members, { mutate: mutateMembers }] = createResource(() => params.pid, async pid => await api.listMembers(pid));
+  const [members, { refetch: refetchMembers }] = createResource(() => params.pid, async pid => await api.listMembers(pid));
 
   const handleProjectTitleInput: JSX.EventHandlerUnion<HTMLInputElement, InputEvent> = async (event) => {
     const newTitle = event.currentTarget.value;
@@ -28,9 +28,17 @@ export const ProjectManager: Component = () => {
 
   };
 
-  const handleAddMemberClicked = () => {
-    //const newUserUsername = prompt("Type the username of the member you would like to add.");
-    //api.createMember(project()?.id, { })
+  const handleAddMemberClicked = async () => {
+    const newUserUsername = prompt("Type the username of the member you would like to add.");
+    if (!newUserUsername)
+      return;
+    const newUser = await api.getUser(newUserUsername);
+    if (!newUser) {
+      alert("User not found.");
+      return;
+    }
+    await api.createMember(project()!.id, { user: newUser.id, admin: false });
+    await refetchMembers();
   };
 
   const handleDeleteClick = async () => {

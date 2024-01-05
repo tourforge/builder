@@ -14,7 +14,7 @@ export function useApiClient() {
   const navigate = useNavigate();
 
   return new ApiClient(navigate);
-};
+}
 
 export type ApiProjectsList = ApiProject[];
 export type ApiProject = {
@@ -53,7 +53,12 @@ export type ApiAsset = {
   name: string;
   file: string;
   type: "image" | "audio";
-};
+}
+
+export type ApiUser = {
+  id: string;
+  username: string;
+}
 
 type ApiTokenResponse = {
   expiry: string,
@@ -118,7 +123,7 @@ export class ApiClient {
   }
 
   async createTour(pid: string, tour: ApiTourData) {
-    return await this.apiRequest(`/projects/${pid}/tours`, "POST", { project: pid, ...tour }) as ApiTour;
+    return await this.apiRequest(`/projects/${pid}/tours`, "POST", tour) as ApiTour;
   }
 
   async deleteTour(pid: string, id: string) {
@@ -213,6 +218,14 @@ export class ApiClient {
     return await this.apiRequest(`/projects/${pid}/unpublish`, "POST");
   }
 
+  async getUser(username: string) {
+    try {
+      return await this.apiRequest(`/users/by_username/${username}`) as ApiUser;
+    } catch (e) {
+      return null;
+    }
+  }
+
   async apiRequest(path: string, method: string = "GET", body?: any): Promise<unknown> {
     const extraHeaders: { [_: string]: string } = {};
     if (body instanceof FormData) {
@@ -246,6 +259,7 @@ export class ApiClient {
       }
     } catch (e) {
       debugger;
+      throw e;
     }
   }
 

@@ -35,6 +35,7 @@ class TourSerializer(ModelSerializer):
     class Meta:
         model = Tour
         fields = '__all__'
+        read_only_fields = ('project',)
 
 class ProjectMemberSerializer(ModelSerializer):
     username = serializers.CharField(read_only=True, source='user.username')
@@ -42,6 +43,7 @@ class ProjectMemberSerializer(ModelSerializer):
     class Meta:
         model = ProjectMember
         fields = '__all__'
+        read_only_fields = ('project',)
 
 _NAME_REGEX = re.compile(r"(.+)/(.+)(\..+)?")
 class _SignedFileField(serializers.FileField):

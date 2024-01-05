@@ -1,8 +1,5 @@
 from django.contrib import admin
-from otb_server.models import Project
+from .models import User
+from django.contrib.auth.admin import UserAdmin
 
-class ProjectAdmin(admin.ModelAdmin):
-    pass
-
-
-admin.site.register(Project, ProjectAdmin)
+admin.site.register(User, UserAdmin)
