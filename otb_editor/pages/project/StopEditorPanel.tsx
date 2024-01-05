@@ -151,7 +151,6 @@ export const StopEditorPanel: Component<{ pid: string, waypoint: () => StopModel
             <div>
               <input
                 type="radio"
-                name="control"
                 id={`${id}-path`}
                 value="path"
                 checked={props.waypoint()!.control === "path"} 
@@ -162,7 +161,6 @@ export const StopEditorPanel: Component<{ pid: string, waypoint: () => StopModel
             <div>
               <input
                 type="radio"
-                name="control"
                 id={`${id}-route`}
                 value="route"
                 checked={props.waypoint()!.control === "route"}
@@ -173,7 +171,6 @@ export const StopEditorPanel: Component<{ pid: string, waypoint: () => StopModel
             <div>
               <input
                 type="radio"
-                name="control"
                 id={`${id}-none`}
                 value="none"
                 checked={props.waypoint()!.control === "none"}

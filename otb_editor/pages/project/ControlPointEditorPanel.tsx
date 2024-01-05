@@ -43,7 +43,6 @@ export const ControlPointEditorPanel: Component<{ pid: string, controlPoint: () 
             <div>
               <input
                 type="radio"
-                name="control"
                 id={`${id}-path`}
                 value="path"
                 checked={props.controlPoint()!.control === "path"} 
@@ -54,7 +53,6 @@ export const ControlPointEditorPanel: Component<{ pid: string, controlPoint: () 
             <div>
               <input
                 type="radio"
-                name="control"
                 id={`${id}-route`}
                 value="route"
                 checked={props.controlPoint()!.control === "route"}
