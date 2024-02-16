@@ -281,3 +281,18 @@ def download_project_file(request, project_id, file_path):
         with zip_ref.open(file_path) as file:
             response = HttpResponse(file.read(), content_type='application/octet-stream')
             return response
+
+def catchall_view(request, path=None):
+    """
+    Serve the `index.html` file for any path not matched by other routes.
+    We need this because the Solid-based frontend is a single-page application
+    that uses path-based routing.
+
+    The implementation isn't very efficient, but luckily, index.html is tiny!
+    """
+    index_file_path = os.path.join(settings.STATIC_ROOT, 'index.html')
+
+    with open(index_file_path, 'r') as file:
+        index_file_content = file.read()
+
+    return HttpResponse(index_file_content, content_type='text/html')

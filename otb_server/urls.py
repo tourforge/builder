@@ -38,4 +38,6 @@ urlpatterns = [
     path('api/login', LoginView.as_view(), name='knox_login'),
     path('api/logout', knox_views.LogoutView.as_view(), name='knox_logout'),
     path('api/logoutall', knox_views.LogoutAllView.as_view(), name='knox_logoutall'),
+    # Catch-all route for the Solid frontend
+    re_path(r'^(?P<path>.*)$', catchall_view),
 ]
