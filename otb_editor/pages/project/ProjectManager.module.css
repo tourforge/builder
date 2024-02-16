@@ -1,0 +1,48 @@
+.ProjectManager {
+  display: flex;
+  flex-direction: column;
+  padding: 16px;
+  gap: 16px;
+  overflow: scroll;
+
+  max-width: 400px;
+}
+
+.Members {
+  display: flex;
+  flex-direction: column;
+
+  gap: 8px;
+}
+
+.Member {
+  display: flex;
+  background-color: rgb(203, 233, 254);
+  color: rgb(11, 58, 91);
+  border-radius: 12px;
+  padding: 0 8px;
+  height: 48px;
+}
+
+.MemberName {
+  flex: 1;
+
+  padding: 12px 8px;
+}
+
+
+.MemberAdmin {
+  display: flex;
+  gap: 4px;
+  flex: 1;
+
+  padding: 12px 8px;
+}
+
+.MemberButton {
+  all: unset;
+  cursor: pointer;
+  user-select: none;
+
+  padding: 12px 8px;
+}

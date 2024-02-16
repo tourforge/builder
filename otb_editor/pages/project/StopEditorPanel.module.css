@@ -1,0 +1,10 @@
+.StopEditorPanel {
+  display: flex;
+  flex-direction: column;
+  width: 320px;
+  overflow-y: auto;
+
+  border-right: 1px solid lightgray;
+
+  padding: 16px;
+}

@@ -1,7 +1,5 @@
-[*]
-end_of_line = lf
-insert_final_newline = true
+[otb_editor/*]
 indent_size = 2
 
-[*.rs]
+[otb_server/*]
 indent_size = 4
