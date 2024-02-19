@@ -3,8 +3,7 @@ import { Navigator, useNavigate } from "@solidjs/router";
 import * as polyline from "./polyline";
 
 import { LatLng, TourModel } from "./data";
-
-export const apiBase = "http://127.0.0.1:8000";
+import { apiBase } from "./settings";
 
 const apiUrl = apiBase + "/api";
 

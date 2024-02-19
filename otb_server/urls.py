@@ -16,6 +16,8 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, re_path, include
+from django.conf import settings
+from django.conf.urls.static import static
 from rest_framework_nested import routers
 import knox.views as knox_views
 from .views import *
@@ -38,6 +40,8 @@ urlpatterns = [
     path('api/login', LoginView.as_view(), name='knox_login'),
     path('api/logout', knox_views.LogoutView.as_view(), name='knox_logout'),
     path('api/logoutall', knox_views.LogoutAllView.as_view(), name='knox_logoutall'),
-    # Catch-all route for the Solid frontend
-    re_path(r'^(?P<path>.*)$', catchall_view),
+] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT) + [
+    # Catch-all routes for the Solid frontend
+    path('', catchall_view),
+    re_path(r'^(?P<path>.*)/$', catchall_view),
 ]

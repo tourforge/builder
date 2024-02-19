@@ -6,6 +6,7 @@
     "start": "vite",
     "dev": "vite",
     "build": "vite build",
+    "watch": "vite build --watch",
     "serve": "vite preview"
   },
   "license": "MIT",

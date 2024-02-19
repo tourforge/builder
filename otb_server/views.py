@@ -13,10 +13,11 @@ from rest_framework.viewsets import ModelViewSet, ViewSet
 from rest_framework.authentication import BasicAuthentication
 from rest_framework.decorators import action
 from django.contrib.auth import get_user_model
-from django.http import FileResponse, HttpResponseBadRequest, FileResponse, HttpResponse, Http404
+from django.http import FileResponse, HttpResponseBadRequest, FileResponse, HttpResponse, Http404, StreamingHttpResponse
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from django.core.files import File
+from wsgiref.util import FileWrapper
 
 from knox.auth import TokenAuthentication
 from knox.views import LoginView as KnoxLoginView
@@ -278,21 +279,15 @@ def download_project_file(request, project_id, file_path):
             raise Http404("File not found in published bundle.")
 
         # Extract and serve the file
-        with zip_ref.open(file_path) as file:
-            response = HttpResponse(file.read(), content_type='application/octet-stream')
-            return response
+        response = StreamingHttpResponse(FileWrapper(zip_ref.open(file_path)), content_type='application/octet-stream')
+        return response
 
-def catchall_view(request, path=None):
+def catchall_view(request, path=None, resource=None, exception=None):
     """
     Serve the `index.html` file for any path not matched by other routes.
     We need this because the Solid-based frontend is a single-page application
     that uses path-based routing.
-
-    The implementation isn't very efficient, but luckily, index.html is tiny!
     """
-    index_file_path = os.path.join(settings.STATIC_ROOT, 'index.html')
+    index_file_path = os.path.join(settings.BASE_DIR, 'dist', 'index.html')
 
-    with open(index_file_path, 'r') as file:
-        index_file_content = file.read()
-
-    return HttpResponse(index_file_content, content_type='text/html')
+    return StreamingHttpResponse(FileWrapper(open(index_file_path, 'r')), content_type='text/html')

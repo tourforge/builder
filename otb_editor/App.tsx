@@ -2,7 +2,7 @@ import { Route, Routes } from "@solidjs/router";
 import type { Component } from "solid-js";
 
 import { Navbar } from "./Navbar";
-import { apiBase } from "./api";
+import { apiBase } from "./settings";
 import { Home } from "./pages/home/Home";
 import { Login } from "./pages/login/Login";
 import { ProjectAssetsEditor } from "./pages/project/ProjectAssetsEditor";
