@@ -42,6 +42,6 @@ This two-server setup is a bit different from production, where only one server 
 
 ## Production
 
-Production deployment will be handled by a GitHub Action, which has yet to be configured. In production deployment, two files are replaced with their production counterparts:
-- `otb_editor/settings.ts` is replaced with `otb_editor/prod.settings.ts`
-- `otb_server/settings.py` is replaced with `otb_server/prod.settings.py`.
+Production deployment will be handled by a GitHub Action, which has yet to be configured. In production deployment, the settings files for each project are replaced by their production counterparts:
+- `otb_editor/settings.ts` is replaced by `otb_editor/settings.prod.ts`
+- `otb_server/settings.py` is replaced by `otb_server/settings.prod.py`.
