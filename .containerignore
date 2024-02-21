@@ -5,3 +5,7 @@ assets/
 db.sqlite3
 **/__pycache__/
 staticfiles/
+Containerfile
+.containerignore
+README.md
+.editorconfig

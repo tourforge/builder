@@ -1,11 +1,25 @@
+# ======= Build stage =======
+FROM node:latest as builder
+
+WORKDIR /code
+
+COPY package*.json .
+RUN npm ci
+
+COPY otb_editor otb_editor
+COPY index.html index.html
+COPY tsconfig.json tsconfig.json
+COPY vite.config.ts vite.config.ts
+RUN mv otb_editor/settings.prod.ts otb_editor/settings.ts
+
+RUN npm run build
+
+
+# ====== Runtime stage ======
 FROM alpine:3.19
 
-ARG SECRET_KEY
-ARG DJANGO_HOST
-ARG DJANGO_SUPERUSER_PASSWORD
-
 # system dependencies
-RUN apk add --no-cache nodejs-current npm python3 py3-pip
+RUN apk add --no-cache python3 py3-pip bash
 
 # set up venv so we can use pip to install python deps (without this we can't)
 ENV VIRTUAL_ENV=/opt/venv
@@ -16,36 +30,27 @@ ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 COPY requirements.txt requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
-# copy the code and cd to it
-COPY . code
+# only copy exactly what we need at runtime
 WORKDIR /code
-
-# replace each settings file with prod settings
+COPY --from=builder /code/dist dist
+COPY manage.py manage.py
+COPY otb_server otb_server
 RUN mv otb_server/settings.prod.py otb_server/settings.py
-RUN mv otb_editor/settings.prod.ts otb_editor/settings.ts
 
-# install js deps and then build the frontend
-# note: technically there's no need to have nodejs and npm inside the container and this step
-# could be done outside the container, but this method is easier for now (and maybe forever!).
-RUN npm install
-RUN npm run build
+# these vars are used in settings.py, but their values don't matter for collectstatic
+ENV SECRET_KEY=""
+ENV DJANGO_HOST=""
+ENV DB_PATH=""
 
-# create env var for each arg
-ENV SECRET_KEY=$SECRET_KEY
-ENV DJANGO_HOST=$DJANGO_HOST
-ENV DJANGO_SUPERUSER_PASSWORD=$DJANGO_SUPERUSER_PASSWORD
-
-# it is required to run ./manage.py collectstatic so that whitenoise can find the static html/js/css.
+# run ./manage.py collectstatic so that whitenoise can find the static html/js/css
 RUN mkdir staticfiles
 RUN ./manage.py collectstatic
 
-# to create the database we need to run the migrations.
-RUN ./manage.py migrate
-
-# make a superuser for the Django admin panel.
-RUN ./manage.py createsuperuser --username admin --email admin@example.org --noinput
+# need for running prod.sh and gunicorn
+COPY prod.sh prod.sh
+COPY config config
 
 EXPOSE 8000
 
-ENTRYPOINT ["gunicorn"]
-CMD ["-c", "config/gunicorn/prod.py"]
+ENTRYPOINT ["bash"]
+CMD ["prod.sh"]
