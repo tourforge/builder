@@ -45,3 +45,37 @@ This two-server setup is a bit different from production, where only one server 
 Production deployment will be handled by a GitHub Action, which has yet to be configured. In production deployment, the settings files for each project are replaced by their production counterparts:
 - `otb_editor/settings.ts` is replaced by `otb_editor/settings.prod.ts`
 - `otb_server/settings.py` is replaced by `otb_server/settings.prod.py`.
+
+### Running production locally
+
+You can test the production build locally using Docker, Podman, or any other container runtime. First, build the container:
+
+```sh
+podman build . -t otb
+```
+
+Then run it:
+
+```sh
+podman run \
+           -e SECRET_KEY='django-insecure-ho=n9yrmpbqv+-43^&$6*&s8qy8^*!&y2)afnxx7^@%+18werk' \
+           -e DJANGO_HOST='*' \
+           -e DB_PATH='/db.sqlite3' \
+           -e DJANGO_SUPERUSER_PASSWORD='dont-use-in-prod' \
+           -p 8000:8000 \
+           -it localhost/otb
+```
+
+The `-e` option is used to provide the values of four different environment variables:
+ - `SECRET_KEY`: This is used by Django. In a publically-deployed production environment, `SECRET_KEY` should be secret. Generate a random secret key before doing a real deployment. For running locally, the supplied value in the above command is okay.
+ - `DJANGO_HOST`: This is used in our `settings.py` to specify which `Host` HTTP header values will be permitted in requests to the server. The wildcard value `*` skips Django's `Host` header checks; for a real deployment, `DJANGO_HOST` should be set to the domain name pointing to the deployment.
+ - `DB_PATH`: This is used in our `settings.py` to specify where the SQLite3 database is located within the container. The default value is fine for testing; for real deployment the value can be adjusted to point within a persistent volume.
+ - `DJANGO_SUPERUSER_PASSWORD`: This is used by the production startup script `prod.py` for the default password of the default admin user, which is created whenever the database is created for the first time. Don't use the same default password in production.
+
+The `-p` option is used to specify which ports in the container are exposed in the host (your computer), and which ports they are exposed as. The default value is fine for testing.
+
+The `-it` options are used for convenience to make working with the container easier once it is started. For example, it allows you to press `Ctrl+C` to stop the container.
+
+Finally, `localhost/otb` is the name of the container.
+
+Once started, the container should be accessible at `127.0.0.1:8000`. You can log in with the username `admin` and the password that was specified in `DJANGO_SUPERUSER_PASSWORD`.
