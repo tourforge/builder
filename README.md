@@ -62,7 +62,7 @@ podman run \
            -e DJANGO_HOST='*' \
            -e DB_PATH='/db.sqlite3' \
            -e DJANGO_SUPERUSER_PASSWORD='dont-use-in-prod' \
-           -p 8000:8000 \
+           -p 8000:80 \
            -it localhost/otb
 ```
 

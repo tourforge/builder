@@ -11,8 +11,8 @@ fi
 
 if [ "$NEW_DB" = true ]; then
     # create a default admin account if the database is new
-    echo "Creating default superuser account"
+    echo "Creating default superuser account..."
     ./manage.py createsuperuser --username admin --email admin@example.org --noinput
 fi
 
-gunicorn -c config/gunicorn/prod.py
+gunicorn -c config/gunicorn/prod.py & nginx -g 'daemon off;' -c $PWD/config/nginx/nginx.conf

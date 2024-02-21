@@ -19,7 +19,7 @@ RUN npm run build
 FROM alpine:3.19
 
 # system dependencies
-RUN apk add --no-cache python3 py3-pip bash
+RUN apk add --no-cache nginx python3 py3-pip bash
 
 # set up venv so we can use pip to install python deps (without this we can't)
 ENV VIRTUAL_ENV=/opt/venv
