@@ -10,7 +10,7 @@ import { useProject } from "../../hooks/ProjectContext";
 export const ProjectManager: Component = () => {
   const params = useParams();
   const api = useApiClient();
-  const [username, setUsername] = createSignal<string | null | undefined>(undefined);
+  const [username, setUsername] = createSignal<string | null | undefined>(api.loggedInUsername());
   api.addLoginStatusListener(() => {
     setUsername(api.loggedInUsername());
   });

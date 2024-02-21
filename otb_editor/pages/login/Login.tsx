@@ -29,7 +29,7 @@ export const Login: Component = () => {
       if (redirect) {
         navigate(redirect);
       } else {
-        navigate("/projects");
+        navigate("/");
       }
     } catch (e) {
       alert("Failed to login: " + e);

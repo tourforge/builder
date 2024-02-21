@@ -8,7 +8,6 @@ import { Login } from "./pages/login/Login";
 import { ProjectAssetsEditor } from "./pages/project/ProjectAssetsEditor";
 import { ProjectEditor } from "./pages/project/ProjectEditor";
 import { ProjectManager } from "./pages/project/ProjectManager";
-import { ProjectsList } from "./pages/project/ProjectsList";
 import { TourEditor } from "./pages/project/TourEditor";
 
 const App: Component = () => {
@@ -16,7 +15,6 @@ const App: Component = () => {
     <Routes>
       <Route path="/" component={Navbar}>
         <Route path="/" component={Home} />
-        <Route path="/projects" component={ProjectsList} />
         <Route path="/projects/:pid" component={ProjectEditor}>
           <Route path="/" component={Blank} />
           <Route path="/assets" component={ProjectAssetsEditor} />

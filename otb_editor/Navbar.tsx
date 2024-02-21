@@ -7,7 +7,7 @@ import { useApiClient } from "./api";
 export const Navbar: Component = () => {
   const api = useApiClient();
   const navigate = useNavigate();
-  const [username, setUsername] = createSignal<string | null | undefined>(undefined);
+  const [username, setUsername] = createSignal<string | null | undefined>(api.loggedInUsername());
   api.addLoginStatusListener(() => {
     setUsername(api.loggedInUsername());
   });
@@ -21,14 +21,13 @@ export const Navbar: Component = () => {
     <div class={styles.Wrapper}>
       <nav class={styles.Nav}>
         <A class={styles.NavButton} classList={{[styles.NavHeader]: true}} href="/">OpenTourBuilder</A>
-        <A class={styles.NavButton} href="/projects">Projects</A>
-        <a class={styles.NavButton} href="/admin">Admin Panel</a>
         <div style="flex: 1"></div>
+        <a class={styles.NavButton} classList={{[styles.AdminPanelButton]: true}} href="/admin">Admin Panel</a>
         <Show when={username() === null}>
-          <A class={styles.NavButton} href="/login">Log In</A>
+          <A class={styles.NavButton} classList={{[styles.LogInButton]: true}} href="/login">Log In</A>
         </Show>
         <Show when={username() !== null && username !== undefined}>
-          <button class={styles.NavButton} onClick={handleLogOut}>Log Out ({username()})</button>
+          <button class={styles.NavButton} classList={{[styles.LogOutButton]: true}} onClick={handleLogOut}>Log Out ({username()})</button>
         </Show>
       </nav>
       <main class={styles.Main}><Outlet /></main>
