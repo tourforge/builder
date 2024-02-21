@@ -50,7 +50,7 @@ RUN ./manage.py collectstatic
 COPY prod.sh prod.sh
 COPY config config
 
-EXPOSE 8000
+EXPOSE 80
 
 ENTRYPOINT ["bash"]
 CMD ["prod.sh"]
