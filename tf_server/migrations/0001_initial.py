@@ -57,7 +57,7 @@ class Migration(migrations.Migration):
                 ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
                 ('title', models.CharField(max_length=200)),
                 ('content', models.JSONField()),
-                ('project', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='otb_server.project')),
+                ('project', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='tf_server.project')),
             ],
         ),
         migrations.CreateModel(
@@ -65,7 +65,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
                 ('admin', models.BooleanField(default=False)),
-                ('project', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='otb_server.project')),
+                ('project', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='tf_server.project')),
                 ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
             ],
             options={

@@ -92,7 +92,7 @@ export class ApiClient {
   }
 
   loggedInUsername() {
-    return window.localStorage.getItem("otbUsername");
+    return window.localStorage.getItem("tfUsername");
   }
 
   async listProjects(extraOptions?: { forceAuth?: boolean }) {
@@ -246,7 +246,7 @@ export class ApiClient {
         credentials: "same-origin",
         headers: {
           "Accept": "application/json",
-          "Authorization": `Token ${window.localStorage.getItem("otbLoginToken")}`,
+          "Authorization": `Token ${window.localStorage.getItem("tfLoginToken")}`,
           ...extraHeaders,
         }
       });
@@ -284,8 +284,8 @@ export class ApiClient {
 
     if (resp.status >= 200 && resp.status <= 299) {
       const data = await resp.json() as ApiTokenResponse;
-      window.localStorage.setItem("otbUsername", username);
-      window.localStorage.setItem("otbLoginToken", data.token);
+      window.localStorage.setItem("tfUsername", username);
+      window.localStorage.setItem("tfLoginToken", data.token);
       this.authUpdateMessage();
     } else {
       throw Error("Failed to login: " + resp.statusText);
@@ -293,8 +293,8 @@ export class ApiClient {
   }
 
   logout() {
-    window.localStorage.removeItem("otbUsername");
-    window.localStorage.removeItem("otbLoginToken");
+    window.localStorage.removeItem("tfUsername");
+    window.localStorage.removeItem("tfLoginToken");
     this.authUpdateMessage();
   }
 

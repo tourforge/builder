@@ -2,14 +2,14 @@
 
 from django.db import migrations, models
 import django.db.models.deletion
-import otb_server.models
+import tf_server.models
 import uuid
 
 
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('otb_server', '0001_initial'),
+        ('tf_server', '0001_initial'),
     ]
 
     operations = [
@@ -18,8 +18,8 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
                 ('name', models.CharField(max_length=100, unique=True)),
-                ('file', models.FileField(upload_to=otb_server.models._asset_path)),
-                ('project', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='otb_server.project')),
+                ('file', models.FileField(upload_to=tf_server.models._asset_path)),
+                ('project', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='tf_server.project')),
             ],
         ),
     ]

@@ -20,7 +20,7 @@ export const Navbar: Component = () => {
   return (
     <div class={styles.Wrapper}>
       <nav class={styles.Nav}>
-        <A class={styles.NavButton} classList={{[styles.NavHeader]: true}} href="/">OpenTourBuilder</A>
+        <A class={styles.NavButton} classList={{[styles.NavHeader]: true}} href="/">TourForge</A>
         <div style="flex: 1"></div>
         <a class={styles.NavButton} classList={{[styles.AdminPanelButton]: true}} href="/admin">Admin Panel</a>
         <Show when={username() === null}>

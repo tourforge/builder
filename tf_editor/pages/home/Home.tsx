@@ -33,7 +33,7 @@ export const Home: Component = () => {
   return (
     <div class={styles.Home}>
       <div class={styles.Welcome}>
-        <header>Welcome to OpenTourBuilder!</header>
+        <header>Welcome to TourForge!</header>
         {projects.loading && "Loading..."}
         {projects.error && `${projects.error}`}
         <Show when={!projects.loading && projects()}>

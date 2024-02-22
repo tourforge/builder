@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('otb_server', '0002_asset'),
+        ('tf_server', '0002_asset'),
     ]
 
     operations = [

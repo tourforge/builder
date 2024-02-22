@@ -1,5 +1,5 @@
-[otb_editor/*]
+[tf_editor/*]
 indent_size = 2
 
-[otb_server/*]
+[tf_server/*]
 indent_size = 4

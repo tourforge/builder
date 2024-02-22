@@ -6,11 +6,11 @@ WORKDIR /code
 COPY package*.json .
 RUN npm ci
 
-COPY otb_editor otb_editor
+COPY tf_editor tf_editor
 COPY index.html index.html
 COPY tsconfig.json tsconfig.json
 COPY vite.config.ts vite.config.ts
-RUN mv otb_editor/settings.prod.ts otb_editor/settings.ts
+RUN mv tf_editor/settings.prod.ts tf_editor/settings.ts
 
 RUN npm run build
 
@@ -34,8 +34,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 WORKDIR /code
 COPY --from=builder /code/dist dist
 COPY manage.py manage.py
-COPY otb_server otb_server
-RUN mv otb_server/settings.prod.py otb_server/settings.py
+COPY tf_server tf_server
+RUN mv tf_server/settings.prod.py tf_server/settings.py
 
 # these vars are used in settings.py, but their values don't matter for collectstatic
 ENV SECRET_KEY=""
