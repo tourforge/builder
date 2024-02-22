@@ -37,7 +37,7 @@ export const Home: Component = () => {
         {projects.loading && "Loading..."}
         {projects.error && `${projects.error}`}
         <Show when={!projects.loading && projects()}>
-          <p>Click on a project below to begin, or start a new project with the <strong>Create Tour</strong> button.</p>
+          <p>Click on a project below to begin, or start a new project with the <strong>Create Project</strong> button.</p>
           <div class={styles.Projects}>
             <For each={projects()}>
               {project => (
