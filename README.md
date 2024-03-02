@@ -13,6 +13,7 @@ npm install
 python3 -m venv .venv
 source .venv/bin/activate
 python3 -m pip install -r requirements.txt
+python3 manage.py migrate
 ```
 
 (If the `python3` command isn't found, try `python` (no `3`) instead and see if that works.)
