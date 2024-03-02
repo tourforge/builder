@@ -24,6 +24,10 @@ export type ApiProjectData = {
   name: string;
 }
 
+export type ApiRole = {
+  role: "admin" | "member";
+}
+
 export type ApiToursList = ApiTour[];
 export type ApiTour = {
   project: string;
@@ -113,6 +117,10 @@ export class ApiClient {
 
   async deleteProject(id: string) {
     await this.apiRequest(`/projects/${id}`, "DELETE");
+  }
+
+  async getRole(pid: string) {
+    return await this.apiRequest(`/projects/${pid}/role`) as ApiRole;
   }
 
   async listTours(pid: string) {

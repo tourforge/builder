@@ -13,7 +13,7 @@ from rest_framework.viewsets import ModelViewSet, ViewSet
 from rest_framework.authentication import BasicAuthentication
 from rest_framework.decorators import action
 from django.contrib.auth import get_user_model
-from django.http import FileResponse, HttpResponseBadRequest, FileResponse, HttpResponse, Http404, StreamingHttpResponse
+from django.http import FileResponse, HttpResponseBadRequest, FileResponse, HttpResponse, Http404, StreamingHttpResponse, JsonResponse
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from django.core.files import File
@@ -127,6 +127,16 @@ class ProjectViewSet(ModelViewSet):
         project = self.get_object()
         project.published_bundle.delete()
         return HttpResponse()
+    
+    @action(methods=['get'], detail=True)
+    def role(self, request, *args, **kwargs):
+        user = request.user
+        project = self.get_object()
+
+        if ProjectMember.objects.filter(user=user, project=project, admin=True).exists():
+            return JsonResponse({"role": "admin"})
+        else:
+            return JsonResponse({"role": "member"})
 
 class TourViewSet(ModelViewSet):
     serializer_class = TourSerializer

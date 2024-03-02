@@ -25,7 +25,16 @@ export const ProjectManager: Component = () => {
   };
 
   const handleMemberAdminInput: (member: ApiMember) => JSX.EventHandlerUnion<HTMLInputElement, InputEvent> = (member) => async (event) => {
+    await api.updateMember(params.pid, member.id, {
+      ...member,
+      admin: event.currentTarget.checked
+    });
+    await refetchMembers();
+  };
 
+  const handleMemberDeleteClicked = (member: ApiMember) => async () => {
+    await api.deleteMember(params.pid, member.id);
+    await refetchMembers();
   };
 
   const handleAddMemberClicked = async () => {
@@ -104,7 +113,7 @@ export const ProjectManager: Component = () => {
                         </div>
                       )}
                     </Field>
-                    <button class={styles.MemberButton} title="Remove as Member"><FiTrash /></button>
+                    <button class={styles.MemberButton} title="Remove as Member" onClick={handleMemberDeleteClicked(member)}><FiTrash /></button>
                   </Show>
                   <Show when={member.username === username()}>
                     <div style="flex:1"></div>

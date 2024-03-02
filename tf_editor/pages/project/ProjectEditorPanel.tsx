@@ -1,5 +1,5 @@
 import { A, useParams } from "@solidjs/router";
-import { Component, For, Show } from "solid-js";
+import { Component, For, Show, createResource } from "solid-js";
 
 import { useApiClient } from "../../api";
 
@@ -12,6 +12,7 @@ export const ProjectEditorPanel: Component = () => {
   const api = useApiClient();
   const [project, _] = useProject();
   const [tours, refetchTours] = useToursList();
+  const [role] = createResource(async () => await api.getRole(params.pid))
 
   const handleCreateTourClick = async () => {
     await api.createTour(params.pid, {
@@ -28,7 +29,7 @@ export const ProjectEditorPanel: Component = () => {
       },
     });
 
-    await refetchTours();
+    refetchTours();
   };
 
   return (
@@ -59,9 +60,11 @@ export const ProjectEditorPanel: Component = () => {
 
       <div style="flex:1"></div>
 
-      <div class={styles.BottomButtons}>
-        <A class="secondary" href={`/projects/${params.pid}/manage`}>Manage Project</A>
-      </div>      
+      <Show when={role()?.role === "admin"}>
+        <div class={styles.BottomButtons}>
+          <A class="secondary" href={`/projects/${params.pid}/manage`}>Manage Project</A>
+        </div>
+      </Show>
     </div>
   );
 };
