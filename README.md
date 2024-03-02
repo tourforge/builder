@@ -20,7 +20,11 @@ python3 manage.py migrate
 
 That's your initial setup. You shouldn't need to run `python -m venv .venv` again.
 
-If the dependencies of `tf_server` (the backend) change, you'll need to run `python3 -m pip install -r requirements.txt` again. Before running any Python-related commands (pip is one of them), you always must first run `source .venv/bin/activate` at least once within the same terminal session.
+If the dependencies of `tf_server` (the backend) change, you'll need to run `python3 -m pip install -r requirements.txt` again. 
+
+If the database schema (located in `tf_server/models.py`) changes, you'll need to run `python3 manage.py migrate` again.
+
+Before running any Python-related commands (pip is one of them), you always must first run `source .venv/bin/activate` at least once within the same terminal session.
 
 If the dependencies of `tf_editor` (the frontend) change, you'll need to run `npm install` again. Since this is a Node.js-related command, running `source .venv/bin/activate` first isn't required. However, that command having been previously run doesn't harm anything.
 
