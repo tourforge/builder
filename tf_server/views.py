@@ -62,7 +62,7 @@ class ProjectViewSet(ModelViewSet):
                 ext = f".{split[1]}"
             else:
                 ext = ""
-            new_filename = f"assets/{asset.hash}{ext}"
+            new_filename = f"{asset.hash}{ext}"
             required_assets[new_filename] = asset
             return new_filename
 
@@ -99,12 +99,15 @@ class ProjectViewSet(ModelViewSet):
                 content_filename = f"{content_hash}.json"
                 zf.writestr(content_filename, content_str)
 
+                content["content"] = content_filename
+
             index = {
                 "tours": [{
                     "title": tour["title"] if "title" in tour else None,
                     "thumbnail": next(iter(tour["gallery"]), None),
                     "type": tour["type"] if "type" in tour else None,
                     "stops": sum(w["type"] == "stop" for w in tour["route"]),
+                    "content": tour["content"],
                 } for tour in tours_content],
             }
             index_str = json.dumps(index)
