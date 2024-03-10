@@ -2,8 +2,7 @@ import { defineConfig } from 'vite';
 import solidPlugin from 'vite-plugin-solid';
 // import devtools from 'solid-devtools/vite';
 
-export default defineConfig(({ mode }) => ({
-  base: mode === "production" ? "/static/" : undefined,
+export default defineConfig({
   plugins: [
     /* 
     Uncomment the following line to enable solid-devtools.
@@ -18,4 +17,4 @@ export default defineConfig(({ mode }) => ({
   build: {
     target: 'esnext',
   },
-}));
+});

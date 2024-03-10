@@ -1,5 +1,2 @@
-[tf_editor/*]
+[src/*]
 indent_size = 2
-
-[tf_server/*]
-indent_size = 4
