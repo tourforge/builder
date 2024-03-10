@@ -1,5 +1,7 @@
 # TourForge
 
+[Open in your browser](https://tourforge.github.io/builder)
+
 This repository holds the sourcecode for the TourForge web application.
 
 ## Development
