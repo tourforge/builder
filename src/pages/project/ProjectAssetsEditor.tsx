@@ -1,16 +1,14 @@
-import { createResource, type Component, For, createUniqueId, JSX, Show } from "solid-js";
-import { useParams } from "@solidjs/router";
+import { createResource, type Component, For, createUniqueId, type JSX, Show } from "solid-js";
 import { FiTrash, FiUpload, FiDownload, FiMusic, FiFile } from "solid-icons/fi";
 
-import styles from "./ProjectAssetsEditor.module.css";
 import { useProject } from "../../hooks/Project";
 import { useDB } from "../../db";
 import { useAssetUrl } from "../../hooks/AssetUrl";
 
-export const ProjectAssetsEditor: Component = () => {
-  const params = useParams();
+import styles from "./ProjectAssetsEditor.module.css";
 
-  const [project] = useProject()
+export const ProjectAssetsEditor: Component = () => {
+  const [project] = useProject();
   const assets = () => Object.keys(project()?.assets ?? []);
 
   return (
@@ -33,7 +31,7 @@ const AssetCard: Component<{ asset: string }> = (props) => {
   const db = useDB();
   const [project, setProject] = useProject();
   const assetUrl = useAssetUrl(project, () => props.asset);
-  const [assetBlob] = createResource(() => props.asset, asset => {
+  const [assetBlob] = createResource(() => props.asset, async asset => {
     if (asset === undefined) {
       return undefined;
     }
@@ -41,17 +39,17 @@ const AssetCard: Component<{ asset: string }> = (props) => {
     if (currentProject === undefined) {
       return undefined;
     }
-    if (!currentProject.assets[asset]) {
+    if (currentProject.assets[asset] == null) {
       return undefined;
     }
-    return db.loadAsset(currentProject.assets[asset].hash);
+    return await db.loadAsset(currentProject.assets[asset].hash);
   });
-  const assetIsImage = () => assetBlob() ? ["image/jpeg", "image/png"].includes(assetBlob()!.type) : false;
-  const assetIsAudio = () => assetBlob() ? ["audio/mpeg"].includes(assetBlob()!.type) : false;
+  const assetIsImage = () => assetBlob() != null ? ["image/jpeg", "image/png"].includes(assetBlob()!.type) : false;
+  const assetIsAudio = () => assetBlob() != null ? ["audio/mpeg"].includes(assetBlob()!.type) : false;
 
   const handleFileInput: JSX.EventHandlerUnion<HTMLInputElement, InputEvent> = async (event) => {
     const files = event.currentTarget.files;
-    if (!files || files.length < 1) return;
+    if (files == null || files.length < 1) return;
 
     const file = files[0];
     const assetHash = await db.storeAsset(file);
@@ -66,7 +64,7 @@ const AssetCard: Component<{ asset: string }> = (props) => {
           ...(props.asset in project.assets ? project.assets[props.asset] : {}),
           hash: assetHash,
         },
-      }
+      },
     }));
   };
 
@@ -82,12 +80,13 @@ const AssetCard: Component<{ asset: string }> = (props) => {
     if (confirm("Are you sure you want to delete this asset? This cannot be undone.")) {
       setProject(project => {
         const oldAssets = project.assets;
-        const assetsClone = {...oldAssets};
+        const assetsClone = { ...oldAssets };
+        // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
         delete assetsClone[props.asset];
         return {
           ...project,
           assets: assetsClone,
-        }
+        };
       });
     }
   };

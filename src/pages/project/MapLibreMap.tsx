@@ -1,12 +1,11 @@
-import { Accessor, Component, Setter, createContext, createSignal, createUniqueId, onMount, useContext, JSX } from "solid-js";
-
+import { type Accessor, type Component, type Setter, createContext, createSignal, createUniqueId, onMount, useContext, type JSX } from "solid-js";
 import * as maplibregl from "maplibre-gl";
 
 import styles from "./MapLibreMap.module.css";
 
 export const MapLibreMap: Component<{ onLoad: () => void }> = (props) => {
   const mapId = createUniqueId();
-  const [_, setMap] = useContext(MapContext)!;
+  const [, setMap] = useContext(MapContext)!;
 
   onMount(() => {
     setMap(new maplibregl.Map({
@@ -14,7 +13,7 @@ export const MapLibreMap: Component<{ onLoad: () => void }> = (props) => {
       style: "https://api.maptiler.com/maps/streets-v2/style.json?key=LBk0jSklMmNKwGftcTqc", // stylesheet location
       center: [-79, 34], // starting position [lng, lat]
       zoom: 5, // starting zoom
-    }).on("load", props.onLoad))
+    }).on("load", props.onLoad));
   });
 
   return <div id={mapId} class={styles.MapLibreMapContainer}></div>;
@@ -25,7 +24,7 @@ const MapContext = createContext<[Accessor<maplibregl.Map | undefined>, Setter<m
 export const useMapController = () => {
   const result = useContext(MapContext);
 
-  if (!result) {
+  if (result == null) {
     throw Error("Attempted to call useMapController outside of the MapContext");
   } else {
     return result[0];

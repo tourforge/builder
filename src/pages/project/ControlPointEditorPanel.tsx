@@ -1,9 +1,10 @@
-import { Component, Show, JSX } from "solid-js";
-import { ControlPointModel } from "../../data";
+import { type Component, Show, type JSX } from "solid-js";
 
-import styles from "./ControlPointEditorPanel.module.css";
+import { type ControlPointModel } from "../../data";
 import { Field } from "../../components/Field";
 import { LatLngEditor } from "../../components/LatLngEditor";
+
+import styles from "./ControlPointEditorPanel.module.css";
 
 export const ControlPointEditorPanel: Component<{ controlPoint: () => ControlPointModel | undefined, onChange: (newControlPoint: ControlPointModel) => void }> = (props) => {
   const handleLocationChange = (lat: number, lng: number) => {
@@ -12,18 +13,18 @@ export const ControlPointEditorPanel: Component<{ controlPoint: () => ControlPoi
     }
 
     props.onChange(({ ...props.controlPoint()!, lat, lng }));
-  }
+  };
 
   const handleControlTypeInput: JSX.EventHandlerUnion<HTMLInputElement, InputEvent> = (ev) => {
     if (!ev.currentTarget.checked) return;
 
     const control = ev.currentTarget.value;
     if (control === "path" || control === "route") {
-      props.onChange(({ ...props.controlPoint()!, control: control }));
+      props.onChange(({ ...props.controlPoint()!, control }));
     } else {
       console.error("Unexpected value:", control);
     }
-  }
+  };
 
   return (
     <Show when={props.controlPoint()}>
@@ -45,7 +46,7 @@ export const ControlPointEditorPanel: Component<{ controlPoint: () => ControlPoi
                 type="radio"
                 id={`${id}-path`}
                 value="path"
-                checked={props.controlPoint()!.control === "path"} 
+                checked={props.controlPoint()!.control === "path"}
                 onInput={handleControlTypeInput}
               />
               <label for={`${id}-path`}>Path</label>

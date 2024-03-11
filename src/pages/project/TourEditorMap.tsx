@@ -3,17 +3,17 @@ import * as maplibregl from "maplibre-gl";
 import circle from "@turf/circle";
 
 import * as polyline from "../../polyline";
-import { MapLibreMap, useMapController } from "./MapLibreMap";
-
-import styles from "./TourEditorMap.module.css";
 import { useTour } from "../../hooks/Tour";
+
+import { MapLibreMap, useMapController } from "./MapLibreMap";
+import styles from "./TourEditorMap.module.css";
 
 export const TourEditorMap: Component = () => {
   const mapSignal = useMapController();
   const [tour, setTour] = useTour();
 
   const [isLoaded, setIsLoaded] = createSignal(mapSignal()?.loaded() ?? false);
-  const [markers, setMarkers] = createSignal<{ [id: string]: maplibregl.Marker }>({});
+  const [markers, setMarkers] = createSignal<Record<string, maplibregl.Marker>>({});
 
   const createMarkerElement = (index: number | null) => {
     if (index !== null) {
@@ -29,13 +29,12 @@ export const TourEditorMap: Component = () => {
   };
 
   const updateMarkerElement = (element: HTMLElement, index: number | null) => {
-    if (index !== null)
-      element.innerText = `${index + 1}`;
+    if (index !== null) { element.innerText = `${index + 1}`; }
   };
 
   const handleMarkerDragEnd = (id: string) => {
     const marker = markers()[id];
-    if (!marker) return;
+    if (marker == null) return;
 
     const idx = tour()!.route.findIndex(w => w.id === id);
     if (idx < 0) return;
@@ -63,7 +62,7 @@ export const TourEditorMap: Component = () => {
 
   const handlePoiMarkerDragEnd = (id: string) => {
     const marker = markers()[id];
-    if (!marker) return;
+    if (marker == null) return;
 
     const idx = tour()!.route.findIndex(w => w.id === id);
     if (idx < 0) return;
@@ -85,15 +84,15 @@ export const TourEditorMap: Component = () => {
   // This effect manages the markers on the map
   createEffect(() => {
     const map = mapSignal();
-    if (!map) return;
-    if (!tour()) return;
+    if (map == null) return;
+    if (tour() == null) return;
 
     // waypoint symbols
     tour()!.route.forEach(waypoint => {
       let index: number | null = tour()!.route.filter(w => w.type === "stop").findIndex(w => w.id === waypoint.id);
       if (index === -1) index = null;
 
-      if (markers()[waypoint.id]) {
+      if (markers()[waypoint.id] != null) {
         markers()[waypoint.id].setLngLat(waypoint);
         updateMarkerElement(markers()[waypoint.id].getElement(), index);
       } else {
@@ -104,14 +103,14 @@ export const TourEditorMap: Component = () => {
             element: createMarkerElement(index),
           }).setLngLat(waypoint)
             .addTo(map)
-            .on("dragend", () => handleMarkerDragEnd(waypoint.id)),
-        }); 
+            .on("dragend", () => { handleMarkerDragEnd(waypoint.id); }),
+        });
       }
     });
 
     // poi symbols
     tour()!.pois.forEach(poi => {
-      if (markers()[poi.id]) {
+      if (markers()[poi.id] != null) {
         markers()[poi.id].setLngLat(poi);
       } else {
         setMarkers({
@@ -121,14 +120,14 @@ export const TourEditorMap: Component = () => {
             element: createPoiMarkerElement(),
           }).setLngLat(poi)
             .addTo(map)
-            .on("dragend", () => handlePoiMarkerDragEnd(poi.id)),
+            .on("dragend", () => { handlePoiMarkerDragEnd(poi.id); }),
         });
       }
     });
 
     // manage the records on which markers are currently present
     for (const id in markers()) {
-      if (!tour()!.route.some(waypoint => waypoint.id == id) && !tour()!.pois.some(poi => poi.id == id)) {
+      if (!tour()!.route.some(waypoint => waypoint.id === id) && !tour()!.pois.some(poi => poi.id === id)) {
         markers()[id].remove();
         const { [id]: _, ...newMarkers } = markers();
         setMarkers(newMarkers);
@@ -139,13 +138,13 @@ export const TourEditorMap: Component = () => {
   // This effect manages the map's GeoJSON data
   createEffect(() => {
     const map = mapSignal();
-    if (!isLoaded() || !map) return;
-    if (!tour()) return;
+    if (!isLoaded() || map == null) return;
+    if (tour() == null) return;
 
     if (tour()!.route.length > 0) {
       const triggerRadiiGeoJson: GeoJSON.GeoJSON = {
-        "type": "FeatureCollection",
-        "features": tour()!.route.filter(w => w.type === "stop").map(waypoint => (
+        type: "FeatureCollection",
+        features: tour()!.route.filter(w => w.type === "stop").map(waypoint => (
           circle(
             [waypoint.lng, waypoint.lat],
             waypoint.type === "stop" ? waypoint.trigger_radius : 0,
@@ -154,23 +153,23 @@ export const TourEditorMap: Component = () => {
         )),
       };
 
-      if (!map.getSource("trigger_radii")) {
+      if (map.getSource("trigger_radii") == null) {
         map.addSource("trigger_radii", {
-          "type": "geojson",
-          "data": triggerRadiiGeoJson,
+          type: "geojson",
+          data: triggerRadiiGeoJson,
         });
       } else {
         (map.getSource("trigger_radii") as maplibregl.GeoJSONSource).setData(triggerRadiiGeoJson);
       }
 
-      if (!map.getLayer("trigger_radii_layer")) {
+      if (map.getLayer("trigger_radii_layer") == null) {
         map.addLayer({
-          "id": "trigger_radii_layer",
-          "type": "fill",
-          "source": "trigger_radii",
-          "layout": {},
-          "paint": {
-            "fill-color": "rgba(239, 140, 47, 0.5)"
+          id: "trigger_radii_layer",
+          type: "fill",
+          source: "trigger_radii",
+          layout: {},
+          paint: {
+            "fill-color": "rgba(239, 140, 47, 0.5)",
           },
         });
       }
@@ -180,43 +179,41 @@ export const TourEditorMap: Component = () => {
       const route = polyline.decode(tour()!.path);
 
       const routeGeoJson: GeoJSON.GeoJSON = {
-        "type": "Feature",
-        "properties": {},
-        "geometry": {
-          "type": "LineString",
-          "coordinates": route.map(point => [point.lng, point.lat])
-        }
+        type: "Feature",
+        properties: {},
+        geometry: {
+          type: "LineString",
+          coordinates: route.map(point => [point.lng, point.lat]),
+        },
       };
 
-      if (!map.getSource("route")) {
+      if (map.getSource("route") == null) {
         map.addSource("route", {
-          "type": "geojson",
-          "data": routeGeoJson
+          type: "geojson",
+          data: routeGeoJson,
         });
       } else {
         (map.getSource("route") as maplibregl.GeoJSONSource).setData(routeGeoJson);
       }
 
-      if (!map.getLayer("route_layer")) {
+      if (map.getLayer("route_layer") == null) {
         map.addLayer({
-          "id": "route_layer",
-          "type": "line",
-          "source": "route",
-          "layout": {
+          id: "route_layer",
+          type: "line",
+          source: "route",
+          layout: {
             "line-join": "round",
-            "line-cap": "round"
+            "line-cap": "round",
           },
-          "paint": {
+          paint: {
             "line-color": "#f00",
-            "line-width": 4
+            "line-width": 4,
           },
         });
       }
     } else {
-      if (map.getLayer("route_layer"))
-        map.removeLayer("route_layer");
-      if (map.getSource("route"))
-        map.removeSource("route");
+      if (map.getLayer("route_layer") != null) { map.removeLayer("route_layer"); }
+      if (map.getSource("route") != null) { map.removeSource("route"); }
     }
   });
 

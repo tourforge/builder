@@ -1,26 +1,27 @@
-import { Component, Show, JSX } from "solid-js";
-import { StopModel } from "../../data";
+import { type Component, Show, type JSX } from "solid-js";
 
-import styles from "./StopEditorPanel.module.css";
+import { type StopModel } from "../../data";
 import { Field } from "../../components/Field";
 import { Gallery } from "../../components/Gallery";
 import { Asset } from "../../components/Asset";
 import { LatLngEditor } from "../../components/LatLngEditor";
 
+import styles from "./StopEditorPanel.module.css";
+
 export const StopEditorPanel: Component<{ waypoint: () => StopModel | undefined, onChange: (newWaypoint: StopModel) => void }> = (props) => {
   const handleTitleChange: JSX.EventHandlerUnion<HTMLInputElement, InputEvent> = (ev) => {
     props.onChange(({ ...props.waypoint()!, title: ev.currentTarget.value }));
-  }
+  };
 
   const handleDescChange: JSX.EventHandlerUnion<HTMLTextAreaElement, InputEvent> = (ev) => {
     props.onChange(({ ...props.waypoint()!, desc: ev.currentTarget.value }));
-  }
+  };
 
   const handleTriggerRadChange: JSX.EventHandlerUnion<HTMLInputElement, InputEvent> = (ev) => {
-    if (+ev.currentTarget.value) {
+    if (+ev.currentTarget.value !== 0 && !Number.isNaN(+ev.currentTarget.value)) {
       props.onChange(({ ...props.waypoint()!, trigger_radius: +ev.currentTarget.value }));
     }
-  }
+  };
 
   const handleLocationChange = (lat: number, lng: number) => {
     if (lat === props.waypoint()!.lat && lng === props.waypoint()!.lng) {
@@ -28,34 +29,34 @@ export const StopEditorPanel: Component<{ waypoint: () => StopModel | undefined,
     }
 
     props.onChange(({ ...props.waypoint()!, lat, lng }));
-  }
+  };
 
   const handleTranscriptChange: JSX.EventHandlerUnion<HTMLTextAreaElement, InputEvent> = (ev) => {
     props.onChange(({ ...props.waypoint()!, transcript: ev.currentTarget.value }));
-  }
+  };
 
   const handleNarrationChange = (narration: string) => {
     props.onChange(({ ...props.waypoint()!, narration: narration.trim() === "" ? undefined : narration.trim() }));
-  }
+  };
 
   const handleSiteLinkChange: JSX.EventHandlerUnion<HTMLInputElement, InputEvent> = (ev) => {
-    if (!ev.currentTarget.value) {
+    if (ev.currentTarget.value === "") {
       props.onChange(({ ...props.waypoint()!, links: {} }));
     } else {
       props.onChange(({ ...props.waypoint()!, links: { "Site Link": { href: ev.currentTarget.value } } }));
     }
-  }
+  };
 
   const handleControlTypeInput: JSX.EventHandlerUnion<HTMLInputElement, InputEvent> = (ev) => {
     if (!ev.currentTarget.checked) return;
 
     const control = ev.currentTarget.value;
     if (control === "path" || control === "route" || control === "none") {
-      props.onChange(({ ...props.waypoint()!, control: control }));
+      props.onChange(({ ...props.waypoint()!, control }));
     } else {
       console.error("Unexpected value:", control);
     }
-  }
+  };
 
   return (
     <Show when={props.waypoint()}>
@@ -106,10 +107,12 @@ export const StopEditorPanel: Component<{ waypoint: () => StopModel | undefined,
             <Gallery
               id={id}
               value={props.waypoint()!.gallery}
-              onChange={newGallery => props.onChange({
-                ...props.waypoint()!,
-                gallery: newGallery,
-              })}
+              onChange={newGallery => {
+                props.onChange({
+                  ...props.waypoint()!,
+                  gallery: newGallery,
+                });
+              }}
             />
           )}
         </Field>
@@ -151,7 +154,7 @@ export const StopEditorPanel: Component<{ waypoint: () => StopModel | undefined,
                 type="radio"
                 id={`${id}-path`}
                 value="path"
-                checked={props.waypoint()!.control === "path"} 
+                checked={props.waypoint()!.control === "path"}
                 onInput={handleControlTypeInput}
               />
               <label for={`${id}-path`}>Path</label>

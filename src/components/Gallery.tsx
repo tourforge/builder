@@ -1,8 +1,8 @@
-import { Component, Index } from "solid-js";
+import { type Component, Index } from "solid-js";
 
-import { GalleryModel } from "../data";
+import { type GalleryModel } from "../data";
+
 import { Asset } from "./Asset";
-
 import styles from "./Gallery.module.css";
 
 export const Gallery: Component<{
@@ -26,7 +26,7 @@ export const Gallery: Component<{
     if (i <= 0 || i >= props.value.length) {
       return;
     }
-    props.onChange([...props.value.slice(0, i - 1), props.value[i], props.value[i - 1], ...props.value.slice(i + 1)])
+    props.onChange([...props.value.slice(0, i - 1), props.value[i], props.value[i - 1], ...props.value.slice(i + 1)]);
   };
 
   const handleDownClick = (i: number) => () => {

@@ -1,11 +1,11 @@
-import { createUniqueId, type Component, JSX, Show } from "solid-js";
+import { createUniqueId, type Component, type JSX, Show } from "solid-js";
 
 import styles from "./Field.module.css";
 
 export const Field: Component<{ set?: boolean, label?: JSX.Element, children: (id: string) => JSX.Element }> = (props) => {
   const id = createUniqueId();
 
-  if (props.set) {
+  if (props.set === true) {
     return (
       <fieldset class={styles.Field}>
         <Show when={props.label}>

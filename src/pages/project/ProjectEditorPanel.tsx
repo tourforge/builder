@@ -1,11 +1,13 @@
 import { A, useParams } from "@solidjs/router";
-import { Component, For, Show } from "solid-js";
+import { type Component, For, Show } from "solid-js";
+import { toast } from "solid-toast";
 import { v4 as uuidv4 } from "uuid";
 
-import styles from "./ProjectEditorPanel.module.css";
 import { useProject } from "../../hooks/Project";
-import { exportProject } from "../../export";
+import { ExportError, exportProject } from "../../export";
 import { useDB } from "../../db";
+
+import styles from "./ProjectEditorPanel.module.css";
 
 export const ProjectEditorPanel: Component = () => {
   const params = useParams();
@@ -16,6 +18,7 @@ export const ProjectEditorPanel: Component = () => {
     setProject(project => ({
       ...project,
       tours: [
+        ...project.tours,
         {
           type: "driving",
           id: uuidv4(),
@@ -26,16 +29,24 @@ export const ProjectEditorPanel: Component = () => {
           pois: [],
           path: "",
         },
-        ...project.tours,
-      ]
+      ],
     }));
   };
   const handleSaveClick = async () => {
-    if (!project()) {
+    if (project() == null) {
       return;
     }
 
-    await exportProject(db, project()!.id);
+    try {
+      await exportProject(db, project()!.id);
+    } catch (err) {
+      console.error("Error while exporting project:", err);
+      if (err instanceof ExportError) {
+        toast.error("An error occurred while saving the project: " + err.message);
+      } else {
+        toast.error("An internal error occurred while saving the project.");
+      }
+    }
   };
 
   return (

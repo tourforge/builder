@@ -1,14 +1,14 @@
-import { openDB, DBSchema } from 'idb';
-import { createSHA256, sha256 } from 'hash-wasm';
+import { openDB, type DBSchema } from "idb";
+import { createSHA256 } from "hash-wasm";
+import { type IHasher } from "hash-wasm/dist/lib/WASMInterface";
 
-import { AssetType, ProjectModel } from './data';
-import { IHasher } from 'hash-wasm/dist/lib/WASMInterface';
+import { type ProjectModel } from "./data";
 
 export const useDB = () => {
   // in case we ever do something different than one global instance,
   // we don't expose DB.instance directly and treat it like a hook.
   return DB.instance;
-}
+};
 
 export type DbProject = ProjectModel & {
   id: string,
@@ -25,8 +25,8 @@ export type DbProject = ProjectModel & {
 export class DB {
   static instance = new DB();
 
-  private persisted: Promise<boolean> = navigator.storage.persist();
-  private hasher: Promise<IHasher> = createSHA256();
+  private readonly persisted: Promise<boolean> = navigator.storage.persist();
+  private readonly hasher: Promise<IHasher> = createSHA256();
 
   async isPersistent() {
     return await this.persisted;
@@ -67,6 +67,12 @@ export class DB {
     await db.put("projects", project);
   }
 
+  async deleteProject(id: string) {
+    const db = await this.openDB();
+
+    await db.delete("projects", id);
+  }
+
   async loadAsset(hash: string) {
     const db = await this.openDB();
 
@@ -78,7 +84,7 @@ export class DB {
 
     const db = await this.openDB();
 
-    return await db.put("assets", data, hash)
+    return await db.put("assets", data, hash);
   }
 
   private async hashBlob(data: Blob) {
@@ -89,13 +95,13 @@ export class DB {
 
     let currentOffset = 0;
     while (currentOffset < data.size) {
-        const chunk = data.slice(currentOffset, currentOffset + chunkSize);
-        const buffer = await chunk.arrayBuffer();
-        h.update(new Uint8Array(buffer));
-        currentOffset += chunkSize;
+      const chunk = data.slice(currentOffset, currentOffset + chunkSize);
+      const buffer = await chunk.arrayBuffer();
+      h.update(new Uint8Array(buffer));
+      currentOffset += chunkSize;
     }
 
-    return h.digest('hex');
+    return h.digest("hex");
   }
 
   private async openDB() {
@@ -122,7 +128,7 @@ export class DB {
         if (!db.objectStoreNames.contains("assets")) {
           db.createObjectStore("assets");
         }
-      }
+      },
     });
   }
 }

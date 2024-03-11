@@ -1,17 +1,18 @@
+/* eslint-disable @typescript-eslint/naming-convention */
 // MIT License
-// 
+//
 // Copyright (c) 2022 Placemark
-// 
+//
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
 // in the Software without restriction, including without limitation the rights
 // to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be included in all
 // copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -20,7 +21,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-import { LatLng } from "./data";
+import { type LatLng } from "./data";
 
 // https://github.com/mapbox/polyline/blob/master/src/polyline.js
 
@@ -53,6 +54,7 @@ function encodeNumber(current: number, previous: number, factor: number) {
 }
 
 function resultChange(result: number) {
+  // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
   return result & 1 ? ~(result >> 1) : result >> 1;
 }
 
@@ -106,7 +108,7 @@ export function decode(str: string, precision: number = 5): LatLng[] {
     lat += latitude_change;
     lng += longitude_change;
 
-    coordinates.push({ "lng": lng / factor, "lat": lat / factor });
+    coordinates.push({ lng: lng / factor, lat: lat / factor });
   }
 
   return coordinates;
@@ -119,7 +121,7 @@ export function decode(str: string, precision: number = 5): LatLng[] {
  * @returns encoded polyline
  */
 export function encode(coordinates: LatLng[], precision: number = 5) {
-  if (!coordinates.length) {
+  if (coordinates.length === 0) {
     return "";
   }
   const factor = Math.pow(10, precision);

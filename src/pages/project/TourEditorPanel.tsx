@@ -1,19 +1,19 @@
 import { FiArrowDown, FiArrowLeft, FiArrowUp, FiEdit, FiTrash } from "solid-icons/fi";
-import { For, JSX, Resource, Setter, Show, createSignal, type Component } from "solid-js";
+import { For, type JSX, type Setter, Show, createSignal, type Component } from "solid-js";
 import { v4 as uuidv4 } from "uuid";
+import { useNavigate } from "@solidjs/router";
 
 import { Field } from "../../components/Field";
 import { Gallery } from "../../components/Gallery";
-import { ControlPointModel, GalleryModel, StopModel } from "../../data";
+import { type ControlPointModel, type GalleryModel, type StopModel } from "../../data";
 import { useRouteCalculator } from "../../hooks/RouteCalculator";
-import { useMapController } from "./MapLibreMap";
-import { StopEditorPanel } from "./StopEditorPanel";
-
-import styles from "./TourEditorPanel.module.css";
-import { useNavigate } from "@solidjs/router";
-import { ControlPointEditorPanel } from "./ControlPointEditorPanel";
 import { useTour } from "../../hooks/Tour";
 import { useProject } from "../../hooks/Project";
+
+import { ControlPointEditorPanel } from "./ControlPointEditorPanel";
+import styles from "./TourEditorPanel.module.css";
+import { StopEditorPanel } from "./StopEditorPanel";
+import { useMapController } from "./MapLibreMap";
 
 type Panel = {
   which: "main",
@@ -32,9 +32,9 @@ export const TourEditorPanel: Component = () => {
   useRouteCalculator();
 
   const waypointPanelWaypoint = () => {
-    let curPanel = panel();
-    let found = tour()?.route.find(w => curPanel.which === "stop" && w.type === "stop" && w.id === curPanel.id);
-    if (found && found.type === "stop") {
+    const curPanel = panel();
+    const found = tour()?.route.find(w => curPanel.which === "stop" && w.type === "stop" && w.id === curPanel.id);
+    if (found != null && found.type === "stop") {
       return found;
     } else {
       return undefined;
@@ -42,7 +42,7 @@ export const TourEditorPanel: Component = () => {
   };
 
   const handleWaypointPanelWaypointChange = (newWaypoint: StopModel) => {
-    let foundIdx = tour()?.route.findIndex(w => w.type === "stop" && w.id === newWaypoint.id);
+    const foundIdx = tour()?.route.findIndex(w => w.type === "stop" && w.id === newWaypoint.id);
     if (foundIdx === undefined || foundIdx < 0) return;
 
     setTour({
@@ -52,9 +52,9 @@ export const TourEditorPanel: Component = () => {
   };
 
   const controlPanelControlPoint = () => {
-    let curPanel = panel();
-    let found = tour()?.route.find(w => curPanel.which === "control" && w.type === "control" && w.id === curPanel.id);
-    if (found && found.type === "control") {
+    const curPanel = panel();
+    const found = tour()?.route.find(w => curPanel.which === "control" && w.type === "control" && w.id === curPanel.id);
+    if (found != null && found.type === "control") {
       return found;
     } else {
       return undefined;
@@ -62,7 +62,7 @@ export const TourEditorPanel: Component = () => {
   };
 
   const handleControlPanelControlChange = (newControlPoint: ControlPointModel) => {
-    let foundIdx = tour()?.route.findIndex(w => w.type === "control" && w.id === newControlPoint.id);
+    const foundIdx = tour()?.route.findIndex(w => w.type === "control" && w.id === newControlPoint.id);
     if (foundIdx === undefined || foundIdx < 0) return;
 
     setTour({
@@ -121,12 +121,12 @@ const MainPanel: Component<{ show: boolean, setPanel: Setter<Panel> }> = (props)
     if (type === "driving" || type === "walking") {
       setTour(({
         ...tour()!,
-        type: type,
+        type,
       }));
     } else {
       console.error("Unexpected value:", type);
     }
-  }
+  };
 
   const handleTourSiteLinkInput: JSX.EventHandlerUnion<HTMLInputElement, InputEvent> = (event) => {
     const currentTour = tour()!;
@@ -144,7 +144,7 @@ const MainPanel: Component<{ show: boolean, setPanel: Setter<Panel> }> = (props)
     });
   };
 
-  const handleRouteChange = (newRoute: (StopModel | ControlPointModel)[]) => {
+  const handleRouteChange = (newRoute: Array<StopModel | ControlPointModel>) => {
     const currentTour = tour()!;
     setTour({
       ...currentTour,
@@ -154,7 +154,7 @@ const MainPanel: Component<{ show: boolean, setPanel: Setter<Panel> }> = (props)
 
   const handleDeleteClick = async () => {
     const currentProject = project();
-    if (currentProject && confirm("Are you sure you want to delete the tour? This action canot be undone.")) {
+    if (currentProject != null && confirm("Are you sure you want to delete the tour? This action canot be undone.")) {
       deleteTour();
       navigate(`/projects/${currentProject.id}`);
     }
@@ -181,7 +181,7 @@ const MainPanel: Component<{ show: boolean, setPanel: Setter<Panel> }> = (props)
                 name="control"
                 id={`${id}-driving`}
                 value="driving"
-                checked={tour()!.type === "driving"} 
+                checked={tour()!.type === "driving"}
                 onInput={handleTypeInput}
               />
               <label for={`${id}-driving`}>Driving</label>
@@ -192,7 +192,7 @@ const MainPanel: Component<{ show: boolean, setPanel: Setter<Panel> }> = (props)
                 name="control"
                 id={`${id}-walking`}
                 value="walking"
-                checked={tour()!.type === "walking"} 
+                checked={tour()!.type === "walking"}
                 onInput={handleTypeInput}
               />
               <label for={`${id}-walking`}>Walking</label>
@@ -217,7 +217,7 @@ const MainPanel: Component<{ show: boolean, setPanel: Setter<Panel> }> = (props)
             <RouteList
               route={() => tour()!.route}
               onChange={handleRouteChange}
-              onEditClick={(id, type) => props.setPanel({ which: type, id: id })}
+              onEditClick={(id, type) => props.setPanel({ which: type, id })}
             />
         </Show>
         <Show when={currentTab() === "pois"}>
@@ -231,8 +231,8 @@ const MainPanel: Component<{ show: boolean, setPanel: Setter<Panel> }> = (props)
 };
 
 const RouteList: Component<{
-  route: () => (StopModel | ControlPointModel)[],
-  onChange: (newRoute: (StopModel | ControlPointModel)[]) => void,
+  route: () => Array<StopModel | ControlPointModel>,
+  onChange: (newRoute: Array<StopModel | ControlPointModel>) => void,
   onEditClick: (id: string, type: "stop" | "control") => void,
 }> = (props) => {
   const map = useMapController();
@@ -253,7 +253,7 @@ const RouteList: Component<{
     };
 
     props.onChange([...props.route(), newWaypoint]);
-  }
+  };
 
   const addControlPoint = () => {
     const newWaypoint: ControlPointModel = {
@@ -265,7 +265,7 @@ const RouteList: Component<{
     };
 
     props.onChange([...props.route(), newWaypoint]);
-  }
+  };
 
   const handleMove = (id: string, dir: "up" | "down") => {
     const index = props.route().findIndex(w => w.id === id);
@@ -280,7 +280,7 @@ const RouteList: Component<{
 
       props.onChange([...props.route().slice(0, index), props.route()[index + 1], props.route()[index], ...props.route().slice(index + 2)]);
     }
-  }
+  };
 
   const handleDelete = (id: string) => {
     const index = props.route().findIndex(w => w.id === id);
@@ -288,7 +288,7 @@ const RouteList: Component<{
     const name = wp.type === "control" ? "Control Point" : wp.title;
     if (!confirm(`Are you sure you want to delete the waypoint "${name}"? This action cannot be undone.`)) return;
     props.onChange([...props.route().slice(0, index), ...props.route().slice(index + 1)]);
-  }
+  };
 
   return (
     <div class={styles.PointsList}>
@@ -298,16 +298,16 @@ const RouteList: Component<{
           <div class={styles.PointName}>
             {waypoint.type === "stop" ? waypoint.title : "Control Point"}
           </div>
-          <button class={styles.PointButton} onClick={() => handleMove(waypoint.id, "up")}>
+          <button class={styles.PointButton} onClick={() => { handleMove(waypoint.id, "up"); }}>
             <FiArrowUp />
           </button>
-          <button class={styles.PointButton} onClick={() => handleMove(waypoint.id, "down")}>
+          <button class={styles.PointButton} onClick={() => { handleMove(waypoint.id, "down"); }}>
             <FiArrowDown />
           </button>
-          <button class={styles.PointButton} onClick={() => props.onEditClick(waypoint.id, waypoint.type)}>
+          <button class={styles.PointButton} onClick={() => { props.onEditClick(waypoint.id, waypoint.type); }}>
             <FiEdit />
           </button>
-          <button class={styles.PointButton} onClick={() => handleDelete(waypoint.id)}>
+          <button class={styles.PointButton} onClick={() => { handleDelete(waypoint.id); }}>
             <FiTrash />
           </button>
         </div>
@@ -321,7 +321,7 @@ const RouteList: Component<{
       </button>
     </div>
   );
-}
+};
 
 const SubPanel: Component<{ show: boolean, title: JSX.Element, onClose: () => void, children: JSX.Element }> = (props) => {
   return (

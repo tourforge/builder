@@ -1,10 +1,11 @@
 import { FiArrowDown, FiArrowUp, FiImage, FiMusic, FiTrash, FiUpload } from "solid-icons/fi";
-import { Component, createSignal, createUniqueId, For, JSX, Show } from "solid-js";
+import { type Component, createSignal, createUniqueId, For, type JSX, Show } from "solid-js";
 
-import styles from "./Asset.module.css";
 import { useDB } from "../db";
 import { useProject } from "../hooks/Project";
 import { useAssetUrl } from "../hooks/AssetUrl";
+
+import styles from "./Asset.module.css";
 
 export const Asset: Component<{
   id?: string,
@@ -19,7 +20,7 @@ export const Asset: Component<{
   const fileInputId = createUniqueId();
 
   const [imageLoaded, setImageLoaded] = createSignal(false);
-  const [query, setQuery] = createSignal(props.asset);
+  const [query, setQuery] = createSignal(props.asset ?? "");
 
   const db = useDB();
   const [project, setProject] = useProject();
@@ -32,7 +33,7 @@ export const Asset: Component<{
     setQuery(newQuery);
 
     const match = assets().find(asset => asset === newQuery);
-    if (match) {
+    if (match != null) {
       props.onIdChange(match);
     }
   };
@@ -43,17 +44,16 @@ export const Asset: Component<{
     }
 
     const assetName = query();
-    if (!assetName) {
+    if (assetName === "") {
       alert("Cannot upload asset with empty name.");
       return;
     }
-  
+
     const files = event.currentTarget.files;
-    if (!files || files.length < 1) return;
+    if (files == null || files.length < 1) return;
 
     const file = files[0];
-    let assetHash: string;
-    assetHash = await db.storeAsset(file);
+    const assetHash = await db.storeAsset(file);
 
     setProject(project => ({
       ...project,
@@ -65,7 +65,7 @@ export const Asset: Component<{
           ...(assetName in project.assets ? project.assets[assetName] : {}),
           hash: assetHash,
         },
-      }
+      },
     }));
 
     if (props.asset !== assetName) {

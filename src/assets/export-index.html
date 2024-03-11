@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>%PROJECT_TITLE%</title>
+    </head>
+    <body>
+        <p>This URL contains the data for %PROJECT_TITLE%, a set of tours created with TourForge.</p>
+        <noscript>
+            <p>To edit this tour, copy the URL for this webpage and paste it into the relevant field in TourForge.</p>
+        </noscript>
+
+        <template id="content">
+            <p>To edit this tour, use the following link: <a class="edit-tour-link"></a></p>
+        </template>
+    </body>
+    <script>
+        const template = document.querySelector("template#content");
+        const clone = template.content.cloneNode(true);
+        const link = clone.querySelector(".edit-tour-link");
+        let selfLink = window.location.href;
+        if (selfLink.endsWith("/index.html/")) {
+            selfLink = selfLink.substring(0, selfLink.length - "/index.html/".length);
+        } else if (selfLink.endsWith("/index.html")) {
+            selfLink = selfLink.substring(0, selfLink.length - "/index.html".length);
+        }
+        const linkText = "https://tourforge.github.io/builder?tourforge-load-project=" + encodeURIComponent(selfLink);
+        link.href = linkText;
+        link.innerText = linkText;
+        document.body.appendChild(clone);
+    </script>
+</html>

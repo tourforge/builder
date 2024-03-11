@@ -1,16 +1,16 @@
 import { A } from "@solidjs/router";
-import { Component, Show, JSX, createResource, onCleanup } from "solid-js";
+import { type Component, Show, type JSX, createResource, onCleanup } from "solid-js";
 
 import styles from "./Navbar.module.css";
 import { useDB } from "./db";
 
-export const Navbar: Component<{children?: JSX.Element}> = (props) => {
+export const Navbar: Component<{ children?: JSX.Element }> = (props) => {
   const db = useDB();
-  const [isPersistent] = createResource(() => db.isPersistent());
-  const [storageEstimate, { refetch: reestimate }] = createResource(() => db.storageEstimate());
+  const [isPersistent] = createResource(async () => await db.isPersistent());
+  const [storageEstimate, { refetch: reestimate }] = createResource(async () => await db.storageEstimate());
   const usedMB = () => {
     const est = storageEstimate();
-    if (est === undefined || est.usage === undefined) {
+    if (est?.usage === undefined) {
       return undefined;
     }
 
@@ -18,7 +18,7 @@ export const Navbar: Component<{children?: JSX.Element}> = (props) => {
   };
   const quotaMB = () => {
     const est = storageEstimate();
-    if (est === undefined || est.quota === undefined) {
+    if (est?.quota === undefined) {
       return undefined;
     }
 
@@ -26,20 +26,20 @@ export const Navbar: Component<{children?: JSX.Element}> = (props) => {
   };
   const usedPct = () => {
     const est = storageEstimate();
-    if (est === undefined || est.usage === undefined || est.quota === undefined) {
+    if (est?.usage === undefined || est.quota === undefined) {
       return undefined;
     }
 
-    return Number(est.usage / est.quota / 100).toLocaleString(undefined, { style: 'percent', minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    return Number(est.usage / est.quota / 100).toLocaleString(undefined, { style: "percent", minimumFractionDigits: 2, maximumFractionDigits: 2 });
   };
 
-  const intervalId = setInterval(() => reestimate(), 10000);
-  onCleanup(() => clearInterval(intervalId));
+  const intervalId = setInterval(async () => await reestimate(), 10000);
+  onCleanup(() => { clearInterval(intervalId); });
 
   return (
     <div class={styles.Wrapper}>
       <nav class={styles.Nav}>
-        <A class={styles.NavButton} classList={{[styles.NavHeader]: true}} href="/">TourForge</A>
+        <A class={styles.NavButton} classList={{ [styles.NavHeader]: true }} href="/">TourForge</A>
         <div style="flex: 1"></div>
         <Show when={isPersistent() === true}>
           <div>Changes are only saved locally in your browser.</div>
@@ -49,7 +49,7 @@ export const Navbar: Component<{children?: JSX.Element}> = (props) => {
             Changes are only saved temporarily and will go away when your browser restarts.
           </div>
         </Show>
-        <Show when={usedMB() && quotaMB() && usedPct()}>
+        <Show when={usedMB() !== undefined && quotaMB() !== undefined && usedPct() !== undefined}>
           <div>
             Storage: {usedMB()} of {quotaMB()} used ({usedPct()})
           </div>
@@ -57,5 +57,5 @@ export const Navbar: Component<{children?: JSX.Element}> = (props) => {
       </nav>
       <main class={styles.Main}>{props.children}</main>
     </div>
-  )
-}
+  );
+};

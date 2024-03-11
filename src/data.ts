@@ -1,35 +1,31 @@
 export type AssetType = "narration" | "image" | "tiles";
 
-export type ProjectModel = {
+export interface ProjectModel {
   title: string,
   tours: TourModel[],
-  assets: {
-    [asset: AssetReference]: {
-      hash: string,
-      alt: string,
-      attrib: string,
-    },
-  },
+  assets: Record<AssetReference, {
+    hash: string,
+    alt: string,
+    attrib: string,
+  }>,
 }
 
-export type TourModel = {
+export interface TourModel {
   type: "driving" | "walking",
   id: string,
   title: string,
   desc: string,
   gallery: GalleryModel,
   tiles?: AssetReference,
-  route: (StopModel | ControlPointModel)[],
+  route: Array<StopModel | ControlPointModel>,
   pois: PoiModel[],
   path: string,
-  links?: {
-    [name: string]: {
-      href: string,
-    }
-  } | undefined,
+  links?: Record<string, {
+    href: string,
+  }> | undefined,
 }
 
-export type StopModel = {
+export interface StopModel {
   type: "stop",
   id: string,
   title: string,
@@ -41,14 +37,12 @@ export type StopModel = {
   gallery: GalleryModel,
   transcript?: AssetReference,
   narration?: AssetReference,
-  links?: {
-    [name: string]: {
-      href: string,
-    }
-  } | undefined,
+  links?: Record<string, {
+    href: string,
+  }> | undefined,
 }
 
-export type ControlPointModel = {
+export interface ControlPointModel {
   type: "control",
   id: string,
   lat: number,
@@ -56,22 +50,20 @@ export type ControlPointModel = {
   control: "route" | "path",
 }
 
-export type PoiModel = {
+export interface PoiModel {
   id: string,
   lat: number,
   lng: number,
   title: string,
   desc: string,
   gallery: GalleryModel,
-  links?: {
-    [name: string]: {
-      href: string,
-    }
-  } | undefined,
+  links?: Record<string, {
+    href: string,
+  }> | undefined,
 }
 
-export type GalleryModel = AssetReference[]
+export type GalleryModel = AssetReference[];
 
-export type AssetReference = string
+export type AssetReference = string;
 
-export type LatLng = { lat: number, lng: number }
+export interface LatLng { lat: number, lng: number }

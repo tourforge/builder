@@ -1,6 +1,8 @@
-import { Component, JSX, children, createContext, createSignal, useContext } from "solid-js";
+import { type Component, type JSX, createContext, createSignal, useContext } from "solid-js";
+
+import { type TourModel } from "../data";
+
 import { useProject } from "./Project";
-import { TourModel } from "../data";
 
 export const useTour = () => {
   const context = useContext(TourContext);
@@ -10,10 +12,11 @@ export const useTour = () => {
   } else {
     throw new Error("Attempted to useTour() outside of TourProvider");
   }
-}
+};
 
 export const TourContext = createContext<[
   () => TourModel | undefined,
+  // eslint-disable-next-line @typescript-eslint/ban-types
   (value: (Exclude<TourModel, Function> | ((value: TourModel) => TourModel))) => void,
   () => void,
 ]>();
@@ -25,8 +28,9 @@ export const TourProvider: Component<{ id: string, children: JSX.Element }> = (p
   const get = () => {
     if (deleted()) return undefined;
 
-    return project()?.tours.find(tour => tour.id === props.id)
+    return project()?.tours.find(tour => tour.id === props.id);
   };
+  // eslint-disable-next-line @typescript-eslint/ban-types
   const set = (value: (Exclude<TourModel, Function> | ((value: TourModel) => TourModel))) => {
     if (deleted()) return;
 
@@ -55,11 +59,21 @@ export const TourProvider: Component<{ id: string, children: JSX.Element }> = (p
   };
   const del = () => {
     setDeleted(true);
+    const currentTourIndex = project()?.tours.findIndex(tour => tour.id === props.id);
+    if (currentTourIndex !== undefined && currentTourIndex >= 0) {
+      setProject(project => ({
+        ...project,
+        tours: [
+          ...project.tours.slice(0, currentTourIndex),
+          ...project.tours.slice(currentTourIndex + 1),
+        ],
+      }));
+    }
   };
 
   return (
     <TourContext.Provider value={[get, set, del]}>
       {props.children}
     </TourContext.Provider>
-  )
-}
+  );
+};

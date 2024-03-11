@@ -1,14 +1,14 @@
-import { Component, createResource, createSignal, For, JSX, Show } from "solid-js";
-import { FiTrash } from "solid-icons/fi";
+import { type Component, type JSX } from "solid-js";
+import { useNavigate } from "@solidjs/router";
 
-import styles from "./ProjectManager.module.css";
 import { Field } from "../../components/Field";
-import { useParams } from "@solidjs/router";
 import { useProject } from "../../hooks/Project";
 
+import styles from "./ProjectManager.module.css";
+
 export const ProjectManager: Component = () => {
-  const params = useParams();
-  const [project, setProject] = useProject();
+  const navigate = useNavigate();
+  const [project, setProject, deleteProject] = useProject();
 
   const handleProjectTitleInput: JSX.EventHandlerUnion<HTMLInputElement, InputEvent> = async (event) => {
     const newTitle = event.currentTarget.value;
@@ -19,9 +19,10 @@ export const ProjectManager: Component = () => {
   };
 
   const handleDeleteClick = async () => {
-    if (!project()) return;
+    if (project() == null) return;
     if (prompt("Are you sure you want to delete this project? This cannot be undone.\nTo delete the project, type its full name below.") === project()!.title) {
-      console.error("TODO")
+      await deleteProject();
+      navigate("/");
     }
   };
 
@@ -32,8 +33,6 @@ export const ProjectManager: Component = () => {
           <input type="text" id={id} value={project()?.title ?? ""} onInput={handleProjectTitleInput} />
         )}
       </Field>
-
-      
       <Field set label="Actions">
         {() => (
           <>
@@ -44,4 +43,4 @@ export const ProjectManager: Component = () => {
       </Field>
     </div>
   );
-}
+};

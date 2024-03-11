@@ -1,7 +1,6 @@
-import { Component, createEffect, createSignal, JSX } from "solid-js";
+import { type Component, createEffect, createSignal, type JSX } from "solid-js";
 
 import { Field } from "./Field";
-
 import styles from "./LatLngEditor.module.css";
 
 export const LatLngEditor: Component<{
@@ -25,15 +24,15 @@ export const LatLngEditor: Component<{
       setLatTxt("0");
     } else {
       const group = /-?0*(\d*(\.\d*)?)/.exec(trimmed)?.[1];
-      if (!group) return;
+      if (group == null) return;
 
-      let newLatTxt = truncateDecimal(trimmed.startsWith("-") ? "-" + group : group, maxDigitsAfterDot);
+      const newLatTxt = truncateDecimal(trimmed.startsWith("-") ? "-" + group : group, maxDigitsAfterDot);
 
       setLatVal(newLat = Number.parseFloat(newLatTxt));
       setLatTxt(newLatTxt);
     }
     props.onChange(newLat, lngVal());
-  }
+  };
 
   const handleLngChange: JSX.EventHandlerUnion<HTMLInputElement, InputEvent> = (ev) => {
     const trimmed = ev.currentTarget.value.trim();
@@ -43,27 +42,27 @@ export const LatLngEditor: Component<{
       setLngTxt("0");
     } else {
       const group = /-?0*(\d*(\.\d*)?)/.exec(trimmed)?.[1];
-      if (!group) return;
+      if (group == null) return;
 
-      let newLngTxt = truncateDecimal(trimmed.startsWith("-") ? "-" + group : group, maxDigitsAfterDot);
+      const newLngTxt = truncateDecimal(trimmed.startsWith("-") ? "-" + group : group, maxDigitsAfterDot);
 
       setLngVal(newLng = Number.parseFloat(newLngTxt));
       setLngTxt(newLngTxt);
     }
     props.onChange(latVal(), newLng);
-  }
+  };
 
   createEffect(() => {
-    if (props.lat && latVal() !== props.lat) {
+    if (props.lat !== 0 && latVal() !== props.lat) {
       setLatVal(props.lat);
       setLatTxt(truncateDecimal(latVal().toString(), maxDigitsAfterDot));
     }
-    if (props.lng && lngVal() !== props.lng) {
+    if (props.lng !== 0 && lngVal() !== props.lng) {
       setLngVal(props.lng);
       setLngTxt(truncateDecimal(lngVal().toString(), maxDigitsAfterDot));
     }
   });
-  
+
   return (
     <div class={styles.LatLngEditor} id={props.id}>
       <Field label="Latitude">
@@ -77,11 +76,11 @@ export const LatLngEditor: Component<{
         )}
       </Field>
     </div>
-  )
-}
+  );
+};
 
 function truncateDecimal(s: string, maxDigitsAfterDot: number): string {
-  let parts = s.split(".");
+  const parts = s.split(".");
 
   if (parts.length === 0) {
     return "";

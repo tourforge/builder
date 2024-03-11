@@ -1,7 +1,7 @@
 /* @refresh reload */
 import { render } from "solid-js/web";
 import { HashRouter, Route } from "@solidjs/router";
-import { Component } from "solid-js";
+import { type Component } from "solid-js";
 import { Toaster } from "solid-toast";
 
 import "./index.css";
@@ -40,7 +40,5 @@ render(
       <Toaster position="bottom-right" toastOptions={{ duration: 10000 }} />
     </>
   ),
-  root!
+  root!,
 );
-
-
