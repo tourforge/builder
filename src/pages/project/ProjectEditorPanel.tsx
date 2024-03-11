@@ -4,9 +4,12 @@ import { v4 as uuidv4 } from "uuid";
 
 import styles from "./ProjectEditorPanel.module.css";
 import { useProject } from "../../hooks/Project";
+import { exportProject } from "../../export";
+import { useDB } from "../../db";
 
 export const ProjectEditorPanel: Component = () => {
   const params = useParams();
+  const db = useDB();
   const [project, setProject] = useProject();
 
   const handleCreateTourClick = async () => {
@@ -26,6 +29,13 @@ export const ProjectEditorPanel: Component = () => {
         ...project.tours,
       ]
     }));
+  };
+  const handleSaveClick = async () => {
+    if (!project()) {
+      return;
+    }
+
+    await exportProject(db, project()!.id);
   };
 
   return (
@@ -51,7 +61,8 @@ export const ProjectEditorPanel: Component = () => {
         <div style="flex:1"></div>
 
         <div class={styles.BottomButtons}>
-          <A class="secondary" href={`/projects/${params.pid}/manage`}>Manage Project</A>
+          <button class="primary" onClick={handleSaveClick}>Save (Ctrl+S)</button>
+          <A class="secondary" href={`/projects/${params.pid}/manage`}>Settings</A>
         </div>
       </div>
     </Show>
