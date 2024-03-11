@@ -10,7 +10,7 @@ export function useRouteCalculator() {
 
   const [prevLatLongs, setPrevLatLongs] = createSignal<(LatLng & { control: "path" | "route" })[]>([]);
 
-  createEffect(() => {
+  createEffect(async () => {
     if (!tour()) return;
 
     const latLongs = tour()!.route
@@ -31,13 +31,14 @@ export function useRouteCalculator() {
 
     setPrevLatLongs(latLongs);
 
-    route(latLongs)
-      .then(route => setTour(({
-        ...tour()!,
-        path: polyline.encode(route),
-      })))
-      .catch(err => {
-        console.error(err);
-      });
+    const routePoints = await route(latLongs);
+    if (!routePoints) {
+      return;
+    }
+
+    setTour(tour => ({
+      ...tour,
+      path: polyline.encode(routePoints),
+    }));
   });
 }

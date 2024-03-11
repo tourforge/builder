@@ -31,8 +31,8 @@ export const TourProvider: Component<{ id: string, children: JSX.Element }> = (p
     if (deleted()) return;
 
     const currentProject = project();
-    const currentTourIndex = project()?.tours.findIndex(tour => tour.id === props.id);
-    if (currentProject === undefined || currentTourIndex === undefined || currentTourIndex === -1) {
+    const currentTourIndex = currentProject?.tours.findIndex(tour => tour.id === props.id);
+    if (currentProject === undefined || currentTourIndex === undefined || currentTourIndex < 0) {
       console.warn("Ignoring update with undefined currentTour");
       return;
     }

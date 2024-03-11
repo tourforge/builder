@@ -1,10 +1,9 @@
-import { Component, createEffect, createResource, JSX, For, createUniqueId, createSignal, Index, Show } from "solid-js";
-import { FiArrowDown, FiArrowUp, FiImage, FiTrash, FiUpload } from "solid-icons/fi";
+import { Component, Index } from "solid-js";
 
 import { GalleryModel } from "../data";
+import { Asset } from "./Asset";
 
 import styles from "./Gallery.module.css";
-import { Asset } from "./Asset";
 
 export const Gallery: Component<{
   id?: string | undefined,
@@ -24,11 +23,17 @@ export const Gallery: Component<{
   };
 
   const handleUpClick = (i: number) => () => {
-
+    if (i <= 0 || i >= props.value.length) {
+      return;
+    }
+    props.onChange([...props.value.slice(0, i - 1), props.value[i], props.value[i - 1], ...props.value.slice(i + 1)])
   };
 
   const handleDownClick = (i: number) => () => {
-
+    if (i < 0 || i >= props.value.length - 1) {
+      return;
+    }
+    props.onChange([...props.value.slice(0, i), props.value[i + 1], props.value[i], ...props.value.slice(i + 2)]);
   };
 
   return (

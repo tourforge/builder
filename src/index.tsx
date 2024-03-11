@@ -2,6 +2,7 @@
 import { render } from "solid-js/web";
 import { HashRouter, Route } from "@solidjs/router";
 import { Component } from "solid-js";
+import { Toaster } from "solid-toast";
 
 import "./index.css";
 import "maplibre-gl/dist/maplibre-gl.css";
@@ -24,17 +25,20 @@ const Blank: Component = () => <></>;
 
 render(
   () => (
-    <HashRouter>
-      <Route path="/" component={Navbar}>
-        <Route path="/" component={Home} />
-        <Route path="/projects/:pid" component={ProjectEditor}>
-          <Route path="/" component={Blank} />
-          <Route path="/assets" component={ProjectAssetsEditor} />
-          <Route path="/manage" component={ProjectManager} />
-          <Route path="/tours/:tid" component={TourEditor} />
+    <>
+      <HashRouter>
+        <Route path="/" component={Navbar}>
+          <Route path="/" component={Home} />
+          <Route path="/projects/:pid" component={ProjectEditor}>
+            <Route path="/" component={Blank} />
+            <Route path="/assets" component={ProjectAssetsEditor} />
+            <Route path="/manage" component={ProjectManager} />
+            <Route path="/tours/:tid" component={TourEditor} />
+          </Route>
         </Route>
-      </Route>
-    </HashRouter>
+      </HashRouter>
+      <Toaster position="bottom-right" toastOptions={{ duration: 10000 }} />
+    </>
   ),
   root!
 );

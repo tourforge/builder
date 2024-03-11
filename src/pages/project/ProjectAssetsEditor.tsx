@@ -1,10 +1,11 @@
 import { createResource, type Component, For, createUniqueId, JSX, Show } from "solid-js";
 import { useParams } from "@solidjs/router";
-import { FiTrash, FiUpload, FiDownload, FiMusic } from "solid-icons/fi";
+import { FiTrash, FiUpload, FiDownload, FiMusic, FiFile } from "solid-icons/fi";
 
 import styles from "./ProjectAssetsEditor.module.css";
 import { useProject } from "../../hooks/Project";
 import { useDB } from "../../db";
+import { useAssetUrl } from "../../hooks/AssetUrl";
 
 export const ProjectAssetsEditor: Component = () => {
   const params = useParams();
@@ -31,6 +32,7 @@ const AssetCard: Component<{ asset: string }> = (props) => {
   const fileInputId = createUniqueId();
   const db = useDB();
   const [project, setProject] = useProject();
+  const assetUrl = useAssetUrl(project, () => props.asset);
   const [assetBlob] = createResource(() => props.asset, asset => {
     if (asset === undefined) {
       return undefined;
@@ -42,32 +44,17 @@ const AssetCard: Component<{ asset: string }> = (props) => {
     if (!currentProject.assets[asset]) {
       return undefined;
     }
-    return db.loadAsset(currentProject.assets[asset].hash).then(r => {
-      console.log(r);
-      return r;
-    })
+    return db.loadAsset(currentProject.assets[asset].hash);
   });
   const assetIsImage = () => assetBlob() ? ["image/jpeg", "image/png"].includes(assetBlob()!.type) : false;
   const assetIsAudio = () => assetBlob() ? ["audio/mpeg"].includes(assetBlob()!.type) : false;
-  const assetUrl = () => assetBlob() ? URL.createObjectURL(assetBlob()!) : undefined;
 
   const handleFileInput: JSX.EventHandlerUnion<HTMLInputElement, InputEvent> = async (event) => {
-    if (project() === undefined) {
-      return;
-    }
-  
     const files = event.currentTarget.files;
     if (!files || files.length < 1) return;
 
     const file = files[0];
-    let assetHash: string;
-    try {
-      assetHash = await db.storeAsset(file);
-    } catch (e) {
-      alert(`Failed to update asset. The storage alloted to this site by your web browser may have become full.`)
-      console.error("Failed to add asset", e);
-      return;
-    }
+    const assetHash = await db.storeAsset(file);
 
     setProject(project => ({
       ...project,
@@ -117,6 +104,11 @@ const AssetCard: Component<{ asset: string }> = (props) => {
       <Show when={assetIsAudio()}>
         <div class={styles.AssetThumbnail} onClick={() => window.open(assetUrl(), "_blank")}>
           <FiMusic />
+        </div>
+      </Show>
+      <Show when={!assetIsImage() && !assetIsAudio()}>
+        <div class={styles.AssetThumbnail} onClick={() => window.open(assetUrl(), "_blank")}>
+          <FiFile />
         </div>
       </Show>
       <div class={styles.AssetName}>{props.asset}</div>

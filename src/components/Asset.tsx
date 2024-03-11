@@ -1,9 +1,10 @@
 import { FiArrowDown, FiArrowUp, FiImage, FiMusic, FiTrash, FiUpload } from "solid-icons/fi";
-import { Component, createEffect, createResource, createSignal, createUniqueId, For, JSX, Show } from "solid-js";
+import { Component, createSignal, createUniqueId, For, JSX, Show } from "solid-js";
 
 import styles from "./Asset.module.css";
 import { useDB } from "../db";
 import { useProject } from "../hooks/Project";
+import { useAssetUrl } from "../hooks/AssetUrl";
 
 export const Asset: Component<{
   id?: string,
@@ -16,46 +17,21 @@ export const Asset: Component<{
 }> = (props) => {
   const datalistId = createUniqueId();
   const fileInputId = createUniqueId();
-  const db = useDB();
-  const [project, setProject] = useProject();
+
   const [imageLoaded, setImageLoaded] = createSignal(false);
   const [query, setQuery] = createSignal(props.asset);
-  const asset = () => props.asset && project() && props.asset in project()!.assets ? project()?.assets[props.asset] : undefined;
-  const [assetBlob] = createResource(() => props.asset, asset => {
-    if (asset === undefined) {
-      return undefined;
-    }
-    const currentProject = project();
-    if (currentProject === undefined) {
-      return undefined;
-    }
-    if (!currentProject.assets[asset]) {
-      return undefined;
-    }
-    return db.loadAsset(currentProject.assets[asset].hash);
-  });
-  const assetUrl = () => {
-    const blob = assetBlob();
-    if (blob === undefined) {
-      return undefined;
-    }
-    return URL.createObjectURL(blob);
-  };
-  const assets = () => {
-    const currentProject = project();
-    if (currentProject === undefined) {
-      return undefined;
-    }
-    return Object.keys(currentProject.assets);
-  }
 
-  const resolved = () => !!asset();
+  const db = useDB();
+  const [project, setProject] = useProject();
+  const assetUrl = useAssetUrl(project, () => props.asset);
+
+  const assets = () => Object.keys(project()?.assets ?? {});
 
   const handleQueryInput: JSX.EventHandlerUnion<HTMLInputElement, InputEvent> = async (event) => {
     const newQuery = event.currentTarget.value;
     setQuery(newQuery);
 
-    const match = Object.keys(project()?.assets ?? {}).find(asset => asset === newQuery);
+    const match = assets().find(asset => asset === newQuery);
     if (match) {
       props.onIdChange(match);
     }
@@ -77,13 +53,7 @@ export const Asset: Component<{
 
     const file = files[0];
     let assetHash: string;
-    try {
-      assetHash = await db.storeAsset(file);
-    } catch (e) {
-      alert(`Failed to add asset. The storage alloted to this site by your web browser may have become full.`)
-      console.error("Failed to add asset", e);
-      return;
-    }
+    assetHash = await db.storeAsset(file);
 
     setProject(project => ({
       ...project,
@@ -141,7 +111,7 @@ export const Asset: Component<{
       <Show when={props.onDownClick}>
         <button class={styles.AssetButton} title="Move Down" onClick={props.onDownClick}><FiArrowDown /></button>
       </Show>
-      <button class={styles.AssetButton} title={resolved() ? "Change Image" : "Create New Asset"} onClick={() => document.getElementById(fileInputId)?.click()}><FiUpload /></button>
+      <button class={styles.AssetButton} title={"Upload New Asset"} onClick={() => document.getElementById(fileInputId)?.click()}><FiUpload /></button>
       <Show when={props.onDeleteClick}>
         <button class={styles.AssetButton} title="Remove Item" onClick={props.onDeleteClick}><FiTrash /></button>
       </Show>

@@ -10,10 +10,12 @@ export const LatLngEditor: Component<{
   lng: number,
   onChange: (newLat: number, newLng: number) => void,
 }> = (props) => {
+  const maxDigitsAfterDot = 6;
+
   const [latVal, setLatVal] = createSignal(props.lat ?? 0);
   const [lngVal, setLngVal] = createSignal(props.lng ?? 0);
-  const [latTxt, setLatTxt] = createSignal(truncateDecimal(latVal().toString(), 6));
-  const [lngTxt, setLngTxt] = createSignal(truncateDecimal(lngVal().toString(), 6));
+  const [latTxt, setLatTxt] = createSignal(truncateDecimal(latVal().toString(), maxDigitsAfterDot));
+  const [lngTxt, setLngTxt] = createSignal(truncateDecimal(lngVal().toString(), maxDigitsAfterDot));
 
   const handleLatChange: JSX.EventHandlerUnion<HTMLInputElement, InputEvent> = (ev) => {
     const trimmed = ev.currentTarget.value.trim();
@@ -25,7 +27,7 @@ export const LatLngEditor: Component<{
       const group = /-?0*(\d*(\.\d*)?)/.exec(trimmed)?.[1];
       if (!group) return;
 
-      let newLatTxt = truncateDecimal(trimmed.startsWith("-") ? "-" + group : group, 6);
+      let newLatTxt = truncateDecimal(trimmed.startsWith("-") ? "-" + group : group, maxDigitsAfterDot);
 
       setLatVal(newLat = Number.parseFloat(newLatTxt));
       setLatTxt(newLatTxt);
@@ -43,7 +45,7 @@ export const LatLngEditor: Component<{
       const group = /-?0*(\d*(\.\d*)?)/.exec(trimmed)?.[1];
       if (!group) return;
 
-      let newLngTxt = truncateDecimal(trimmed.startsWith("-") ? "-" + group : group, 6);
+      let newLngTxt = truncateDecimal(trimmed.startsWith("-") ? "-" + group : group, maxDigitsAfterDot);
 
       setLngVal(newLng = Number.parseFloat(newLngTxt));
       setLngTxt(newLngTxt);
@@ -54,11 +56,11 @@ export const LatLngEditor: Component<{
   createEffect(() => {
     if (props.lat && latVal() !== props.lat) {
       setLatVal(props.lat);
-      setLatTxt(truncateDecimal(latVal().toString(), 6));
+      setLatTxt(truncateDecimal(latVal().toString(), maxDigitsAfterDot));
     }
     if (props.lng && lngVal() !== props.lng) {
       setLngVal(props.lng);
-      setLngTxt(truncateDecimal(lngVal().toString(), 6));
+      setLngTxt(truncateDecimal(lngVal().toString(), maxDigitsAfterDot));
     }
   });
   
@@ -81,7 +83,9 @@ export const LatLngEditor: Component<{
 function truncateDecimal(s: string, maxDigitsAfterDot: number): string {
   let parts = s.split(".");
 
-  if (parts.length === 1) {
+  if (parts.length === 0) {
+    return "";
+  } else if (parts.length === 1) {
     return s;
   } else {
     return `${parts[0]}.${parts[1].substring(0, maxDigitsAfterDot)}`;
