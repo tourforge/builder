@@ -78,6 +78,12 @@
   padding: 12px 8px;
 }
 
+.AddButtons {
+  display: grid;
+  grid-template-columns: auto auto;
+  gap: 8px;
+}
+
 /* --- subpanel --- */
 
 .SubPanel {

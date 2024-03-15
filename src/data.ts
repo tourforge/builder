@@ -1,69 +1,84 @@
-export type AssetType = "narration" | "image" | "tiles";
+import { z } from "zod";
 
-export interface ProjectModel {
-  title: string,
-  tours: TourModel[],
-  assets: Record<AssetReference, {
-    hash: string,
-    alt: string,
-    attrib: string,
-  }>,
-}
+export const AssetTypeSchema = z.literal("narration").or(z.literal("image")).or(z.literal("tiles"));
 
-export interface TourModel {
-  type: "driving" | "walking",
-  id: string,
-  title: string,
-  desc: string,
-  gallery: GalleryModel,
-  tiles?: AssetReference,
-  route: Array<StopModel | ControlPointModel>,
-  pois: PoiModel[],
-  path: string,
-  links?: Record<string, {
-    href: string,
-  }> | undefined,
-}
+export const AssetReferenceSchema = z.string();
 
-export interface StopModel {
-  type: "stop",
-  id: string,
-  title: string,
-  desc: string,
-  lat: number,
-  lng: number,
-  trigger_radius: number,
-  control: "route" | "path" | "none",
-  gallery: GalleryModel,
-  transcript?: AssetReference,
-  narration?: AssetReference,
-  links?: Record<string, {
-    href: string,
-  }> | undefined,
-}
+export const GalleryModelSchema = z.array(AssetReferenceSchema);
 
-export interface ControlPointModel {
-  type: "control",
-  id: string,
-  lat: number,
-  lng: number,
-  control: "route" | "path",
-}
+export const LatLngSchema = z.object({
+  lat: z.number(),
+  lng: z.number(),
+});
 
-export interface PoiModel {
-  id: string,
-  lat: number,
-  lng: number,
-  title: string,
-  desc: string,
-  gallery: GalleryModel,
-  links?: Record<string, {
-    href: string,
-  }> | undefined,
-}
+export const PoiModelSchema = z.object({
+  id: z.string(),
+  title: z.string(),
+  desc: z.string(),
+  lat: z.number(),
+  lng: z.number(),
+  gallery: GalleryModelSchema,
+  links: z.record(z.object({ href: z.string() })),
+});
 
-export type GalleryModel = AssetReference[];
+export const ControlPointModelSchema = z.object({
+  type: z.literal("control"),
+  id: z.string(),
+  lat: z.number(),
+  lng: z.number(),
+  control: z.literal("route").or(z.literal("path")).or(z.literal("none")),
+});
 
-export type AssetReference = string;
+export const StopModelSchema = z.object({
+  type: z.literal("stop"),
+  id: z.string(),
+  title: z.string(),
+  desc: z.string(),
+  lat: z.number(),
+  lng: z.number(),
+  trigger_radius: z.number(),
+  control: z.literal("route").or(z.literal("path")).or(z.literal("none")),
+  gallery: GalleryModelSchema,
+  transcript: z.optional(AssetReferenceSchema),
+  narration: z.optional(AssetReferenceSchema),
+  links: z.record(z.object({ href: z.string() })),
+});
 
-export interface LatLng { lat: number, lng: number }
+export const TourModelSchema = z.object({
+  type: z.literal("driving").or(z.literal("walking")),
+  id: z.string(),
+  title: z.string(),
+  desc: z.string(),
+  gallery: GalleryModelSchema,
+  tiles: z.optional(AssetReferenceSchema),
+  route: z.array(z.discriminatedUnion("type", [
+    StopModelSchema,
+    ControlPointModelSchema,
+  ])),
+  pois: z.array(PoiModelSchema),
+  path: z.string(),
+  links: z.record(z.object({ href: z.string() })),
+});
+
+export const ProjectModelSchema = z.object({
+  originalId: z.string(),
+  createDate: z.optional(z.coerce.date()),
+  modifyDate: z.optional(z.coerce.date()),
+  title: z.string(),
+  tours: z.array(TourModelSchema),
+  assets: z.record(AssetReferenceSchema, z.object({
+    hash: z.string(),
+    alt: z.string(),
+    attrib: z.string(),
+  })),
+});
+
+export type AssetType = z.infer<typeof AssetTypeSchema>;
+export type AssetReference = z.infer<typeof AssetReferenceSchema>;
+export type GalleryModel = z.infer<typeof GalleryModelSchema>;
+export type LatLng = z.infer<typeof LatLngSchema>;
+export type PoiModel = z.infer<typeof PoiModelSchema>;
+export type ControlPointModel = z.infer<typeof ControlPointModelSchema>;
+export type StopModel = z.infer<typeof StopModelSchema>;
+export type TourModel = z.infer<typeof TourModelSchema>;
+export type ProjectModel = z.infer<typeof ProjectModelSchema>;

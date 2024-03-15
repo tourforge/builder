@@ -4,7 +4,7 @@ import { toast } from "solid-toast";
 
 import { ProjectProvider } from "../../hooks/Project";
 import { useDB } from "../../db";
-import { exportProject, ExportError } from "../../export";
+import { exportProject, ExportError } from "../../export-bundle";
 
 import styles from "./ProjectEditor.module.css";
 import { ProjectEditorPanel } from "./ProjectEditorPanel";

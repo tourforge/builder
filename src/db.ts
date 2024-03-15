@@ -59,18 +59,32 @@ export class DB {
 
   /**
    * Stores a project in the database.
+   *
+   * The createDate and modifyDate fields in the provided project are automatically managed.
    * @param project The content of the project.
    */
   async storeProject(project: DbProject) {
     const db = await this.openDB();
 
-    await db.put("projects", project);
+    const prev = await db.get("projects", project.id);
+
+    await db.put("projects", {
+      ...project,
+      createDate: prev?.createDate ?? new Date(),
+      modifyDate: new Date(),
+    });
   }
 
   async deleteProject(id: string) {
     const db = await this.openDB();
 
     await db.delete("projects", id);
+  }
+
+  async containsAsset(hash: string) {
+    const db = await this.openDB();
+
+    return await db.getKey("assets", hash) !== undefined;
   }
 
   async loadAsset(hash: string) {
@@ -82,6 +96,17 @@ export class DB {
   async storeAsset(data: Blob) {
     const hash = await this.hashBlob(data);
 
+    return await this.storeAssetWithHash(hash, data);
+  }
+
+  /**
+   * Stores an asset assuming it has the given hash. You should only use this method if you are
+   * reasonably certain that the hash is valid.
+   * @param hash The precomputed hash of data.
+   * @param data The asset data to store.
+   * @returns The precomputed hash.
+   */
+  async storeAssetWithHash(hash: string, data: Blob) {
     const db = await this.openDB();
 
     return await db.put("assets", data, hash);

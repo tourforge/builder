@@ -201,7 +201,7 @@ const MainPanel: Component<{ show: boolean, setPanel: Setter<Panel> }> = (props)
         </Field>
         <Field label="Site Link">
           {(id) => (
-            <input type="text" id={id} value={tour()!.links?.["Site Link"].href ?? ""} onInput={handleTourSiteLinkInput} />
+            <input type="text" id={id} value={tour()!.links["Site Link"]?.href ?? ""} onInput={handleTourSiteLinkInput} />
           )}
         </Field>
         <Field label="Gallery">
@@ -250,6 +250,7 @@ const RouteList: Component<{
       transcript: undefined,
       gallery: [],
       control: "route",
+      links: {},
     };
 
     props.onChange([...props.route(), newWaypoint]);
@@ -313,12 +314,14 @@ const RouteList: Component<{
         </div>
         )}
       </For>
-      <button class="primary" style={{ margin: "auto" }} onClick={addStop}>
-        Add Stop
-      </button>
-      <button class="primary" style={{ margin: "auto" }} onClick={addControlPoint}>
-        Add Control Point
-      </button>
+      <div class={styles.AddButtons}>
+        <button class="primary" onClick={addStop}>
+          Add Stop
+        </button>
+        <button class="primary" onClick={addControlPoint}>
+          Add Control Point
+        </button>
+      </div>
     </div>
   );
 };

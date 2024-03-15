@@ -4,7 +4,7 @@ import { toast } from "solid-toast";
 import { v4 as uuidv4 } from "uuid";
 
 import { useProject } from "../../hooks/Project";
-import { ExportError, exportProject } from "../../export";
+import { ExportError, exportProject } from "../../export-bundle";
 import { useDB } from "../../db";
 
 import styles from "./ProjectEditorPanel.module.css";
@@ -28,6 +28,7 @@ export const ProjectEditorPanel: Component = () => {
           route: [],
           pois: [],
           path: "",
+          links: {},
         },
       ],
     }));

@@ -142,7 +142,7 @@ export const StopEditorPanel: Component<{ waypoint: () => StopModel | undefined,
             <input
               id={id}
               type="text"
-              value={props.waypoint()!.links?.["Site Link"]?.href ?? ""}
+              value={props.waypoint()!.links["Site Link"]?.href ?? ""}
               onInput={handleSiteLinkChange}
             />
           )}
