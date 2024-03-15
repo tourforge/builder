@@ -5,7 +5,7 @@ import { toast } from "solid-toast";
 import { FiEdit, FiFile, FiFilePlus, FiGlobe, FiTrash } from "solid-icons/fi";
 
 import { type DbProject, useDB } from "../../db";
-import { ImportError, type ReplacementAction, importBundle } from "../../import-bundle";
+import { ImportError, type ReplacementAction, importProjectBundle, importProjectUrl } from "../../import";
 
 import styles from "./Home.module.css";
 
@@ -52,7 +52,7 @@ export const Home: Component = () => {
       };
 
       try {
-        await toast.promise(importBundle(db, file, chooseReplacement), {
+        await toast.promise(importProjectBundle(db, file, chooseReplacement), {
           loading: "Loading the project...",
           success: "Successfully loaded the project.",
           error(e) {
@@ -78,7 +78,32 @@ export const Home: Component = () => {
       return;
     }
 
-    console.log(url);
+    let parsedURL: URL;
+    try {
+      parsedURL = new URL(url);
+    } catch (e) {
+      toast.error("The URL you entered is invalid. URLs look like this: https://example.org/example/test/");
+      console.error("Invalid URL", e);
+      return;
+    }
+
+    try {
+      await toast.promise(importProjectUrl(db, parsedURL, async () => "new"), {
+        loading: "Downloading the project from the internet...",
+        success: "Successfully downloaded the project.",
+        error(e) {
+          if (e instanceof ImportError) {
+            return `An error occurred while downloading the project: ${e.message}`;
+          } else {
+            return "An internal error occurred while downloading the project.";
+          }
+        },
+      });
+    } catch (e) {
+      console.error("Failed to import tour bundle:", e);
+    }
+
+    await refetchProjects();
   };
 
   const handleProjectDeleteClick = (id: string, title: string) => async () => {

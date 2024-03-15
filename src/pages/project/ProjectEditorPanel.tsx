@@ -4,7 +4,7 @@ import { toast } from "solid-toast";
 import { v4 as uuidv4 } from "uuid";
 
 import { useProject } from "../../hooks/Project";
-import { ExportError, exportProject } from "../../export-bundle";
+import { ExportError, exportProjectBundle } from "../../export";
 import { useDB } from "../../db";
 
 import styles from "./ProjectEditorPanel.module.css";
@@ -39,7 +39,7 @@ export const ProjectEditorPanel: Component = () => {
     }
 
     try {
-      await exportProject(db, project()!.id);
+      await exportProjectBundle(db, project()!.id);
     } catch (err) {
       console.error("Error while exporting project:", err);
       if (err instanceof ExportError) {

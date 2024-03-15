@@ -7,7 +7,7 @@ import { type DB } from "./db";
 export class ExportError extends Error {
 }
 
-export const exportProject = async (db: DB, project: string, options: { includeAssets: boolean } = { includeAssets: true }) => {
+export const exportProjectBundle = async (db: DB, project: string, options: { includeAssets: boolean } = { includeAssets: true }) => {
   const projectContent: ProjectModel & { id: unknown, source: unknown } | undefined = await db.loadProject(project);
   if (projectContent === undefined) {
     throw new ExportError("Failed to load project for export.");

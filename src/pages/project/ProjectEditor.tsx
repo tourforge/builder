@@ -4,7 +4,7 @@ import { toast } from "solid-toast";
 
 import { ProjectProvider } from "../../hooks/Project";
 import { useDB } from "../../db";
-import { exportProject, ExportError } from "../../export-bundle";
+import { exportProjectBundle, ExportError } from "../../export";
 
 import styles from "./ProjectEditor.module.css";
 import { ProjectEditorPanel } from "./ProjectEditorPanel";
@@ -17,7 +17,7 @@ export const ProjectEditor: Component<{ children?: JSX.Element }> = (props) => {
     if (e.ctrlKey && e.key === "s") {
       e.preventDefault();
       try {
-        await exportProject(db, params.pid);
+        await exportProjectBundle(db, params.pid);
       } catch (err) {
         console.error("Error while exporting project:", err);
         if (err instanceof ExportError) {
