@@ -1,4 +1,4 @@
-import { createResource, type Component, Show, For } from "solid-js";
+import { createResource, type Component, Show, For, onMount } from "solid-js";
 import { A } from "@solidjs/router";
 import { v4 as uuidv4 } from "uuid";
 import { toast } from "solid-toast";
@@ -12,6 +12,17 @@ import styles from "./Home.module.css";
 export const Home: Component = () => {
   const db = useDB();
   const [projects, { refetch: refetchProjects }] = createResource(async () => await db.listProjects());
+
+  // Automatic download of projects
+  onMount(async () => {
+    const url = new URL(window.location.href);
+    const toDownload = url.searchParams.get("tourforge-load-project");
+    if (toDownload != null) {
+      url.searchParams.delete("tourforge-load-project");
+      window.history.replaceState({}, "", url);
+      await doLoadFromUrl(toDownload);
+    }
+  });
 
   const handleCreateProjectClick = async () => {
     const id = uuidv4();
@@ -72,12 +83,7 @@ export const Home: Component = () => {
     fileInput.dispatchEvent(new MouseEvent("click"));
   };
 
-  const handleLoadFromUrlClick = async () => {
-    const url = prompt("Enter the URL to load a project from:");
-    if (url == null || url.length === 0) {
-      return;
-    }
-
+  const doLoadFromUrl = async (url: string) => {
     let parsedURL: URL;
     try {
       parsedURL = new URL(url);
@@ -104,6 +110,15 @@ export const Home: Component = () => {
     }
 
     await refetchProjects();
+  };
+
+  const handleLoadFromUrlClick = async () => {
+    const url = prompt("Enter the URL to load a project from:");
+    if (url == null || url.length === 0) {
+      return;
+    }
+
+    await doLoadFromUrl(url);
   };
 
   const handleProjectDeleteClick = (id: string, title: string) => async () => {

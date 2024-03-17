@@ -1,17 +1,17 @@
 /* @refresh reload */
 import { render } from "solid-js/web";
 import { HashRouter, Route } from "@solidjs/router";
-import { type Component } from "solid-js";
+import { lazy, type Component } from "solid-js";
 import { Toaster } from "solid-toast";
 
 import "./index.css";
-import "maplibre-gl/dist/maplibre-gl.css";
 import { Navbar } from "./Navbar";
 import { Home } from "./pages/home/Home";
 import { ProjectEditor } from "./pages/project/ProjectEditor";
 import { ProjectAssetsEditor } from "./pages/project/ProjectAssetsEditor";
 import { ProjectManager } from "./pages/project/ProjectManager";
-import { TourEditor } from "./pages/project/TourEditor";
+
+const TourEditor = lazy(async () => await import("./pages/project/TourEditor"));
 
 const root = document.getElementById("root");
 

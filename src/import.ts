@@ -1,5 +1,6 @@
 import { v4 as uuidv4 } from "uuid";
 import JSZip from "jszip";
+import { z } from "zod";
 
 import { type ProjectModel, ProjectModelSchema } from "./data";
 import { type DB, type DbProject } from "./db";
@@ -41,12 +42,43 @@ export const importProjectBundle = async (db: DB, file: File, chooseReplacement?
   );
 };
 
+const responseSchema = z.discriminatedUnion("status", [
+  z.object({ status: z.literal("success"), asset: z.string(), data: z.instanceof(Blob) }),
+  z.object({ status: z.literal("failure"), asset: z.optional(z.string()) }),
+]);
+
 export const importProjectUrl = async (db: DB, url: URL, chooseReplacement?: (options: DbProject[]) => Promise<ReplacementAction>) => {
   if (!["http:", "https:"].includes(url.protocol)) {
     throw new ImportError("Project URLs must use http or https protocols.");
   }
 
-  if (url.pathname.endsWith("/index.html")) {
+  // Add an invisible iframe with the given URL.
+  const iframe = document.createElement("iframe");
+  iframe.style.display = "none";
+  iframe.src = url.toString();
+
+  document.body.appendChild(iframe);
+
+  // Wait for the iframe to load
+  await new Promise<void>(resolve => {
+    iframe.addEventListener("load", () => { resolve(); });
+  });
+
+  const result = await importProject(
+    db,
+    async () => JSON.parse(await (await loadViaIFrame(url.origin, iframe, "tourforge.json")).text()),
+    async (hash) => await loadViaIFrame(url.origin, iframe, hash),
+    chooseReplacement,
+  );
+
+  document.body.removeChild(iframe);
+
+  return result;
+
+  // The commented code gets the tour data via the fetch API. Only works if the external server has
+  // added CORS headers allowing the tour builder to make the requests. I.e., usually fails.
+  // TODO: Use this method as a fallback when something doesn't work with the iframe method?
+  /* if (url.pathname.endsWith("/index.html")) {
     url.pathname = url.pathname.slice(0, url.pathname.length - "/index.html".length);
   } else if (url.pathname.endsWith("/index.html/")) {
     url.pathname = url.pathname.slice(0, url.pathname.length - "/index.html".length);
@@ -72,7 +104,48 @@ export const importProjectUrl = async (db: DB, url: URL, chooseReplacement?: (op
       const respBlob = await resp.blob();
       return respBlob;
     },
-  );
+  ); */
+};
+
+const loadViaIFrame = async (origin: string, iframe: HTMLIFrameElement, asset: string, timeout: number = 10000) => {
+  return await new Promise<Blob>((resolve, reject) => {
+    const eventListener = (ev: MessageEvent) => {
+      console.log(ev);
+      if (ev.source !== iframe.contentWindow) {
+        // Ignore this message, it could be for something else
+        return;
+      }
+
+      const parseResult = responseSchema.safeParse(ev.data);
+      if (!parseResult.success) {
+        // Ignore this failure, it could be for another request
+        return;
+      }
+      const response = parseResult.data;
+
+      if (response.asset === asset) {
+        if (response.status === "success") {
+          window.removeEventListener("message", eventListener);
+          resolve(response.data);
+        } else {
+          window.removeEventListener("message", eventListener);
+          reject(new ImportError("Failed to request asset via iframe"));
+        }
+      }
+    };
+
+    // Automatically timeout
+    setTimeout(() => {
+      window.removeEventListener("message", eventListener);
+      reject(new ImportError("Timed out while requesting asset via iframe"));
+    }, timeout);
+
+    // Add the listener
+    window.addEventListener("message", eventListener);
+
+    // And finally, send the message
+    iframe.contentWindow!.postMessage(asset, origin);
+  });
 };
 
 const importProject = async (

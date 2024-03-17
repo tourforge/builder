@@ -1,5 +1,6 @@
 import { type Accessor, type Component, type Setter, createContext, createSignal, createUniqueId, onMount, useContext, type JSX } from "solid-js";
 import * as maplibregl from "maplibre-gl";
+import "maplibre-gl/dist/maplibre-gl.css";
 
 import styles from "./MapLibreMap.module.css";
 

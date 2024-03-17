@@ -1,12 +1,13 @@
-import { type Component } from "solid-js";
+import { lazy, type Component } from "solid-js";
 import { useParams } from "@solidjs/router";
 
 import { TourProvider } from "../../hooks/Tour";
 
 import { MapContextProvider } from "./MapLibreMap";
 import { TourEditorMap } from "./TourEditorMap";
-import { TourEditorPanel } from "./TourEditorPanel";
 import styles from "./TourEditor.module.css";
+
+const TourEditorPanel = lazy(async () => await import("./TourEditorPanel"));
 
 export const TourEditor: Component = () => {
   const params = useParams();
@@ -22,3 +23,5 @@ export const TourEditor: Component = () => {
     </TourProvider>
   );
 };
+
+export default TourEditor;

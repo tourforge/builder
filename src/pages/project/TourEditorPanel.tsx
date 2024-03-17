@@ -92,6 +92,8 @@ export const TourEditorPanel: Component = () => {
   );
 };
 
+export default TourEditorPanel;
+
 const MainPanel: Component<{ show: boolean, setPanel: Setter<Panel> }> = (props) => {
   const [project] = useProject();
   const [tour, setTour, deleteTour] = useTour();

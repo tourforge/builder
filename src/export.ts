@@ -1,6 +1,8 @@
 import JSZip from "jszip";
 
-import exportIndexHtmlContent from "./assets/export-index.html?raw";
+import bundleIndexJsContent from "../gen/bundle/index.js?raw";
+
+import bundleIndexHtmlContent from "./bundle/index.html?raw";
 import { type ProjectModel } from "./data";
 import { type DB } from "./db";
 
@@ -17,32 +19,7 @@ export const exportProjectBundle = async (db: DB, project: string, options: { in
   delete projectContent.id;
   delete projectContent.source;
 
-  const assetBlobs: Record<string, Blob> = {};
-  if (options.includeAssets) {
-    for (const assetInfo of Object.values(projectContent.assets)) {
-      const blob = await db.loadAsset(assetInfo.hash);
-      if (blob === undefined) {
-        console.warn("export warning: ignoring missing blob for asset with hash '" + assetInfo.hash + "'");
-      } else {
-        assetBlobs[assetInfo.hash] = blob;
-      }
-    }
-  }
-
-  const projectContentString = JSON.stringify(projectContent);
-
-  let zipBlob: Blob;
-  try {
-    const zip = new JSZip();
-    zip.file("index.html", exportIndexHtmlContent.replaceAll("%PROJECT_TITLE%", projectContent.title));
-    zip.file("tourforge.json", projectContentString);
-    for (const [assetHash, assetBlob] of Object.entries(assetBlobs)) {
-      zip.file(assetHash, assetBlob);
-    }
-    zipBlob = await zip.generateAsync({ type: "blob" });
-  } catch (err) {
-    throw new ExportError("Failed to create tour zip file.");
-  }
+  const zipBlob = await exportProjectBundleRaw(projectContent, async (hash) => await db.loadAsset(hash));
 
   // download the zip file
   const zipUrl = URL.createObjectURL(zipBlob);
@@ -53,4 +30,36 @@ export const exportProjectBundle = async (db: DB, project: string, options: { in
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(zipUrl);
+};
+
+const exportProjectBundleRaw = async (project: ProjectModel, loadAsset: (hash: string) => Promise<Blob | undefined>, options: { includeAssets: boolean } = { includeAssets: true }) => {
+  const assetBlobs: Record<string, Blob> = {};
+  if (options.includeAssets) {
+    for (const assetInfo of Object.values(project.assets)) {
+      const blob = await loadAsset(assetInfo.hash);
+      if (blob === undefined) {
+        console.warn("export warning: ignoring missing blob for asset with hash '" + assetInfo.hash + "'");
+      } else {
+        assetBlobs[assetInfo.hash] = blob;
+      }
+    }
+  }
+
+  const projectContentString = JSON.stringify(project);
+
+  let zipBlob: Blob;
+  try {
+    const zip = new JSZip();
+    zip.file("index.html", bundleIndexHtmlContent.replaceAll("%PROJECT_TITLE%", project.title).replaceAll("%INDEX_JS%", "index.js"));
+    zip.file("index.js", bundleIndexJsContent);
+    zip.file("tourforge.json", projectContentString);
+    for (const [assetHash, assetBlob] of Object.entries(assetBlobs)) {
+      zip.file(assetHash, assetBlob);
+    }
+    zipBlob = await zip.generateAsync({ type: "blob" });
+  } catch (err) {
+    throw new ExportError("Failed to create tour zip file.");
+  }
+
+  return zipBlob;
 };
