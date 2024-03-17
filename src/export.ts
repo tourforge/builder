@@ -22,11 +22,20 @@ export const exportProjectBundle = async (db: DB, project: string, options: { in
 
   const zipBlob = await exportProjectBundleRaw(projectContent, async (hash) => await db.loadAsset(hash));
 
+  const currentDate = new Date();
+  const year = currentDate.getFullYear();
+  const month = String(currentDate.getMonth() + 1).padStart(2, "0"); // Months are zero-based
+  const day = String(currentDate.getDate()).padStart(2, "0");
+  const hours = String(currentDate.getHours()).padStart(2, "0");
+  const minutes = String(currentDate.getMinutes()).padStart(2, "0");
+  const seconds = String(currentDate.getSeconds()).padStart(2, "0");
+  const dateString = `${year}-${month}-${day}-${hours}-${minutes}-${seconds}`;
+
   // download the zip file
   const zipUrl = URL.createObjectURL(zipBlob);
   const a = document.createElement("a");
   a.href = zipUrl;
-  a.download = "TourForge_" + projectContent.title.replaceAll(" ", "_") + ".zip";
+  a.download = "TourForge-" + projectContent.title.replaceAll(" ", "-") + "-" + dateString + ".zip";
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
