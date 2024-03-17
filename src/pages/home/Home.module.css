@@ -1,10 +1,14 @@
+.Wrapper {
+  margin: auto 0;
+}
+
 .Home {
-  width: 70vw;
-  margin: 0 auto;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+  display: flex;
+  flex-wrap: wrap;
+  margin: 32px;
   justify-content: center;
   align-items: center;
+  gap: 50px 100px;
 }
 
 .Welcome {
@@ -38,7 +42,6 @@
 .Projects {
   max-width: 500px;
   min-width: 400px;
-  margin: 0 auto;
   display: flex;
   flex-direction: column;
   align-items: stretch;

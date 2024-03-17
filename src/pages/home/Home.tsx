@@ -136,50 +136,52 @@ export const Home: Component = () => {
   };
 
   return (
-    <div class={styles.Home}>
-      <div class={styles.Welcome}>
-        <header>Welcome to TourForge!</header>
-        <p>
-          TourForge is an application for building tours that are compatible with TourForge Guide.
-          It works entirely within your web browser and as a result is sometimes unable to persistently
-          save your work. A status message is always visible in the top bar indicating whether or not
-          your work will persist.
-        </p>
-        <p>
-          To the right is the list of tours (if any) that are currently loaded into TourForge; click Edit <FiEdit /> to
-          begin editing. Alternatively, start a new project with <strong>Create Project</strong>, or
-          use <strong>Load Project</strong> to load a project zip archive that was previously saved from the
-          project editor screen. <strong>Load Project From URL</strong> downloads the latest content
-          of a project that is currently published at some URL on the internet.
-        </p>
-      </div>
-      <div class={styles.Projects}>
-        {projects.loading && "Loading projects..."}
-        {projects.error != null && `Error occurred while loading projects: ${projects.error}`}
-        <Show when={!projects.loading && projects()}>
-          <For each={projects()}>
-            {project => (
-              <div class={styles.ProjectCard}>
-                <div class={styles.ProjectName}>
-                  {project.title}
+    <div class={styles.Wrapper}>
+      <div class={styles.Home}>
+        <div class={styles.Welcome}>
+          <header>Welcome to TourForge!</header>
+          <p>
+            TourForge is an application for building tours that are compatible with TourForge Guide.
+            It works entirely within your web browser. A status message is always present in the top
+            bar indicating how persistently your work is saved; this message is necessary because
+            the web platform limits our ability to guarantee persistent storage at all times.
+          </p>
+          <p>
+            To the right is the list of tours (if any) that are currently loaded into TourForge; click Edit <FiEdit /> to
+            begin editing. Alternatively, start a new project with <strong>Create Project</strong>, or
+            use <strong>Load Project</strong> to load a project zip archive that was previously saved from the
+            project editor screen. <strong>Load Project From URL</strong> downloads the latest content
+            of a project that is currently published at some URL on the internet.
+          </p>
+        </div>
+        <div class={styles.Projects}>
+          {projects.loading && "Loading projects..."}
+          {projects.error != null && `Error occurred while loading projects: ${projects.error}`}
+          <Show when={!projects.loading && projects()}>
+            <For each={projects()}>
+              {project => (
+                <div class={styles.ProjectCard}>
+                  <div class={styles.ProjectName}>
+                    {project.title}
+                  </div>
+                  <A href={`/projects/${project.id}`} class={styles.ProjectButton}>
+                    <FiEdit />
+                  </A>
+                  <button class={styles.ProjectButton} onClick={handleProjectDeleteClick(project.id, project.title)}>
+                    <FiTrash />
+                  </button>
                 </div>
-                <A href={`/projects/${project.id}`} class={styles.ProjectButton}>
-                  <FiEdit />
-                </A>
-                <button class={styles.ProjectButton} onClick={handleProjectDeleteClick(project.id, project.title)}>
-                  <FiTrash />
-                </button>
+              )}
+            </For>
+            <div class={styles.ProjectsButtons}>
+              <div class={styles.CreateLoadButtons}>
+                <button class="primary" onClick={handleCreateProjectClick}><FiFilePlus /> Create Project</button>
+                <button class="primary" onClick={handleLoadProjectClick}><FiFile /> Load Project</button>
               </div>
-            )}
-          </For>
-          <div class={styles.ProjectsButtons}>
-            <div class={styles.CreateLoadButtons}>
-              <button class="primary" onClick={handleCreateProjectClick}><FiFilePlus /> Create Project</button>
-              <button class="primary" onClick={handleLoadProjectClick}><FiFile /> Load Project</button>
+              <button class="primary" onClick={handleLoadFromUrlClick}><FiGlobe /> Load Project From URL</button>
             </div>
-            <button class="primary" onClick={handleLoadFromUrlClick}><FiGlobe /> Load Project From URL</button>
-          </div>
-        </Show>
+          </Show>
+        </div>
       </div>
     </div>
   );
