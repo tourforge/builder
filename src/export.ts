@@ -2,6 +2,7 @@ import JSZip from "jszip";
 
 import bundleIndexJsContent from "../gen/bundle/index.js?raw";
 
+import readmeTxtContent from "./bundle/README.txt?raw";
 import bundleIndexHtmlContent from "./bundle/index.html?raw";
 import { type ProjectModel } from "./data";
 import { type DB } from "./db";
@@ -50,6 +51,7 @@ const exportProjectBundleRaw = async (project: ProjectModel, loadAsset: (hash: s
   let zipBlob: Blob;
   try {
     const zip = new JSZip();
+    zip.file("README.txt", readmeTxtContent);
     zip.file("index.html", bundleIndexHtmlContent.replaceAll("%PROJECT_TITLE%", project.title).replaceAll("%INDEX_JS%", "index.js"));
     zip.file("index.js", bundleIndexJsContent);
     zip.file("tourforge.json", projectContentString);
