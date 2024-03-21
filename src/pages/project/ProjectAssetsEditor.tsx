@@ -59,9 +59,7 @@ const AssetCard: Component<{ asset: string }> = (props) => {
       assets: {
         ...project.assets,
         [props.asset]: {
-          alt: "",
-          attrib: "",
-          ...(props.asset in project.assets ? project.assets[props.asset] : {}),
+          ...project.assets[props.asset],
           hash: assetHash,
         },
       },

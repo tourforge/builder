@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const AssetTypeSchema = z.literal("narration").or(z.literal("image")).or(z.literal("tiles"));
+export const AssetTypeSchema = z.literal("audio").or(z.literal("image")).or(z.literal("tiles"));
 
 export const AssetReferenceSchema = z.string();
 
@@ -68,6 +68,7 @@ export const ProjectModelSchema = z.object({
   tours: z.array(TourModelSchema),
   assets: z.record(AssetReferenceSchema, z.object({
     hash: z.string(),
+    type: AssetTypeSchema,
     alt: z.string(),
     attrib: z.string(),
   })),

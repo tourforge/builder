@@ -4,12 +4,13 @@ import { type Component, createSignal, createUniqueId, For, type JSX, Show } fro
 import { useDB } from "../db";
 import { useProject } from "../hooks/Project";
 import { useAssetUrl } from "../hooks/AssetUrl";
+import { type AssetType } from "../data";
 
 import styles from "./Asset.module.css";
 
 export const Asset: Component<{
   id?: string,
-  type: "image" | "audio",
+  type: AssetType,
   asset: string | undefined,
   onIdChange: (newId: string) => void,
   onDeleteClick?: () => void,
@@ -26,7 +27,7 @@ export const Asset: Component<{
   const [project, setProject] = useProject();
   const assetUrl = useAssetUrl(project, () => props.asset);
 
-  const assets = () => Object.keys(project()?.assets ?? {});
+  const assets = () => Object.keys(project()?.assets ?? {}).filter(a => project()?.assets[a]?.type === props.type);
 
   const handleQueryInput: JSX.EventHandlerUnion<HTMLInputElement, InputEvent> = async (event) => {
     const newQuery = event.currentTarget.value;
@@ -62,6 +63,7 @@ export const Asset: Component<{
         [assetName]: {
           alt: "",
           attrib: "",
+          type: props.type,
           ...(assetName in project.assets ? project.assets[assetName] : {}),
           hash: assetHash,
         },
@@ -85,14 +87,14 @@ export const Asset: Component<{
     <div id={props.id} class={styles.Asset}>
       <Show when={props.type === "image"}>
         <img
-          src={assetUrl()}
+          src={props.asset === query() ? assetUrl() : ""}
           class={styles.AssetThumbnail}
           classList={{ [styles.Error]: !imageLoaded() }}
           onLoad={handleImageLoad}
           onError={handleImageError}
           onClick={() => window.open(assetUrl(), "_blank")}
         />
-        <Show when={!imageLoaded()}>
+        <Show when={!imageLoaded() || props.asset !== query()}>
           <div title="Image not found" class={styles.AssetThumbnail} onClick={() => window.open(assetUrl(), "_blank")}><FiImage /></div>
         </Show>
       </Show>
