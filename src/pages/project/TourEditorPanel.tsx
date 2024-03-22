@@ -9,6 +9,7 @@ import { type ControlPointModel, type GalleryModel, type StopModel } from "../..
 import { useRouteCalculator } from "../../hooks/RouteCalculator";
 import { useTour } from "../../hooks/Tour";
 import { useProject } from "../../hooks/Project";
+import { Asset } from "../../components/Asset";
 
 import { ControlPointEditorPanel } from "./ControlPointEditorPanel";
 import styles from "./TourEditorPanel.module.css";
@@ -101,19 +102,24 @@ const MainPanel: Component<{ show: boolean, setPanel: Setter<Panel> }> = (props)
   const [currentTab, setCurrentTab] = createSignal<"route" | "pois">("route");
 
   const handleTourTitleInput: JSX.EventHandlerUnion<HTMLInputElement, InputEvent> = (event) => {
-    const currentTour = tour()!;
-    setTour({
-      ...currentTour,
+    setTour(tour => ({
+      ...tour,
       title: event.currentTarget.value,
-    });
+    }));
   };
 
   const handleTourDescInput: JSX.EventHandlerUnion<HTMLTextAreaElement, InputEvent> = (event) => {
-    const currentTour = tour()!;
-    setTour({
-      ...currentTour,
+    setTour(tour => ({
+      ...tour,
       desc: event.currentTarget.value,
-    });
+    }));
+  };
+
+  const handleTilesIdChange = (id: string) => {
+    setTour(tour => ({
+      ...tour,
+      tiles: id,
+    }));
   };
 
   const handleTypeInput: JSX.EventHandlerUnion<HTMLInputElement, InputEvent> = (ev) => {
@@ -173,6 +179,16 @@ const MainPanel: Component<{ show: boolean, setPanel: Setter<Panel> }> = (props)
         <Field label="Description">
           {(id) => (
             <textarea id={id} value={tour()!.desc} onInput={handleTourDescInput}></textarea>
+          )}
+        </Field>
+        <span class="field-label">Tiles</span>
+        <span class="hint" style="margin-bottom: 4px">
+          Adding map tiles to your tour is optional. If you don't know what those are,
+          ignore this field.
+        </span>
+        <Field>
+          {(id) => (
+            <Asset id={id} type="tiles" asset={tour()!.tiles} onIdChange={handleTilesIdChange} />
           )}
         </Field>
         <Field set label="Type">

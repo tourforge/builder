@@ -20,6 +20,11 @@
   object-fit: cover;
   border-top-left-radius: 8px;
   border-bottom-left-radius: 8px;
+  color: rgb(197, 197, 197);
+}
+
+.AssetResolved .AssetThumbnail {
+  color: black;
   cursor: zoom-in;
 }
 

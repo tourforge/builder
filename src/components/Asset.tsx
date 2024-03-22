@@ -1,4 +1,4 @@
-import { FiArrowDown, FiArrowUp, FiImage, FiMusic, FiTrash, FiUpload } from "solid-icons/fi";
+import { FiArrowDown, FiArrowUp, FiImage, FiMap, FiMic, FiTrash, FiUpload } from "solid-icons/fi";
 import { type Component, createSignal, createUniqueId, For, type JSX, Show } from "solid-js";
 
 import { useDB } from "../db";
@@ -20,14 +20,31 @@ export const Asset: Component<{
   const datalistId = createUniqueId();
   const fileInputId = createUniqueId();
 
-  const [imageLoaded, setImageLoaded] = createSignal(false);
-  const [query, setQuery] = createSignal(props.asset ?? "");
-
   const db = useDB();
   const [project, setProject] = useProject();
+  const [imageLoaded, setImageLoaded] = createSignal(false);
+
   const assetUrl = useAssetUrl(project, () => props.asset);
 
   const assets = () => Object.keys(project()?.assets ?? {}).filter(a => project()?.assets[a]?.type === props.type);
+
+  let initialQuery: string;
+  if (project() != null && props.asset != null) {
+    // If the project is accessible when the component is constructed,
+    // we can make sure the initial query only contains props.asset if
+    // props.asset is actually a valid asset. This is useful behavior
+    // in the case that an asset is deleted, because it makes the asset
+    // field blank when it references an invalid (deleted) asset.
+    if (assets().includes(props.asset)) {
+      initialQuery = props.asset;
+    } else {
+      initialQuery = "";
+    }
+  } else {
+    initialQuery = props.asset ?? "";
+  }
+
+  const [query, setQuery] = createSignal(initialQuery);
 
   const handleQueryInput: JSX.EventHandlerUnion<HTMLInputElement, InputEvent> = async (event) => {
     const newQuery = event.currentTarget.value;
@@ -83,8 +100,14 @@ export const Asset: Component<{
     setImageLoaded(false);
   };
 
+  const handleAssetClick = () => {
+    if (assetUrl() != null) {
+      window.open(assetUrl(), "_blank");
+    }
+  };
+
   return (
-    <div id={props.id} class={styles.Asset}>
+    <div id={props.id} class={styles.Asset} classList={{ [styles.AssetResolved]: props.asset === query() && assetUrl() != null }}>
       <Show when={props.type === "image"}>
         <img
           src={props.asset === query() ? assetUrl() : ""}
@@ -92,14 +115,17 @@ export const Asset: Component<{
           classList={{ [styles.Error]: !imageLoaded() }}
           onLoad={handleImageLoad}
           onError={handleImageError}
-          onClick={() => window.open(assetUrl(), "_blank")}
+          onClick={handleAssetClick}
         />
         <Show when={!imageLoaded() || props.asset !== query()}>
           <div title="Image not found" class={styles.AssetThumbnail} onClick={() => window.open(assetUrl(), "_blank")}><FiImage /></div>
         </Show>
       </Show>
       <Show when={props.type === "audio"}>
-        <div class={styles.AssetThumbnail} onClick={() => window.open(assetUrl(), "_blank")}><FiMusic /></div>
+        <div class={styles.AssetThumbnail} onClick={handleAssetClick}><FiMic size={24.0} /></div>
+      </Show>
+      <Show when={props.type === "tiles"}>
+        <div class={styles.AssetThumbnail} onClick={handleAssetClick}><FiMap size={24.0} /></div>
       </Show>
       <input class={styles.AssetInput} type="text" value={query()} onInput={handleQueryInput} placeholder="Type a name here..." list={datalistId} />
       <datalist id={datalistId}>
