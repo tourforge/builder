@@ -232,14 +232,14 @@ const MainPanel: Component<{ show: boolean, setPanel: Setter<Panel> }> = (props)
           <button onClick={() => setCurrentTab("pois")}>POIs</button>
         </header>
         <Show when={currentTab() === "route"}>
-            <RouteList
-              route={() => tour()!.route}
-              onChange={handleRouteChange}
-              onEditClick={(id, type) => props.setPanel({ which: type, id })}
-            />
+          <RouteList
+            route={() => tour()!.route}
+            onChange={handleRouteChange}
+            onEditClick={(id, type) => props.setPanel({ which: type, id })}
+          />
         </Show>
         <Show when={currentTab() === "pois"}>
-            Points of interest are not currently implemented.
+          Points of interest are not currently implemented.
         </Show>
         <div style="flex:1"></div>
         <button onClick={handleDeleteClick} class="danger" style="margin-top: 32px">Delete Tour</button>
@@ -254,8 +254,10 @@ const RouteList: Component<{
   onEditClick: (id: string, type: "stop" | "control") => void,
 }> = (props) => {
   const map = useMapController();
+  const [tour] = useTour();
 
   const addStop = () => {
+
     const newWaypoint: StopModel = {
       type: "stop",
       id: uuidv4(),
@@ -271,6 +273,9 @@ const RouteList: Component<{
       links: {},
     };
 
+    if (tour()?.type === "walking") newWaypoint.control = "path"
+    else newWaypoint.control = "route"
+
     props.onChange([...props.route(), newWaypoint]);
   };
 
@@ -282,6 +287,9 @@ const RouteList: Component<{
       lng: map()?.getCenter().lng ?? 0,
       control: "route",
     };
+
+    if (tour()?.type === "walking") newWaypoint.control = "path"
+    else newWaypoint.control = "route"
 
     props.onChange([...props.route(), newWaypoint]);
   };
@@ -313,23 +321,23 @@ const RouteList: Component<{
     <div class={styles.PointsList}>
       <For each={props.route()}>
         {(waypoint) => (
-        <div class={styles.PointCard}>
-          <div class={styles.PointName}>
-            {waypoint.type === "stop" ? waypoint.title : "Control Point"}
+          <div class={styles.PointCard}>
+            <div class={styles.PointName}>
+              {waypoint.type === "stop" ? waypoint.title : "Control Point"}
+            </div>
+            <button class={styles.PointButton} onClick={() => { handleMove(waypoint.id, "up"); }}>
+              <FiArrowUp />
+            </button>
+            <button class={styles.PointButton} onClick={() => { handleMove(waypoint.id, "down"); }}>
+              <FiArrowDown />
+            </button>
+            <button class={styles.PointButton} onClick={() => { props.onEditClick(waypoint.id, waypoint.type); }}>
+              <FiEdit />
+            </button>
+            <button class={styles.PointButton} onClick={() => { handleDelete(waypoint.id); }}>
+              <FiTrash />
+            </button>
           </div>
-          <button class={styles.PointButton} onClick={() => { handleMove(waypoint.id, "up"); }}>
-            <FiArrowUp />
-          </button>
-          <button class={styles.PointButton} onClick={() => { handleMove(waypoint.id, "down"); }}>
-            <FiArrowDown />
-          </button>
-          <button class={styles.PointButton} onClick={() => { props.onEditClick(waypoint.id, waypoint.type); }}>
-            <FiEdit />
-          </button>
-          <button class={styles.PointButton} onClick={() => { handleDelete(waypoint.id); }}>
-            <FiTrash />
-          </button>
-        </div>
         )}
       </For>
       <div class={styles.AddButtons}>
