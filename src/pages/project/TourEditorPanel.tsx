@@ -257,7 +257,6 @@ const RouteList: Component<{
   const [tour] = useTour();
 
   const addStop = () => {
-
     const newWaypoint: StopModel = {
       type: "stop",
       id: uuidv4(),
@@ -269,12 +268,9 @@ const RouteList: Component<{
       trigger_radius: 30.0,
       transcript: undefined,
       gallery: [],
-      control: "route",
+      control: tour()?.type === "walking" ? "path" : "route",
       links: {},
     };
-
-    if (tour()?.type === "walking") newWaypoint.control = "path"
-    else newWaypoint.control = "route"
 
     props.onChange([...props.route(), newWaypoint]);
   };
@@ -285,11 +281,8 @@ const RouteList: Component<{
       id: uuidv4(),
       lat: map()?.getCenter().lat ?? 0,
       lng: map()?.getCenter().lng ?? 0,
-      control: "route",
+      control: tour()?.type === "walking" ? "path" : "route",
     };
-
-    if (tour()?.type === "walking") newWaypoint.control = "path"
-    else newWaypoint.control = "route"
 
     props.onChange([...props.route(), newWaypoint]);
   };
