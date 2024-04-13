@@ -14,7 +14,7 @@ export const route = async (points: Array<LatLng & { control: "path" | "route" }
   if (points.length > 10) {
     let all: LatLng[] = [];
     for (let i = 0; i * 10 < points.length; i++) {
-      all = [...all, ...await route(points.slice(i * 10, Math.min(i * 10 + 10, points.length)))];
+      all = [...all, ...await route(points.slice(Math.max(i * 10 - 1, 0), Math.min(i * 10 + 10, points.length)))];
     }
     return all;
   }
