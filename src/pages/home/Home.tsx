@@ -104,6 +104,8 @@ export const Home: Component = () => {
             return "An internal error occurred while downloading the project.";
           }
         },
+      }, {
+        duration: Infinity,
       });
     } catch (e) {
       console.error("Failed to import tour bundle:", e);
