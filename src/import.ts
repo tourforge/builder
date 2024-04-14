@@ -172,7 +172,7 @@ const importProject = async (
     try {
       assetBlob = await loadAssetBlob(assetInfo.hash);
     } catch (e) {
-      console.warn("Ignoring failed read of asset with hash", assetInfo.hash);
+      console.warn("Ignoring failed read of asset with hash", assetInfo.hash, e);
       continue;
     }
     assetBlobs[assetInfo.hash] = assetBlob;

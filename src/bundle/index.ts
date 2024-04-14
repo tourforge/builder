@@ -47,7 +47,7 @@ window.addEventListener("message", async (ev) => {
 
     // Security: only serve assets that are part of the project
     const project = await projectPromise;
-    if (Object.keys(project?.assets ?? {}).includes(data)) {
+    if (Object.values(project?.assets ?? {}).map(a => a.hash).includes(data)) {
       console.log("Serving asset with hash " + data + " to postMessage sender");
       source.postMessage({ status: "success", asset: data, data: await fetchAsBlob(data) }, options);
       return;
