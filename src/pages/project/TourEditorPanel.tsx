@@ -224,7 +224,7 @@ const MainPanel: Component<{ show: boolean, setPanel: Setter<Panel> }> = (props)
         </Field>
         <Field label="Gallery">
           {(id) => (
-            <Gallery id={id} value={tour()!.gallery} onChange={handleTourGalleryChange} />
+            <Gallery id={id} valueIdentity={tour()?.id} value={tour()!.gallery} onChange={handleTourGalleryChange} />
           )}
         </Field>
         <header classList={{ [styles.PointsHeader]: true, [styles.Pois]: currentTab() === "pois" }}>

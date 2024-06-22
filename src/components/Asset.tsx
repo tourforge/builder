@@ -1,5 +1,5 @@
 import { FiArrowDown, FiArrowUp, FiImage, FiMap, FiMic, FiTrash, FiUpload } from "solid-icons/fi";
-import { type Component, createSignal, createUniqueId, For, type JSX, Show } from "solid-js";
+import { type Component, createSignal, createUniqueId, For, type JSX, Show, createEffect } from "solid-js";
 
 import { useDB } from "../db";
 import { useProject } from "../hooks/Project";
@@ -11,6 +11,7 @@ import styles from "./Asset.module.css";
 export const Asset: Component<{
   id?: string,
   type: AssetType,
+  assetIdentity?: string,
   asset: string | undefined,
   onIdChange: (newId: string) => void,
   onDeleteClick?: () => void,
@@ -28,23 +29,26 @@ export const Asset: Component<{
 
   const assets = () => Object.keys(project()?.assets ?? {}).filter(a => project()?.assets[a]?.type === props.type);
 
-  let initialQuery: string;
-  if (project() != null && props.asset != null) {
-    // If the project is accessible when the component is constructed,
-    // we can make sure the initial query only contains props.asset if
-    // props.asset is actually a valid asset. This is useful behavior
-    // in the case that an asset is deleted, because it makes the asset
-    // field blank when it references an invalid (deleted) asset.
-    if (assets().includes(props.asset)) {
-      initialQuery = props.asset;
-    } else {
-      initialQuery = "";
-    }
-  } else {
-    initialQuery = props.asset ?? "";
-  }
+  const [query, setQuery] = createSignal("");
 
-  const [query, setQuery] = createSignal(initialQuery);
+  createEffect(() => {
+    ((_) => {})(props.assetIdentity);
+
+    if (project() != null && props.asset != null) {
+      // If the project is accessible when the component is constructed,
+      // we can make sure the initial query only contains props.asset if
+      // props.asset is actually a valid asset. This is useful behavior
+      // in the case that an asset is deleted, because it makes the asset
+      // field blank when it references an invalid (deleted) asset.
+      if (assets().includes(props.asset)) {
+        setQuery(props.asset);
+      } else {
+        setQuery("");
+      }
+    } else {
+      setQuery(props.asset ?? "");
+    }
+  });
 
   const handleQueryInput: JSX.EventHandlerUnion<HTMLInputElement, InputEvent> = async (event) => {
     const newQuery = event.currentTarget.value;

@@ -6,7 +6,8 @@ import { Asset } from "./Asset";
 import styles from "./Gallery.module.css";
 
 export const Gallery: Component<{
-  id?: string | undefined,
+  id?: string,
+  valueIdentity?: string,
   value: GalleryModel,
   onChange: (newValue: GalleryModel) => void,
 }> = (props) => {
@@ -41,6 +42,7 @@ export const Gallery: Component<{
       <Index each={props.value}>
         {(asset, i) => (
           <Asset
+            assetIdentity={props.valueIdentity}
             asset={asset()}
             type="image"
             onIdChange={handleAssetIdChange(i)}
