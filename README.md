@@ -26,10 +26,12 @@ TourForge went through many changes during development. For those who are intere
 5. (Now!) Web app with **NO** backend and TypeScript/Solid frontend. There were challenges in finding cloud hosting for the Django backend with all of the features we needed for maximum maintainability. Actually, this result was already forseen back when we chose to write a desktop app in stage 2 -- but something caused us to forget this and make a web app anyways in stage 4. In any case, we decided to simply get rid of the backend and keep the same frontend but have it interface with IndexedDB. It would have been an equal amount of work to go back to being a desktop app, but we think a fully client-side web app might be close to having the best of both worlds.
 
 ## User script
-There are a few issues we have encountered with the creation of tour bundle, it works well as expected, but there were problems we had to solve with scripting. You can find all script named after its function in `user-script/` at the root of the repository.
+There are a few issues we have encountered with the creation of tour bundle, it works well as expected, but there were problems we had to solve with scripting. You can find all script named after its function in `user-script/` at the root of the builder repository.
 
 ### Image assets are too heavy
 We were receiving full resolution images sometimes upward of 32MB and did not have formal procedure in place to make sure that the image is appropriately sized.
 
 ### Audio assets playback not working in iOS
-The problem was that the backend audio library requires an appropriate filename e.g. ".mp3". The script renames all the audio file with the extension and modify the JSON to the new filename.
+The problem was that the backend audio library requires an appropriate filename e.g. ".mp3". The script renames all the audio file with the extension and modify the JSON to the new filename. The script only resize 1 time so you should just keep running until all files are under a certain limit. You are welcome to rewrite the script to run in a conditional loop and contribute.
+
+Non-nix users should rewrite the first 2 lines of shebang to simply `#! /usr/bin/env bash` and acquire the necessary prerequisite program (they are listed at the second line of original shebang).
