@@ -22,11 +22,11 @@
     "eslint-plugin-promise": "^6.1.1",
     "solid-devtools": "^0.29.3",
     "typescript": "^5.4.2",
-    "vite": "^5.1.5",
+    "vite": "^7.3.1",
     "vite-plugin-solid": "^2.10.1"
   },
   "dependencies": {
-    "@solidjs/router": "^0.12.5",
+    "@solidjs/router": "^0.15.4",
     "@turf/circle": "^6.5.0",
     "hash-wasm": "^4.11.0",
     "idb": "^8.0.0",
